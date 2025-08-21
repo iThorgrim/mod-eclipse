@@ -5,10 +5,12 @@
 
 namespace Eclipse
 {
+    class EventManager; // Forward declaration
+    
     class LuaBindings
     {
     public:
-        static void Register(sol::state& lua);        
+        static void Register(sol::state& lua, EventManager* eventMgr);        
         
     private:
         LuaBindings() = delete;

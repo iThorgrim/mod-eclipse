@@ -1,16 +1,20 @@
 #include "LuaBindings.hpp"
-#include "Log.h"
-#include "PlayerMethods.hpp"
+#include "Methods/PlayerMethods.hpp"
 #include "EventManager.hpp"
 
 namespace Eclipse
 {
-    void LuaBindings::Register(sol::state& lua)
+    void LuaBindings::Register(sol::state& lua, EventManager* eventMgr)
     {       
-        // Register player methods
+        lua["GetStateMapId"] = []() -> int32 {
+            return -1; // Will be overridden by LuaEngine
+        };
+        
         PlayerMethods::Register(lua);
         
-        // Register event system
-        EventManager::Register(lua);
+        if (eventMgr)
+        {
+            eventMgr->Register(lua);
+        }
     }
 }

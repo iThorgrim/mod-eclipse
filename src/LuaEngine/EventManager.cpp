@@ -3,11 +3,6 @@
 
 namespace Eclipse
 {
-    EventManager& EventManager::GetInstance()
-    {
-        static EventManager instance;
-        return instance;
-    }
 
     void EventManager::RegisterPlayerEvent(uint32 eventId, sol::function callback)
     {
@@ -29,17 +24,14 @@ namespace Eclipse
 
     void EventManager::Register(sol::state& lua)
     {
-        // Register Player Event constants
         lua["PLAYER_EVENT_ON_LOGIN"] = PLAYER_EVENT_ON_LOGIN;
         
-        // Register event functions
-        lua["RegisterPlayerEvent"] = [](uint32 eventId, sol::function callback) {
-            EventManager::GetInstance().RegisterPlayerEvent(eventId, callback);
+        lua["RegisterPlayerEvent"] = [this](uint32 eventId, sol::function callback) {
+            this->RegisterPlayerEvent(eventId, callback);
         };
 
-        // Utility functions
-        lua["ClearPlayerEvents"] = []() {
-            EventManager::GetInstance().ClearPlayerEvents();
+        lua["ClearPlayerEvents"] = [this]() {
+            this->ClearPlayerEvents();
         };
     }
 }

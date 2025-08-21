@@ -3,6 +3,8 @@
 
 #include "sol.hpp"
 #include "LuaCache.hpp"
+#include "Common.h"
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -15,43 +17,18 @@ namespace Eclipse
         LuaEngine();
         ~LuaEngine();
 
-        bool Initialize();
+        bool Initialize(int32 mapId = -1);
         void Shutdown();
+        void ReloadScripts();
         
-        // Script management
+        int32 GetStateMapId() const { return stateMapId; }
+        
         bool LoadScript(const std::string& scriptPath);
         bool ExecuteScript(const std::string& script);
         bool LoadDirectory(const std::string& directoryPath);
-        void ReloadScripts();
         
-        // Function execution
-        template<typename... Args>
-        auto CallFunction(const std::string& functionName, Args&&... args) -> decltype(auto)
-        {
-            return cache.GetFunction(functionName, luaState)(std::forward<Args>(args)...);
-        }
-        
-        template<typename... Args>
-        bool TryCallFunction(const std::string& functionName, Args&&... args)
-        {
-            try 
-            {
-                auto func = cache.GetFunction(functionName, luaState);
-                if (func.valid())
-                {
-                    func(std::forward<Args>(args)...);
-                    return true;
-                }
-                return false;
-            }
-            catch (const std::exception&)
-            {
-                return false;
-            }
-        }
-        
-        // Direct state access
         sol::state& GetState() { return luaState; }
+        class EventManager* GetEventManager() const { return eventManager.get(); }
 
     private:
         sol::state luaState;
@@ -59,6 +36,8 @@ namespace Eclipse
         std::vector<std::string> loadedScripts;
         std::string scriptsDirectory;
         LuaCache cache;
+        int32 stateMapId; // -1 = global/world state, >=0 = specific map
+        std::unique_ptr<class EventManager> eventManager;
         
         void InitializeState();
         void RegisterBindings();

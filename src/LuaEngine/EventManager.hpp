@@ -11,28 +11,21 @@ namespace Eclipse
     class EventManager
     {
     public:
-        static EventManager& GetInstance();
-        
-        // Event registration
-        void RegisterPlayerEvent(uint32 eventId, sol::function callback);
-        
-        // Event triggering
-        template<typename... Args>
-        void TriggerPlayerEvent(uint32 eventId, Args&&... args);
-        
-        // Cleanup
-        void ClearAllEvents();
-        void ClearPlayerEvents();
-        
-        // Lua bindings registration
-        static void Register(sol::state& lua);
-        
-    private:
         EventManager() = default;
         ~EventManager() = default;
         EventManager(const EventManager&) = delete;
         EventManager& operator=(const EventManager&) = delete;
         
+        void RegisterPlayerEvent(uint32 eventId, sol::function callback);
+        
+        template<typename... Args>
+        void TriggerPlayerEvent(uint32 eventId, Args&&... args);
+        
+        void ClearAllEvents();
+        void ClearPlayerEvents();
+        void Register(sol::state& lua);
+        
+    private:
         std::unordered_map<uint32, std::vector<sol::function>> playerEvents;
     };
 

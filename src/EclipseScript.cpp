@@ -16,8 +16,10 @@
  */
 #include "ScriptMgr.h"
 #include "Player.h"
-#include "LuaManager.hpp"
+#include "Map.h"
+#include "MapStateManager.hpp"
 #include "EventManager.hpp"
+#include "Events.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -33,9 +35,15 @@ public:
         {
             LOG_INFO("server.eclipse", "Initialize Eclipse Engine...");
             
-            if (!Eclipse::LuaManager::GetInstance())
+            // Initialize the global Lua state
+            auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
+            if (!globalEngine)
             {
-                LOG_ERROR("server.eclipse", "Failed to initialize Eclipse Lua Engine");
+                LOG_ERROR("server.eclipse", "Failed to initialize Eclipse Global Lua Engine");
+            }
+            else
+            {
+                LOG_INFO("server.eclipse", "Eclipse Global Lua Engine initialized successfully");
             }
         }
     }
@@ -43,7 +51,7 @@ public:
     void OnShutdown() override
     {
         LOG_INFO("server.eclipse", "Shutting down Eclipse Engine...");
-        Eclipse::LuaManager::DestroyInstance();
+        Eclipse::MapStateManager::GetInstance().UnloadAllStates();
     }
 };
 
@@ -56,7 +64,59 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        Eclipse::EventManager::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+        // Trigger event on global state (-1) first
+        auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
+        if (globalEngine && globalEngine->GetEventManager())
+        {
+            globalEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+        }
+        
+        // Also trigger on current map state if player is in a map
+        if (player->GetMap())
+        {
+            uint32 mapId = player->GetMap()->GetId();
+            auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+            if (mapEngine && mapEngine != globalEngine && mapEngine->GetEventManager()) // Don't trigger twice on the same engine
+            {
+                mapEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+            }
+        }
+    }
+};
+
+class Eclipse_AllMapScript : public AllMapScript
+{
+public:
+    Eclipse_AllMapScript() : AllMapScript("Eclipse_AllMapScript", { 
+        ALLMAPHOOK_ON_CREATE_MAP,
+        ALLMAPHOOK_ON_DESTROY_MAP,
+        ALLMAPHOOK_ON_PLAYER_ENTER_ALL,
+     }) { }
+
+    void OnPlayerEnterAll(Map* map, Player* player) override
+    {
+        uint32 mapId = map->GetId();
+        
+        // Ensure the Lua state exists for this map
+        Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+    }
+
+    void OnCreateMap(Map* map) override
+    {
+        uint32 mapId = map->GetId();
+        LOG_INFO("server.eclipse", "Map {} created, initializing Lua state...", mapId);
+        
+        // Pre-create the Lua state for this map
+        Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+    }
+
+    void OnDestroyMap(Map* map) override
+    {
+        uint32 mapId = map->GetId();
+        LOG_INFO("server.eclipse", "Map {} destroyed, cleaning up Lua state...", mapId);
+        
+        // Clean up the Lua state for this map
+        Eclipse::MapStateManager::GetInstance().UnloadMapState(mapId);
     }
 };
 
@@ -73,8 +133,7 @@ public:
         std::transform(reload.begin(), reload.end(), reload.begin(), ::tolower);
         if (reload.find("reload eclipse") == 0)
         {
-            if (auto* engine = Eclipse::LuaManager::GetInstance())
-                engine->ReloadScripts();
+            Eclipse::MapStateManager::GetInstance().ReloadAllScripts();
             return false;
         }
 
@@ -86,5 +145,6 @@ void AddSC_EclipseScript()
 {
     new Eclipse_WorldScript();
     new Eclipse_PlayerScript();
+    new Eclipse_AllMapScript();
     new Eclipse_CommandSC();
 }

@@ -6,7 +6,7 @@
 
 namespace Eclipse
 {
-    LuaEngine::LuaEngine() : isInitialized(false), scriptsDirectory("lua_scripts")
+    LuaEngine::LuaEngine() : isInitialized(false), scriptsDirectory("lua_scripts"), stateMapId(-1), eventManager(std::make_unique<EventManager>())
     {
     }
 
@@ -15,10 +15,12 @@ namespace Eclipse
         Shutdown();
     }
 
-    bool LuaEngine::Initialize()
+    bool LuaEngine::Initialize(int32 mapId)
     {
         if (isInitialized)
             return true;
+
+        stateMapId = mapId;
 
         try
         {
@@ -30,7 +32,7 @@ namespace Eclipse
             
             LoadDirectory(scriptsDirectory);
             
-            LOG_INFO("server.eclipse", "Eclipse Lua Engine initialized successfully");
+            LOG_INFO("server.eclipse", "Eclipse Lua Engine initialized successfully for map {}", mapId);
             return true;
         }
         catch (const std::exception& e)
@@ -81,7 +83,12 @@ namespace Eclipse
 
     void LuaEngine::RegisterBindings()
     {
-        LuaBindings::Register(luaState);
+        LuaBindings::Register(luaState, eventManager.get());
+        
+        // Override GetStateMapId to return this engine's mapId
+        luaState["GetStateMapId"] = [this]() -> int32 {
+            return this->stateMapId;
+        };
     }
 
     bool LuaEngine::LoadDirectory(const std::string& directoryPath)
@@ -103,7 +110,10 @@ namespace Eclipse
         LOG_INFO("server.eclipse", "Reloading Lua scripts...");
         
         // Clear events and cache
-        EventManager::GetInstance().ClearAllEvents();
+        if (eventManager)
+        {
+            eventManager->ClearAllEvents();
+        }
         cache.Clear();
         loadedScripts.clear();
         
