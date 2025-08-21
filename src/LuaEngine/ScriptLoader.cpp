@@ -38,14 +38,16 @@ namespace Eclipse
     {
         if (!std::filesystem::exists(directoryPath))
         {
-            return true; // Silent exit if directory doesn't exist
+            LOG_WARN("server.eclipse", "Scripts directory '{}' does not exist", directoryPath);
+            return false;
         }
 
         auto luaFiles = ScanDirectory(directoryPath);
         
         if (luaFiles.empty())
         {
-            return true; // Silent exit if no scripts found
+            LOG_INFO("server.eclipse", "No Lua scripts found in directory '{}'", directoryPath);
+            return true;
         }
 
         int loadedCount = 0;

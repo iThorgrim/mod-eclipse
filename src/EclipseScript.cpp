@@ -15,8 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "ScriptMgr.h"
+#include "Player.h"
 #include "LuaManager.hpp"
-#include "LuaEngine.hpp"
+#include "EventManager.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -46,6 +47,19 @@ public:
     }
 };
 
+class Eclipse_PlayerScript : public PlayerScript
+{
+public:
+    Eclipse_PlayerScript() : PlayerScript("Eclipse_PlayerScript", {
+        PLAYERHOOK_ON_LOGIN
+    }) { }
+
+    void OnPlayerLogin(Player* player) override
+    {
+        Eclipse::EventManager::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+    }
+};
+
 class Eclipse_CommandSC : public CommandSC
 {
 public:
@@ -71,5 +85,6 @@ public:
 void AddSC_EclipseScript()
 {
     new Eclipse_WorldScript();
+    new Eclipse_PlayerScript();
     new Eclipse_CommandSC();
 }

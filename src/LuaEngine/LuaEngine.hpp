@@ -36,8 +36,13 @@ namespace Eclipse
         {
             try 
             {
-                CallFunction(functionName, std::forward<Args>(args)...);
-                return true;
+                auto func = cache.GetFunction(functionName, luaState);
+                if (func.valid())
+                {
+                    func(std::forward<Args>(args)...);
+                    return true;
+                }
+                return false;
             }
             catch (const std::exception&)
             {

@@ -1,6 +1,7 @@
 #include "LuaEngine.hpp"
 #include "LuaBindings.hpp"
 #include "ScriptLoader.hpp"
+#include "EventManager.hpp"
 #include "Log.h"
 
 namespace Eclipse
@@ -80,8 +81,7 @@ namespace Eclipse
 
     void LuaEngine::RegisterBindings()
     {
-        LuaBindings::RegisterCore(luaState);
-        LuaBindings::RegisterLogging(luaState);
+        LuaBindings::Register(luaState);
     }
 
     bool LuaEngine::LoadDirectory(const std::string& directoryPath)
@@ -98,13 +98,13 @@ namespace Eclipse
     void LuaEngine::ReloadScripts()
     {
         if (!isInitialized)
-        {
-            LOG_ERROR("server.eclipse", "Cannot reload scripts: Engine not initialized");
             return;
-        }
 
         LOG_INFO("server.eclipse", "Reloading Lua scripts...");
         
+        // Clear events and cache
+        EventManager::GetInstance().ClearAllEvents();
+        cache.Clear();
         loadedScripts.clear();
         
         InitializeState();
