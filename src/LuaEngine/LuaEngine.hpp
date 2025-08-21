@@ -29,6 +29,8 @@ namespace Eclipse
         
         sol::state& GetState() { return luaState; }
         class EventManager* GetEventManager() const { return eventManager.get(); }
+        
+        void ProcessMessages(); // Process pending inter-state messages
 
     private:
         sol::state luaState;

@@ -64,21 +64,29 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        // Trigger event on global state (-1) first
+        // Process messages for global state
         auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-        if (globalEngine && globalEngine->GetEventManager())
+        if (globalEngine)
         {
-            globalEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+            globalEngine->ProcessMessages();
+            if (globalEngine->GetEventManager())
+            {
+                globalEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+            }
         }
         
-        // Also trigger on current map state if player is in a map
+        // Process messages and trigger events for current map state
         if (player->GetMap())
         {
             uint32 mapId = player->GetMap()->GetId();
             auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
-            if (mapEngine && mapEngine != globalEngine && mapEngine->GetEventManager()) // Don't trigger twice on the same engine
+            if (mapEngine && mapEngine != globalEngine)
             {
-                mapEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+                mapEngine->ProcessMessages();
+                if (mapEngine->GetEventManager())
+                {
+                    mapEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+                }
             }
         }
     }

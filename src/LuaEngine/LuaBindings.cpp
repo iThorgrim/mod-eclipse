@@ -1,5 +1,5 @@
 #include "LuaBindings.hpp"
-#include "Methods/PlayerMethods.hpp"
+#include "PlayerMethods.hpp"
 #include "EventManager.hpp"
 
 namespace Eclipse

@@ -2,6 +2,7 @@
 #include "LuaBindings.hpp"
 #include "ScriptLoader.hpp"
 #include "EventManager.hpp"
+#include "MessageManager.hpp"
 #include "Log.h"
 
 namespace Eclipse
@@ -46,6 +47,9 @@ namespace Eclipse
     {
         if (isInitialized)
         {
+            // Clean up message handlers for this state
+            MessageManager::GetInstance().ClearStateHandlers(stateMapId);
+            
             cache.Clear();
             loadedScripts.clear();
             luaState = sol::state();
@@ -89,6 +93,9 @@ namespace Eclipse
         luaState["GetStateMapId"] = [this]() -> int32 {
             return this->stateMapId;
         };
+        
+        // Register message system bindings
+        MessageManager::GetInstance().RegisterBindings(luaState, stateMapId);
     }
 
     bool LuaEngine::LoadDirectory(const std::string& directoryPath)
@@ -116,6 +123,10 @@ namespace Eclipse
         }
         cache.Clear();
         loadedScripts.clear();
+
+        // Clear message handlers for this state
+        if (MessageManager::GetInstance())
+            MessageManager::GetInstance().ClearStateHandlers(stateMapId);
         
         InitializeState();
         ConfigureOptimizations();
@@ -123,6 +134,14 @@ namespace Eclipse
         LoadDirectory(scriptsDirectory);
         
         LOG_INFO("server.eclipse", "Scripts reloaded successfully");
+    }
+
+    void LuaEngine::ProcessMessages()
+    {
+        if (isInitialized)
+        {
+            MessageManager::GetInstance().ProcessMessages(stateMapId);
+        }
     }
 
     void LuaEngine::InitializeState()
