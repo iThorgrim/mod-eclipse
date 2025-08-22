@@ -1,7 +1,6 @@
 #ifndef ECLIPSE_EVENT_MANAGER_HPP
 #define ECLIPSE_EVENT_MANAGER_HPP
 
-#include "sol.hpp"
 #include "Events.hpp"
 #include <unordered_map>
 #include <vector>
@@ -20,6 +19,7 @@ namespace Eclipse
         
         template<typename... Args>
         void TriggerPlayerEvent(uint32 eventId, Args&&... args);
+        
         
         void ClearAllEvents();
         void ClearPlayerEvents();
@@ -44,10 +44,7 @@ namespace Eclipse
                     {
                         callback(std::forward<Args>(args)...);
                     }
-                    catch (const std::exception&)
-                    {
-                        // Log error but continue with other callbacks
-                    }
+                    catch (const std::exception&) {}
                 }
             }
         }

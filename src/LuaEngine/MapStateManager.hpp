@@ -1,8 +1,9 @@
 #ifndef ECLIPSE_MAP_STATE_MANAGER_HPP
 #define ECLIPSE_MAP_STATE_MANAGER_HPP
 
+#include "EclipseIncludes.hpp"
 #include "LuaEngine.hpp"
-#include "Common.h"
+
 #include <unordered_map>
 #include <memory>
 
@@ -27,8 +28,6 @@ namespace Eclipse
         MapStateManager& operator=(const MapStateManager&) = delete;
         
         std::unordered_map<int32, std::unique_ptr<LuaEngine>> mapStates;
-        
-        LuaEngine* CreateStateForMap(int32 mapId);
     };
 }
 

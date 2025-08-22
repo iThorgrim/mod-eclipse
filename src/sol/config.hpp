@@ -29,7 +29,7 @@
 
 // beginning of sol/config.hpp
 
-/* Configuration for Eluna Sol3 integration */
+/* Configuration for Eclipse Sol3 integration */
 
 // Disable ALL automatic comparison operators generation
 #define SOL_NO_DEFAULT_USERTYPE_TRAITS 1
@@ -38,7 +38,19 @@
 #define SOL_NO_OVERRIDE 1
 
 // Completely disable usertype automatic operators
-#define SOL_USING_CXX_LUA 0
+// Dynamic configuration via CMake
+#ifndef SOL_USING_CXX_LUA
+  #define SOL_USING_CXX_LUA 0
+#endif
+
+#ifndef SOL_USING_CXX_LUAJIT  
+  #define SOL_USING_CXX_LUAJIT 0
+#endif
+
+#ifndef SOL_LUAJIT
+  #define SOL_LUAJIT 0
+#endif
+
 #define SOL_USING_CXX_LUAJIT 0
 
 // Use minimal safe operations only

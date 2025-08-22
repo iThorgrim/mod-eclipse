@@ -1,14 +1,15 @@
 #include "EventManager.hpp"
-#include "Log.h"
 
 namespace Eclipse
 {
-
     void EventManager::RegisterPlayerEvent(uint32 eventId, sol::function callback)
     {
         if (callback.valid())
         {
-            playerEvents[eventId].push_back(callback);
+            auto& events = playerEvents[eventId];
+            if (events.empty())
+                events.reserve(4);
+            events.push_back(callback);
         }
     }
 
@@ -25,6 +26,10 @@ namespace Eclipse
     void EventManager::Register(sol::state& lua)
     {
         lua["PLAYER_EVENT_ON_LOGIN"] = PLAYER_EVENT_ON_LOGIN;
+        lua["PLAYER_EVENT_ON_LOGOUT"] = PLAYER_EVENT_ON_LOGOUT;
+        lua["PLAYER_EVENT_ON_LOOT_ITEM"] = PLAYER_EVENT_ON_LOOT_ITEM;
+        lua["PLAYER_EVENT_ON_LEVEL_CHANGED"] = PLAYER_EVENT_ON_LEVEL_CHANGED;
+        lua["PLAYER_EVENT_ON_KILL_PLAYER"] = PLAYER_EVENT_ON_KILL_PLAYER;
         
         lua["RegisterPlayerEvent"] = [this](uint32 eventId, sol::function callback) {
             this->RegisterPlayerEvent(eventId, callback);

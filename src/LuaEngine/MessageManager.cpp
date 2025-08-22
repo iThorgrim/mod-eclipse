@@ -1,6 +1,5 @@
 #include "MessageManager.hpp"
 #include "MapStateManager.hpp"
-#include "Log.h"
 
 namespace Eclipse
 {
@@ -15,30 +14,24 @@ namespace Eclipse
         StateMessage message(fromStateId, toStateId, messageType, data);
         messageQueue[toStateId].push_back(message);
         
-        LOG_DEBUG("server.eclipse", "Message '{}' queued from state {} to state {}", 
-                 messageType, fromStateId, toStateId);
         
         ProcessMessages(toStateId);
     }
 
     void MessageManager::BroadcastMessage(int32 fromStateId, const std::string& messageType, sol::object data)
-    {
-        auto& stateManager = MapStateManager::GetInstance();
+    {       
+        // Send to global state (-1) only
+        SendMessage(fromStateId, -1, messageType, data);
         
-        if (fromStateId != -1)
-        {
-            SendMessage(fromStateId, -1, messageType, data);
-        }
-        
-        LOG_DEBUG("server.eclipse", "Message '{}' broadcasted from state {}", messageType, fromStateId);
     }
 
     void MessageManager::RegisterMessageEvent(int32 stateId, const std::string& messageType, sol::function callback)
     {
         if (callback.valid())
         {
-            messageHandlers[stateId][messageType].push_back(callback);
-            LOG_DEBUG("server.eclipse", "Message handler registered for '{}' on state {}", messageType, stateId);
+            auto& handlers = messageHandlers[stateId][messageType];
+            handlers.reserve(4); // Reserve space for typical usage
+            handlers.push_back(callback);
         }
     }
 
@@ -58,6 +51,7 @@ namespace Eclipse
         }
         
         messages.clear();
+        // Note: shrink_to_fit() removed - too expensive for frequent operations
     }
 
     void MessageManager::DeliverMessage(const StateMessage& message)
@@ -89,15 +83,12 @@ namespace Eclipse
             }
         }
         
-        LOG_DEBUG("server.eclipse", "Message '{}' delivered to state {} from state {}", 
-                 message.messageType, message.toStateId, message.fromStateId);
     }
 
     void MessageManager::ClearStateHandlers(int32 stateId)
     {
         messageHandlers.erase(stateId);
         messageQueue.erase(stateId);
-        LOG_DEBUG("server.eclipse", "Cleared all message handlers for state {}", stateId);
     }
 
     void MessageManager::RegisterBindings(sol::state& lua, int32 stateId)

@@ -1,25 +1,10 @@
-/*
- * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+// Eclipse Engine - AzerothCore Integration
+
 #include "ScriptMgr.h"
-#include "Player.h"
-#include "Map.h"
 #include "MapStateManager.hpp"
-#include "EventManager.hpp"
+#include "EventDispatcher.hpp"
 #include "Events.hpp"
+#include "LuaCache.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -34,17 +19,8 @@ public:
         if (!reload)
         {
             LOG_INFO("server.eclipse", "Initialize Eclipse Engine...");
-            
-            // Initialize the global Lua state
             auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-            if (!globalEngine)
-            {
-                LOG_ERROR("server.eclipse", "Failed to initialize Eclipse Global Lua Engine");
-            }
-            else
-            {
-                LOG_INFO("server.eclipse", "Eclipse Global Lua Engine initialized successfully");
-            }
+            LOG_INFO("server.eclipse", "Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
         }
     }
 
@@ -59,36 +35,40 @@ class Eclipse_PlayerScript : public PlayerScript
 {
 public:
     Eclipse_PlayerScript() : PlayerScript("Eclipse_PlayerScript", {
-        PLAYERHOOK_ON_LOGIN
+        PLAYERHOOK_ON_LOGIN,
+        PLAYERHOOK_ON_LOGOUT,
+        PLAYERHOOK_ON_LOOT_ITEM
     }) { }
 
     void OnPlayerLogin(Player* player) override
     {
-        // Process messages for global state
         auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
         if (globalEngine)
         {
             globalEngine->ProcessMessages();
-            if (globalEngine->GetEventManager())
-            {
-                globalEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
-            }
         }
         
-        // Process messages and trigger events for current map state
-        if (player->GetMap())
+        Map* playerMap = player->GetMap();
+        if (playerMap)
         {
-            uint32 mapId = player->GetMap()->GetId();
-            auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+            auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(playerMap->GetId());
             if (mapEngine && mapEngine != globalEngine)
             {
                 mapEngine->ProcessMessages();
-                if (mapEngine->GetEventManager())
-                {
-                    mapEngine->GetEventManager()->TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
-                }
             }
         }
+        
+        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+    }
+    
+    void OnPlayerLogout(Player* player) override
+    {
+        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGOUT, player);
+    }
+
+    void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
+    {
+        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOOT_ITEM, player, item, count, lootguid);
     }
 };
 
@@ -101,11 +81,10 @@ public:
         ALLMAPHOOK_ON_PLAYER_ENTER_ALL,
      }) { }
 
-    void OnPlayerEnterAll(Map* map, Player* player) override
+    void OnPlayerEnterAll(Map* map, Player* /*player*/) override
     {
         uint32 mapId = map->GetId();
         
-        // Ensure the Lua state exists for this map
         Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
     }
 
@@ -113,17 +92,12 @@ public:
     {
         uint32 mapId = map->GetId();
         LOG_INFO("server.eclipse", "Map {} created, initializing Lua state...", mapId);
-        
-        // Pre-create the Lua state for this map
         Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
     }
 
     void OnDestroyMap(Map* map) override
     {
-        uint32 mapId = map->GetId();
-        LOG_INFO("server.eclipse", "Map {} destroyed, cleaning up Lua state...", mapId);
-        
-        // Clean up the Lua state for this map
+        uint32 mapId = map->GetId();       
         Eclipse::MapStateManager::GetInstance().UnloadMapState(mapId);
     }
 };
@@ -135,13 +109,24 @@ public:
         ALLCOMMANDHOOK_ON_TRY_EXECUTE_COMMAND
     }) { }
 
-    bool OnTryExecuteCommand(ChatHandler& handler, std::string_view cmdStr) override
+    bool OnTryExecuteCommand(ChatHandler& /*handler*/, std::string_view cmdStr) override
     {
-        std::string reload = std::string(cmdStr).c_str();
-        std::transform(reload.begin(), reload.end(), reload.begin(), ::tolower);
-        if (reload.find("reload eclipse") == 0)
+        std::string cmd(cmdStr);
+        std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+        
+        if (cmd.find("reload eclipse") == 0)
         {
             Eclipse::MapStateManager::GetInstance().ReloadAllScripts();
+            return false;
+        }
+        else if (cmd.find("eclipse cache clear") == 0)
+        {
+            Eclipse::GetGlobalCache().Clear();
+            return false;
+        }
+        else if (cmd.find("eclipse cache stats") == 0)
+        {
+            Eclipse::GetGlobalCache().LogCacheStats();
             return false;
         }
 
@@ -149,7 +134,7 @@ public:
     }
 };
 
-void AddSC_EclipseScript()
+void Addmod_eclipseScripts()
 {
     new Eclipse_WorldScript();
     new Eclipse_PlayerScript();

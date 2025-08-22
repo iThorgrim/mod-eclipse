@@ -1,8 +1,8 @@
 #ifndef ECLIPSE_MESSAGE_MANAGER_HPP
 #define ECLIPSE_MESSAGE_MANAGER_HPP
 
-#include "sol.hpp"
-#include "Common.h"
+#include "EclipseIncludes.hpp"
+
 #include <unordered_map>
 #include <vector>
 #include <functional>
@@ -32,6 +32,7 @@ namespace Eclipse
         void ProcessMessages(int32 stateId);
         void ClearStateHandlers(int32 stateId);
         void RegisterBindings(sol::state& lua, int32 stateId);
+
 
     private:
         MessageManager() = default;

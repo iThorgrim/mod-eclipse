@@ -1,13 +1,13 @@
 #include "LuaEngine.hpp"
-#include "LuaBindings.hpp"
-#include "ScriptLoader.hpp"
+#include "EclipseIncludes.hpp"
 #include "EventManager.hpp"
+#include "LuaBindings.hpp"
 #include "MessageManager.hpp"
-#include "Log.h"
+#include "ScriptLoader.hpp"
 
 namespace Eclipse
 {
-    LuaEngine::LuaEngine() : isInitialized(false), scriptsDirectory("lua_scripts"), stateMapId(-1), eventManager(std::make_unique<EventManager>())
+    LuaEngine::LuaEngine() : isInitialized(false), stateMapId(-1), scriptsDirectory("lua_scripts"), eventManager(std::make_unique<EventManager>())
     {
     }
 
@@ -33,7 +33,6 @@ namespace Eclipse
             
             LoadDirectory(scriptsDirectory);
             
-            LOG_INFO("server.eclipse", "Eclipse Lua Engine initialized successfully for map {}", mapId);
             return true;
         }
         catch (const std::exception& e)
@@ -50,11 +49,9 @@ namespace Eclipse
             // Clean up message handlers for this state
             MessageManager::GetInstance().ClearStateHandlers(stateMapId);
             
-            cache.Clear();
             loadedScripts.clear();
             luaState = sol::state();
             isInitialized = false;
-            LOG_INFO("server.eclipse", "Eclipse Lua Engine shutdown");
         }
     }
 
@@ -66,12 +63,7 @@ namespace Eclipse
             return false;
         }
 
-        bool success = ScriptLoader::LoadFile(luaState, scriptPath);
-        if (success)
-        {
-            cache.SetScriptTimestamp(scriptPath);
-        }
-        return success;
+        return ScriptLoader::LoadFile(luaState, scriptPath);
     }
 
     bool LuaEngine::ExecuteScript(const std::string& script)
@@ -82,19 +74,26 @@ namespace Eclipse
             return false;
         }
 
-        return ScriptLoader::LoadString(luaState, script);
+        try
+        {
+            luaState.script(script);
+            return true;
+        }
+        catch (const std::exception& e)
+        {
+            LOG_ERROR("server.eclipse", "Failed to execute script: {}", e.what());
+            return false;
+        }
     }
 
     void LuaEngine::RegisterBindings()
     {
         LuaBindings::Register(luaState, eventManager.get());
         
-        // Override GetStateMapId to return this engine's mapId
         luaState["GetStateMapId"] = [this]() -> int32 {
             return this->stateMapId;
         };
         
-        // Register message system bindings
         MessageManager::GetInstance().RegisterBindings(luaState, stateMapId);
     }
 
@@ -106,34 +105,35 @@ namespace Eclipse
             return false;
         }
 
-        return ScriptLoader::LoadDirectory(luaState, directoryPath, loadedScripts);
+        luaState["_eclipse_stats"] = sol::lua_nil;
+        bool success = ScriptLoader::LoadDirectory(luaState, directoryPath, loadedScripts);
+        
+        if (sol::optional<sol::table> stats = luaState["_eclipse_stats"])
+        {
+            const char* mapType = (stateMapId == -1) ? "global" : "map";
+            LOG_INFO("server.eclipse", "[Eclipse]: {} scripts loaded for {} state {}",
+                stats->get_or("loaded", 0), mapType, stateMapId);
+        }
+        
+        luaState["_eclipse_stats"] = sol::lua_nil;
+        
+        return success;
     }
 
     void LuaEngine::ReloadScripts()
     {
         if (!isInitialized)
             return;
-
-        LOG_INFO("server.eclipse", "Reloading Lua scripts...");
-        
-        // Clear events and cache
-        if (eventManager)
-        {
-            eventManager->ClearAllEvents();
-        }
-        cache.Clear();
+    
+        if (eventManager) eventManager->ClearAllEvents();
         loadedScripts.clear();
 
-        // Clear message handlers for this state
-        if (MessageManager::GetInstance())
-            MessageManager::GetInstance().ClearStateHandlers(stateMapId);
-        
+        MessageManager::GetInstance().ClearStateHandlers(stateMapId);
         InitializeState();
         ConfigureOptimizations();
         RegisterBindings();
-        LoadDirectory(scriptsDirectory);
         
-        LOG_INFO("server.eclipse", "Scripts reloaded successfully");
+        LoadDirectory(scriptsDirectory);
     }
 
     void LuaEngine::ProcessMessages()
@@ -147,27 +147,36 @@ namespace Eclipse
     void LuaEngine::InitializeState()
     {
         luaState = sol::state();
-        luaState.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, 
-                               sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::io);
+        luaState.open_libraries(
+            sol::lib::base,
+            sol::lib::package,
+            sol::lib::coroutine,
+            sol::lib::string,
+            sol::lib::os,
+            sol::lib::math,
+            sol::lib::table,
+            sol::lib::debug,
+            sol::lib::bit32,
+            sol::lib::utf8
+        );
+        
+#ifdef LUAJIT_VERSION
+        try {
+            lua_State* L = luaState.lua_state();
+            lua_getglobal(L, "require");
+            lua_pushstring(L, "jit");
+            if (lua_pcall(L, 1, 1, 0) == 0) {
+                lua_setglobal(L, "jit");
+                luaState.script("if jit and jit.opt then jit.opt.start(3) end");
+            } else {
+                lua_pop(L, 1);
+            }
+        } catch (...) {}
+#endif
     }
 
     void LuaEngine::ConfigureOptimizations()
     {
-        try 
-        {
-            // Enable JIT compilation if using LuaJIT
-            luaState.script(R"(
-                if jit then
-                    jit.opt.start(3) -- Optimization level 3
-                end
-            )");
-        }
-        catch (const std::exception&)
-        {
-            // LuaJIT not available, continue with standard Lua
-        }
-        
-        // Mark engine as optimized
         luaState["_ECLIPSE_OPTIMIZED"] = true;
     }
 }

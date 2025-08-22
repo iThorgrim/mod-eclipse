@@ -1,7 +1,7 @@
 #ifndef ECLIPSE_LUA_BINDINGS_HPP
 #define ECLIPSE_LUA_BINDINGS_HPP
 
-#include "sol.hpp"
+#include "EclipseIncludes.hpp"
 
 namespace Eclipse
 {
