@@ -83,12 +83,4 @@ namespace Eclipse
         messageHandlers.erase(stateId);
         messageQueue.erase(stateId);
     }
-
-    void MessageManager::RegisterBindings(sol::state& lua, int32 stateId)
-    {
-        // Send message to specific state
-        // lua["SendStateMessage"] = [this, stateId](int32 toStateId, const std::string& messageType, sol::object data) {
-        //     this->SendMessage(stateId, toStateId, messageType, data);
-        // };
-    }
 }
