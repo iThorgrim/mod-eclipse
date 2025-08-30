@@ -29,6 +29,7 @@ git apply mod-eclipse/cmake-patch.diff
 This patch replaces `ELUNA` with `ECLIPSE` in the `CMakeLists.txt` file of your modules folder, which is required for **mod-eclipse** to work properly.
 
 5. **Configure the build**
+
 Go to the `build` folder (at the root of your AzerothCore source), then add the following parameter to your cmake command:
 
 ```bash
