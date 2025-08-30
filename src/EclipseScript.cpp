@@ -5,6 +5,7 @@
 #include "EventDispatcher.hpp"
 #include "Events.hpp"
 #include "LuaCache.hpp"
+#include "EclipseCreatureAI.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -42,33 +43,20 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-        if (globalEngine)
-        {
-            globalEngine->ProcessMessages();
-        }
-        
-        Map* playerMap = player->GetMap();
-        if (playerMap)
-        {
-            auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(playerMap->GetId());
-            if (mapEngine && mapEngine != globalEngine)
-            {
-                mapEngine->ProcessMessages();
-            }
-        }
-        
-        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGIN, player);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(
+            Eclipse::PLAYER_EVENT_ON_LOGIN, 
+            player
+        );
     }
     
     void OnPlayerLogout(Player* player) override
     {
-        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOGOUT, player);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::PLAYER_EVENT_ON_LOGOUT, player);
     }
 
     void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
     {
-        Eclipse::EventDispatcher::GetInstance().TriggerPlayerEvent(Eclipse::PLAYER_EVENT_ON_LOOT_ITEM, player, item, count, lootguid);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::PLAYER_EVENT_ON_LOOT_ITEM, player, item, count, lootguid);
     }
 };
 
@@ -79,13 +67,15 @@ public:
         ALLMAPHOOK_ON_CREATE_MAP,
         ALLMAPHOOK_ON_DESTROY_MAP,
         ALLMAPHOOK_ON_PLAYER_ENTER_ALL,
+        ALLMAPHOOK_ON_MAP_UPDATE,
      }) { }
 
-    void OnPlayerEnterAll(Map* map, Player* /*player*/) override
+    void OnPlayerEnterAll(Map* map, Player* player) override
     {
         uint32 mapId = map->GetId();
-        
+
         Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_PLAYER_ENTER, map, player);
     }
 
     void OnCreateMap(Map* map) override
@@ -99,6 +89,19 @@ public:
     {
         uint32 mapId = map->GetId();       
         Eclipse::MapStateManager::GetInstance().UnloadMapState(mapId);
+    }
+
+    void OnMapUpdate(Map* map, uint32 diff) override
+    {
+        auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
+        if (globalEngine)
+            globalEngine->ProcessMessages();
+        
+        auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(map->GetId());
+        if (mapEngine && mapEngine != globalEngine)
+            mapEngine->ProcessMessages();
+
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_UPDATE, map, diff);
     }
 };
 
@@ -119,20 +122,13 @@ public:
             Eclipse::MapStateManager::GetInstance().ReloadAllScripts();
             return false;
         }
-        else if (cmd.find("eclipse cache clear") == 0)
-        {
-            Eclipse::GetGlobalCache().Clear();
-            return false;
-        }
-        else if (cmd.find("eclipse cache stats") == 0)
-        {
-            Eclipse::GetGlobalCache().LogCacheStats();
-            return false;
-        }
 
         return true;
     }
 };
+
+// Forward declaration
+void AddEclipseCreatureAIScripts();
 
 void Addmod_eclipseScripts()
 {
@@ -140,4 +136,7 @@ void Addmod_eclipseScripts()
     new Eclipse_PlayerScript();
     new Eclipse_AllMapScript();
     new Eclipse_CommandSC();
+    
+    // Initialize automatic creature AI system
+    AddEclipseCreatureAIScripts();
 }

@@ -1,7 +1,8 @@
 #ifndef ECLIPSE_LUA_ENGINE_HPP
 #define ECLIPSE_LUA_ENGINE_HPP
 
-#include "LuaCache.hpp"
+#include "LuaState.hpp"
+#include "LuaCompiler.hpp"
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,22 +25,23 @@ namespace Eclipse
         bool ExecuteScript(const std::string& script);
         bool LoadDirectory(const std::string& directoryPath);
         
-        sol::state& GetState() { return luaState; }
+        sol::state& GetState() { return luaState.GetState(); }
         class EventManager* GetEventManager() const noexcept { return eventManager.get(); }
         
         void ProcessMessages();
 
     private:
-        sol::state luaState;
+        LuaState luaState;
+        LuaCompiler compiler;
         bool isInitialized;
         std::vector<std::string> loadedScripts;
         std::string scriptsDirectory;
         int32 stateMapId; // -1 = global/world state, >=0 = specific map
         std::unique_ptr<class EventManager> eventManager;
         
-        void InitializeState();
+        void InitializeComponents();
         void RegisterBindings();
-        void ConfigureOptimizations();
+        void ShutdownComponents();
     };
 }
 

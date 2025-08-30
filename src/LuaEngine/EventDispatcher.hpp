@@ -7,31 +7,31 @@
 
 namespace Eclipse
 {
-    class LuaEngine; // Forward declaration
+    class LuaEngine;
     
     class EventDispatcher
     {
     public:
         static EventDispatcher& GetInstance();
         
-        // Universal template declaration (implementation in .cpp)
         template<typename... Args>
-        void TriggerPlayerEvent(uint32 eventId, Args&&... args);
-         
-        void TriggerMapEvent(uint32 eventId, Map* map);
-        void TriggerMapPlayerEvent(uint32 eventId, Map* map, Player* player);
+        void TriggerEvent(uint32 eventId, Args&&... args);
+        
+        template<typename... Args>
+        void TriggerKeyedEvent(uint32 eventId, Args&&... args);
         
     private:
         EventDispatcher() = default;
         ~EventDispatcher() = default;
         
-        std::vector<LuaEngine*> GetRelevantEngines(Player* player);
-        std::vector<LuaEngine*> GetRelevantEngines(Map* map);
+        template<typename T>
+        std::vector<LuaEngine*> GetRelevantEngines(T* object);
         
-        void TriggerOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Player* player);
+        template<typename T, typename... Args>
+        void TriggerOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Args&&... args);
         
-        // Type-erased callback execution
-        void ExecuteOnRelevantEngines(Player* player, std::function<void(LuaEngine*)> callback);
+        template<EventType Type, typename... Args>
+        void TriggerKeyedEventHelper(const std::vector<LuaEngine*>& engines, uint32 objectId, uint32 eventId, Args&&... args);
     };
 }
 

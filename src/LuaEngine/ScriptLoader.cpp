@@ -32,29 +32,20 @@ namespace Eclipse
             
             // Handle different file types
             if (ext == ".moon")
-            {
-                // MoonScript: generate Lua code to load the MoonScript file
                 source = "return require('moonscript').loadfile([[" + filePath + "]])";
-            }
             else if (ext == ".out")
-            {
-                // Pre-compiled bytecode file
                 return LoadPrecompiledFile(lua, filePath);
-            }
             else
-            {
-                // Regular .lua or .ext files
                 source = ReadFileContent(filePath);
-            }
             
             auto bytecode = CompileToBytecode(lua, source);
             
             if (!bytecode.empty())
             {
-                // Load from the fresh bytecode first (before moving)
+                // Load from the fresh bytecode first
                 int result = luaL_loadbuffer(lua.lua_state(), bytecode.data(), bytecode.size(), filePath.c_str());
                 
-                // Cache the bytecode (move to avoid copy)
+                // Cache the bytecode
                 cache.CacheBytecode(filePath, std::move(bytecode));
                 if (result == LUA_OK)
                 {
@@ -65,13 +56,9 @@ namespace Eclipse
             
             // Fallback to direct file loading
             if (ext == ".moon")
-            {
-                lua.script(source); // Execute the moonscript loader
-            }
+                lua.script(source);
             else
-            {
                 lua.script_file(filePath);
-            }
             return true;
         }
         catch (const std::exception& e)
@@ -125,7 +112,6 @@ namespace Eclipse
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         
-        // Store statistics for caller
         lua["_eclipse_stats"] = lua.create_table_with(
             "loaded", loadedCount,
             "cached", cachedCount,
@@ -152,15 +138,15 @@ namespace Eclipse
                         files.push_back(entry.path().string());
                 }
             }
-            // Sort by extension priority: .ext -> .lua -> .moon -> .out, then alphabetically
+            // Sort by extension priority: .ext -> .lua -> .out -> .moon, then alphabetically
             std::sort(files.begin(), files.end(), [](const std::string& a, const std::string& b) {
                 auto getExtPriority = [](const std::string& path) -> int {
                     std::filesystem::path p(path);
                     auto ext = p.extension().string();
                     if (ext == ".ext") return 0;
                     if (ext == ".lua") return 1;
-                    if (ext == ".moon") return 2;
-                    if (ext == ".out") return 3;
+                    if (ext == ".out") return 2;
+                    if (ext == ".moon") return 3;
                     return 4;
                 };
                 
@@ -169,8 +155,9 @@ namespace Eclipse
                 
                 if (priorityA != priorityB)
                     return priorityA < priorityB;
-                    
-                return a < b; // Alphabetical within same priority
+                
+                 // Alphabetical within same priority
+                return a < b;
             });
         }
         catch (const std::exception& e)
@@ -243,8 +230,8 @@ namespace Eclipse
                 return false;
             }
             
-            std::vector<char> bytecode((std::istreambuf_iterator<char>(file)), 
-                                     std::istreambuf_iterator<char>());
+            std::vector<char> bytecode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
             file.close();
             
             int result = luaL_loadbuffer(lua.lua_state(), bytecode.data(), bytecode.size(), filePath.c_str());

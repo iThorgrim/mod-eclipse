@@ -11,8 +11,7 @@ namespace Eclipse
     {
     public:
         static bool LoadFile(sol::state& lua, const std::string& filePath);
-        static bool LoadDirectory(sol::state& lua, const std::string& directoryPath, 
-                                 std::vector<std::string>& loadedScripts);
+        static bool LoadDirectory(sol::state& lua, const std::string& directoryPath, std::vector<std::string>& loadedScripts);
         
     private:
         ScriptLoader() = delete;

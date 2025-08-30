@@ -18,19 +18,12 @@ namespace Eclipse
         ProcessMessages(toStateId);
     }
 
-    void MessageManager::BroadcastMessage(int32 fromStateId, const std::string& messageType, sol::object data)
-    {       
-        // Send to global state (-1) only
-        SendMessage(fromStateId, -1, messageType, data);
-        
-    }
-
     void MessageManager::RegisterMessageEvent(int32 stateId, const std::string& messageType, sol::function callback)
     {
         if (callback.valid())
         {
             auto& handlers = messageHandlers[stateId][messageType];
-            handlers.reserve(4); // Reserve space for typical usage
+            handlers.reserve(4);
             handlers.push_back(callback);
         }
     }
@@ -94,13 +87,8 @@ namespace Eclipse
     void MessageManager::RegisterBindings(sol::state& lua, int32 stateId)
     {
         // Send message to specific state
-        lua["SendStateMessage"] = [this, stateId](int32 toStateId, const std::string& messageType, sol::object data) {
-            this->SendMessage(stateId, toStateId, messageType, data);
-        };
-        
-        // Broadcast message to all states
-        lua["BroadcastMessage"] = [this, stateId](const std::string& messageType, sol::object data) {
-            this->BroadcastMessage(stateId, messageType, data);
-        };
+        // lua["SendStateMessage"] = [this, stateId](int32 toStateId, const std::string& messageType, sol::object data) {
+        //     this->SendMessage(stateId, toStateId, messageType, data);
+        // };
     }
 }
