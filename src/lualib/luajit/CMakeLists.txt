@@ -121,6 +121,9 @@ if (UNIX OR APPLE)
   endif()
 
   # build luajit
+  # Create the include directory early so CMake can find it during configuration
+  file(MAKE_DIRECTORY "${LUA_INSTALL_PATH}/include/luajit-2.1")
+  
   # if (LUA_USR)
   #   add_custom_command(
   #     OUTPUT ${LUAJIT_LIB_PATH}
@@ -148,7 +151,7 @@ if (UNIX OR APPLE)
   set_target_properties(lualib
   PROPERTIES
   # IMPORTED_LOCATION ${LUAJIT_LIB_PATH} # cmake bullshit. spent days figuring this and turns out set_target_properties does squat shit while set_property works fine.
-  INTERFACE_INCLUDE_DIRECTORIES "${LUA_SRC_FOLDER}/src"
+  INTERFACE_INCLUDE_DIRECTORIES "${LUA_SRC_FOLDER}/src;${LUA_INSTALL_PATH}/include/luajit-2.1"
   INTERFACE_COMPILE_DEFINITIONS "LUAJIT_VERSION=1;SOL_LUAJIT=1;SOL_USING_CXX_LUAJIT=1"
   )
   set_property(TARGET lualib PROPERTY IMPORTED_LOCATION ${LUAJIT_LIB_PATH})

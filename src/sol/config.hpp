@@ -51,8 +51,6 @@
   #define SOL_LUAJIT 0
 #endif
 
-#define SOL_USING_CXX_LUAJIT 0
-
 // Use minimal safe operations only
 #define SOL_SAFE_USERTYPE 1
 #define SOL_SAFE_STACK_CHECK 1
