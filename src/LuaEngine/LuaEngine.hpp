@@ -23,7 +23,6 @@ namespace Eclipse
         
         bool LoadScript(const std::string& scriptPath);
         bool ExecuteScript(const std::string& script);
-        bool LoadDirectory(const std::string& directoryPath);
         
         sol::state& GetState() { return luaState.GetState(); }
         class EventManager* GetEventManager() const noexcept { return eventManager.get(); }

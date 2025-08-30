@@ -4,6 +4,7 @@
 #include "Methods/Methods.hpp"
 #include "Methods/GlobalMethods.hpp"
 #include "MessageManager.hpp"
+#include "ScriptLoader.hpp"
 #include <filesystem>
 
 namespace Eclipse
@@ -31,7 +32,7 @@ namespace Eclipse
             
             isInitialized = true;
             
-            LoadDirectory(scriptsDirectory);
+            ScriptLoader::LoadDirectory(GetState(), scriptsDirectory, loadedScripts);
             
             return true;
         }
@@ -83,67 +84,15 @@ namespace Eclipse
         return compiler.ExecuteScript(luaState.GetState(), script);
     }
 
-    bool LuaEngine::LoadDirectory(const std::string& directoryPath)
-    {
-        if (!isInitialized)
-        {
-            LOG_ERROR("server.eclipse", "Cannot load scripts: Engine not initialized");
-            return false;
-        }
-
-        bool success = true;
-        size_t loadedCount = 0;
-        
-        try 
-        {
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath))
-            {
-                if (entry.is_regular_file())
-                {
-                    const auto& path = entry.path();
-                    const auto extension = path.extension().string();
-                    
-                    // Support multiple script formats
-                    if (extension == ".lua" || extension == ".ext" || extension == ".moon" || extension == ".out")
-                    {
-                        if (compiler.CompileAndExecute(luaState.GetState(), path.string()))
-                        {
-                            loadedScripts.push_back(path.string());
-                            loadedCount++;
-                        }
-                        else
-                        {
-                            success = false;
-                        }
-                    }
-                }
-            }
-            
-            const char* mapType = (stateMapId == -1) ? "global" : "map";
-            LOG_INFO("server.eclipse", "[Eclipse]: {} scripts loaded for {} state {}", loadedCount, mapType, stateMapId);
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            LOG_ERROR("server.eclipse", "Filesystem error loading directory '{}': {}", directoryPath, e.what());
-            success = false;
-        }
-        
-        return success;
-    }
-
     void LuaEngine::ReloadScripts()
     {
         if (!isInitialized)
             return;
-    
-        if (eventManager) eventManager->ClearAllEvents();
-        loadedScripts.clear();
-
-        MessageManager::GetInstance().ClearStateHandlers(stateMapId);
-        InitializeComponents();
-        RegisterBindings();
         
-        LoadDirectory(scriptsDirectory);
+        int32 mapId = GetStateMapId();
+
+        Shutdown();
+        Initialize(mapId);
     }
 
     void LuaEngine::ProcessMessages()
