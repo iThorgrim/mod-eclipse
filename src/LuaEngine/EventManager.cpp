@@ -31,7 +31,6 @@ namespace Eclipse
 
         // === KEYED EVENTS ===
         lua["RegisterCreatureEvent"] = [this](uint32 objectId, uint32 eventId, sol::function callback) {
-            LOG_INFO("server.eclipse", "RegisterCreatureEvent - ObjectID: {}, EventID: {}", objectId, eventId);
             this->RegisterKeyedEvent<EventType::CREATURE>(objectId, eventId, callback);
         };
         lua["ClearCreatureEvents"] = [this]() {
