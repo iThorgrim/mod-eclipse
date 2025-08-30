@@ -30,6 +30,7 @@ git apply mod-eclipse/cmake-patch.diff
 Ce patch permet de remplacer `ELUNA` par `ECLIPSE` dans le fichier `CMakeLists.txt` de votre dossier modules, ce qui est nécessaire pour que **mod-eclipse** fonctionne correctement.
 
 5. **Configurer la compilation**
+
 Rendez-vous dans le dossier `build` (à la racine du projet AzerothCore), puis ajoutez le paramètre suivant à votre commande cmake :
 ```bash
 -DLUA_VERSION=lua54
