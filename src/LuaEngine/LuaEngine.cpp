@@ -120,6 +120,9 @@ namespace Eclipse
     {
         // Clean up message handlers for this state
         MessageManager::GetInstance().ClearStateHandlers(stateMapId);
+
+        // Clear all events for this state
+        if (eventManager) eventManager->ClearAllEvents();
         
         // Clear loaded scripts
         loadedScripts.clear();
