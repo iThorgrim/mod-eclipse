@@ -1,36 +1,38 @@
 #include "ScriptLoader.hpp"
 #include "LuaCache.hpp"
+
 #include <filesystem>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <chrono>
+#include <set>
 
 namespace Eclipse
 {
+    bool ScriptLoader::IsValidScriptExtension(const std::string& ext)
+    {
+        return ext == ".ext" || ext == ".lua" || ext == ".moon" || ext == ".out";
+    }
+
     bool ScriptLoader::LoadFile(sol::state& lua, const std::string& filePath)
     {
-        auto& cache = GetGlobalCache();
-        
-        // Try cache first
-        if (cache.IsCacheValid(filePath))
-        {
-            if (cache.LoadFromCache(lua, filePath))
-            {
-                return true;
-            }
-            // Cache failed, invalidate and fallback to file
-            cache.InvalidateCache(filePath);
-        }
-        
-        // Load from file and compile to bytecode
         try
         {
+            auto& cache = GetGlobalCache();
+            
+            if (cache.IsCacheValid(filePath))
+            {
+                if (cache.LoadFromCache(lua, filePath))
+                {
+                    return true;
+                }
+                cache.InvalidateCache(filePath);
+            }
+            
             std::filesystem::path path(filePath);
             auto ext = path.extension().string();
             std::string source;
             
-            // Handle different file types
             if (ext == ".moon")
                 source = "return require('moonscript').loadfile([[" + filePath + "]])";
             else if (ext == ".out")
@@ -42,11 +44,9 @@ namespace Eclipse
             
             if (!bytecode.empty())
             {
-                // Load from the fresh bytecode first
                 int result = luaL_loadbuffer(lua.lua_state(), bytecode.data(), bytecode.size(), filePath.c_str());
-                
-                // Cache the bytecode
                 cache.CacheBytecode(filePath, std::move(bytecode));
+                
                 if (result == LUA_OK)
                 {
                     lua_pcall(lua.lua_state(), 0, 0, 0);
@@ -54,11 +54,11 @@ namespace Eclipse
                 }
             }
             
-            // Fallback to direct file loading
             if (ext == ".moon")
                 lua.script(source);
             else
                 lua.script_file(filePath);
+            
             return true;
         }
         catch (const std::exception& e)
@@ -67,78 +67,37 @@ namespace Eclipse
             return false;
         }
     }
-    
+
     bool ScriptLoader::LoadDirectory(sol::state& lua, const std::string& directoryPath, std::vector<std::string>& loadedScripts)
     {
-        if (!std::filesystem::exists(directoryPath))
-        {
-            return false;
-        }
-
-        auto scriptFiles = ScanDirectory(directoryPath);
-        if (scriptFiles.empty())
-        {
-            return true;
-        }
-
-        auto startTime = std::chrono::high_resolution_clock::now();
-        auto& cache = GetGlobalCache();
-        
-        int loadedCount = 0;
-        int cachedCount = 0;
-        int compiledCount = 0;
-        int precompiledCount = 0;
-        
-        for (const auto& filePath : scriptFiles)
-        {
-            bool wasFromCache = cache.IsCacheValid(filePath);
-            std::filesystem::path path(filePath);
-            auto ext = path.extension().string();
-            
-            if (LoadFile(lua, filePath))
-            {
-                loadedScripts.push_back(filePath);
-                loadedCount++;
-                
-                if (wasFromCache)
-                    cachedCount++;
-                else if (ext == ".out")
-                    precompiledCount++;
-                else
-                    compiledCount++;
-            }
-        }
-
-        auto endTime = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        
-        lua["_eclipse_stats"] = lua.create_table_with(
-            "loaded", loadedCount,
-            "cached", cachedCount,
-            "compiled", compiledCount,
-            "precompiled", precompiledCount,
-            "duration_ms", duration.count()
-        );
-        
-        return loadedCount > 0;
-    }
-    
-    std::vector<std::string> ScriptLoader::ScanDirectory(const std::string& path)
-    {
-        std::vector<std::string> files;
-        
         try
         {
-            for (const auto& entry : std::filesystem::directory_iterator(path))
+            if (!std::filesystem::exists(directoryPath) || !std::filesystem::is_directory(directoryPath))
+            {
+                LOG_ERROR("server.eclipse", "Invalid directory path: {}", directoryPath);
+                return false;
+            }
+
+            auto& pathManager = LuaPathManager::GetInstance();
+            pathManager.AddSearchPath(directoryPath);
+            pathManager.ApplyPaths(lua);
+
+            std::vector<std::string> files;
+            
+            for (const auto& entry : std::filesystem::directory_iterator(directoryPath))
             {
                 if (entry.is_regular_file())
                 {
                     auto ext = entry.path().extension().string();
-                    if (ext == ".ext" || ext == ".lua" || ext == ".moon" || ext == ".out")
+                    if (IsValidScriptExtension(ext))
                         files.push_back(entry.path().string());
                 }
+                else if (entry.is_directory())
+                {
+                    LoadDirectory(lua, entry.path().string(), loadedScripts);
+                }
             }
-            // Sort by extension priority: .ext -> .lua -> .out -> .moon, then alphabetically
+
             std::sort(files.begin(), files.end(), [](const std::string& a, const std::string& b) {
                 auto getExtPriority = [](const std::string& path) -> int {
                     std::filesystem::path p(path);
@@ -153,21 +112,18 @@ namespace Eclipse
                 int priorityA = getExtPriority(a);
                 int priorityB = getExtPriority(b);
                 
-                if (priorityA != priorityB)
-                    return priorityA < priorityB;
-                
-                 // Alphabetical within same priority
-                return a < b;
+                return priorityA != priorityB ? priorityA < priorityB : a < b;
             });
+
+            return LoadFiles(lua, files, loadedScripts);
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("server.eclipse", "Failed to scan directory '{}': {}", path, e.what());
+            LOG_ERROR("server.eclipse", "Error in LoadDirectory for '{}': {}", directoryPath, e.what());
+            return false;
         }
-        
-        return files;
     }
-    
+
     std::vector<char> ScriptLoader::CompileToBytecode(sol::state& lua, const std::string& source)
     {
         std::vector<char> bytecode;
@@ -180,7 +136,6 @@ namespace Eclipse
             
             lua_State* L = lua.lua_state();
             
-            // Writer function for lua_dump
             auto writer = [](lua_State*, const void* p, size_t sz, void* ud) -> int {
                 auto* vec = static_cast<std::vector<char>*>(ud);
                 const char* data = static_cast<const char*>(p);
@@ -189,36 +144,44 @@ namespace Eclipse
             };
             
             lua_dump(L, writer, &bytecode, 0);
-            lua_pop(L, 1); // Remove function from stack
+            lua_pop(L, 1);
         }
-        catch (const std::exception&)
+        catch (const std::exception& e)
         {
+            LOG_ERROR("server.eclipse", "Failed to compile bytecode: {}", e.what());
             bytecode.clear();
         }
         
         return bytecode;
     }
-    
+
     std::string ScriptLoader::ReadFileContent(const std::string& path)
     {
-        std::ifstream file(path, std::ios::binary);
-        if (!file.is_open())
+        try
         {
-            throw std::runtime_error("Cannot open file: " + path);
+            std::ifstream file(path, std::ios::binary);
+            if (!file.is_open())
+            {
+                throw std::runtime_error("Cannot open file: " + path);
+            }
+            
+            file.seekg(0, std::ios::end);
+            auto size = file.tellg();
+            file.seekg(0, std::ios::beg);
+            
+            std::string content;
+            content.reserve(size);
+            content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+            
+            return content;
         }
-        
-        // Get file size and reserve string capacity
-        file.seekg(0, std::ios::end);
-        auto size = file.tellg();
-        file.seekg(0, std::ios::beg);
-        
-        std::string content;
-        content.reserve(size);
-        content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-        
-        return content;
+        catch (const std::exception& e)
+        {
+            LOG_ERROR("server.eclipse", "Failed to read file '{}': {}", path, e.what());
+            throw;
+        }
     }
-    
+
     bool ScriptLoader::LoadPrecompiledFile(sol::state& lua, const std::string& filePath)
     {
         try
@@ -231,7 +194,6 @@ namespace Eclipse
             }
             
             std::vector<char> bytecode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
             file.close();
             
             int result = luaL_loadbuffer(lua.lua_state(), bytecode.data(), bytecode.size(), filePath.c_str());
@@ -248,5 +210,31 @@ namespace Eclipse
             LOG_ERROR("server.eclipse", "Failed to load precompiled file '{}': {}", filePath, e.what());
             return false;
         }
+    }
+
+    int ScriptLoader::LoadFiles(sol::state& lua, const std::vector<std::string>& files, std::vector<std::string>& loadedScripts)
+    {
+        if (files.empty())
+            return 0;
+
+        int loadedCount = 0;
+        
+        for (const auto& filePath : files)
+        {
+            try
+            {
+                if (LoadFile(lua, filePath))
+                {
+                    loadedScripts.push_back(filePath);
+                    loadedCount++;
+                }
+            }
+            catch (const std::exception& e)
+            {
+                LOG_ERROR("server.eclipse", "Failed to load file '{}': {}", filePath, e.what());
+            }
+        }
+
+        return loadedCount;
     }
 }
