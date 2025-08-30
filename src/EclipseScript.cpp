@@ -1,11 +1,12 @@
 // Eclipse Engine - AzerothCore Integration
 
 #include "ScriptMgr.h"
-#include "MapStateManager.hpp"
-#include "EventDispatcher.hpp"
-#include "Events.hpp"
 #include "LuaCache.hpp"
+#include "EventDispatcher.hpp"
+#include "MapStateManager.hpp"
 #include "EclipseCreatureAI.hpp"
+#include "Events.hpp"
+#include "EclipseConfig.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -17,11 +18,16 @@ public:
 
     void OnBeforeConfigLoad(bool reload) override
     {
-        if (!reload)
+        Eclipse::EclipseConfig::GetInstance().Initialize();
+
+        if (Eclipse::EclipseConfig::GetInstance().IsEclipseEnabled())
         {
-            LOG_INFO("server.eclipse", "Initialize Eclipse Engine...");
-            auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-            LOG_INFO("server.eclipse", "Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
+            if (!reload)
+            {
+                LOG_INFO("server.eclipse", "Initialize Eclipse Engine...");
+                auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
+                LOG_INFO("server.eclipse", "Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
+            }
         }
     }
 
@@ -51,12 +57,21 @@ public:
     
     void OnPlayerLogout(Player* player) override
     {
-        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::PLAYER_EVENT_ON_LOGOUT, player);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(
+            Eclipse::PLAYER_EVENT_ON_LOGOUT,
+            player
+        );
     }
 
     void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
     {
-        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::PLAYER_EVENT_ON_LOOT_ITEM, player, item, count, lootguid);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(
+            Eclipse::PLAYER_EVENT_ON_LOOT_ITEM,
+            player,
+            item,
+            count,
+            lootguid
+        );
     }
 };
 
@@ -73,15 +88,17 @@ public:
     void OnPlayerEnterAll(Map* map, Player* player) override
     {
         uint32 mapId = map->GetId();
-
         Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
-        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_PLAYER_ENTER, map, player);
+
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_PLAYER_ENTER,
+            map,
+            player
+        );
     }
 
     void OnCreateMap(Map* map) override
     {
         uint32 mapId = map->GetId();
-        LOG_INFO("server.eclipse", "Map {} created, initializing Lua state...", mapId);
         Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
     }
 
@@ -101,7 +118,10 @@ public:
         if (mapEngine && mapEngine != globalEngine)
             mapEngine->ProcessMessages();
 
-        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_UPDATE, map, diff);
+        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_UPDATE,
+            map,
+            diff
+        );
     }
 };
 
@@ -116,13 +136,13 @@ public:
     {
         std::string cmd(cmdStr);
         std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
-        
+            
         if (cmd.find("reload eclipse") == 0)
         {
             Eclipse::MapStateManager::GetInstance().ReloadAllScripts();
             return false;
         }
-
+    
         return true;
     }
 };
