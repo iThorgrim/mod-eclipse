@@ -8,6 +8,4 @@
 #include "Map.h"
 #include "Item.h"
 
-// Include LuaJIT wrapper before Sol3
-#include "luajit_wrapper.hpp"
 #include "sol.hpp"
