@@ -14,7 +14,7 @@ namespace Eclipse
     LuaEngine* MapStateManager::GetStateForMap(int32 mapId)
     {
         // In compatibility mode, always return global state (-1) except when explicitly requested
-        if (mapId != -1 && EclipseConfig::GetInstance().IsEclipseCompatiblityEnabled())
+        if (mapId != -1 && EclipseConfig::GetInstance().IsCompatibilityEnabled())
         {
             LOG_DEBUG("server.eclipse", "[Eclipse]: Compatibility mode: redirecting map {} to global state (-1)", mapId);
             return GetStateForMap(-1);
