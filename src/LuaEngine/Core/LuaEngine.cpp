@@ -43,9 +43,17 @@ namespace Eclipse
                 LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Discovering and compiling scripts");
                 LoadStatistics stats;
                 ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
+
+                uint32 displayDuration = stats.durationMs;
+                std::string timeUnit = "µs";
+                if (displayDuration >= 1000)
+                {
+                    displayDuration = displayDuration / 1000;
+                    timeUnit = "ms";
+                }
                 
-                LOG_INFO("server.eclipse", "[Eclipse]: Executed {} Lua scripts in {} ms into state {} ({} compiled, {} cached, {} pre-compiled)",
-                    stats.GetSuccessful(), stats.durationMs, stateMapId, 
+                LOG_INFO("server.eclipse", "[Eclipse]: Executed {} Lua scripts in {} {} into state {} ({} compiled, {} cached, {} pre-compiled)",
+                    stats.GetSuccessful(), displayDuration, timeUnit, stateMapId, 
                     stats.compiled, stats.cached, stats.precompiled);
                     
                 if (stats.failed > 0)
@@ -62,10 +70,18 @@ namespace Eclipse
                 LoadCachedScriptsFromGlobalState();
                 
                 auto endTime = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+                uint32 durationUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
                 
-                LOG_INFO("server.eclipse", "[Eclipse]: Executed {} Lua scripts in {} ms into state {} (0 compiled, {} cached, 0 pre-compiled)",
-                    static_cast<int>(loadedScripts.size()), static_cast<uint32>(duration.count()), stateMapId, 
+                uint32 displayDuration = durationUs;
+                std::string timeUnit = "µs";
+                if (displayDuration >= 1000)
+                {
+                    displayDuration = displayDuration / 1000;
+                    timeUnit = "ms";
+                }
+                
+                LOG_INFO("server.eclipse", "[Eclipse]: Executed {} Lua scripts in {} {} into state {} (0 compiled, {} cached, 0 pre-compiled)",
+                    static_cast<int>(loadedScripts.size()), displayDuration, timeUnit, stateMapId, 
                     static_cast<int>(loadedScripts.size()));
             }
             
@@ -106,23 +122,6 @@ namespace Eclipse
             LOG_ERROR("server.eclipse", "[Eclipse]: Failed to load script: {}", scriptPath);
             return false;
         }
-    }
-
-    bool LuaEngine::ExecuteScript(const std::string& script)
-    {
-        if (!isInitialized)
-        {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Cannot execute script: Engine not initialized");
-            return false;
-        }
-
-        auto bytecode = LuaCompiler::CompileTobytecode(GetGlobalCompilerState(), script, "inline_script");
-        if (bytecode.empty())
-        {
-            return false;
-        }
-        
-        return ScriptLoader::LoadBytecodeIntoState(GetState(), bytecode, "inline_script");
     }
 
     void LuaEngine::ReloadScripts()

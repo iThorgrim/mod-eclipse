@@ -21,7 +21,6 @@ namespace Eclipse
         int32 GetStateMapId() const { return stateMapId; }
         
         bool LoadScript(const std::string& scriptPath);
-        bool ExecuteScript(const std::string& script);
         
         // Access to global compiler state (state -1)
         static sol::state& GetGlobalCompilerState();
@@ -30,6 +29,8 @@ namespace Eclipse
         class EventManager* GetEventManager() const noexcept { return eventManager.get(); }
         
         void ProcessMessages();
+
+        void LogScriptStats(uint32 success, uint32 compiled, uint32 cached, uint32 precompiled, uint32 durationUs, int32 mapId);
 
     private:
         LuaState luaState;
