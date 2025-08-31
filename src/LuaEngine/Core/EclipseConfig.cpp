@@ -21,12 +21,12 @@ namespace Eclipse
     void EclipseConfig::BuildConfigCache()
     {
         // Boolean configurations
-        SetConfigValue(EclipseConfigValues::ENABLED, "Eclipse.Enabled", false, Reloadable::Yes);
-        SetConfigValue(EclipseConfigValues::COMPATIBILITY, "Eclipse.Compatibility", true, Reloadable::No);
+        SetConfigValue<bool>(EclipseConfigValues::ENABLED, "Eclipse.Enabled", false);
+        SetConfigValue<bool>(EclipseConfigValues::COMPATIBILITY, "Eclipse.Compatibility", true);
 
         // String configurations  
-        SetConfigValue(EclipseConfigValues::SCRIPT_PATH, "Eclipse.ScriptPath", std::string("lua_scripts"), Reloadable::No);
-        SetConfigValue(EclipseConfigValues::REQUIRE_PATH_EXTRA, "Eclipse.RequirePaths", std::string(""), Reloadable::Yes);
-        SetConfigValue(EclipseConfigValues::REQUIRE_CPATH_EXTRA, "Eclipse.RequireCPaths", std::string(""), Reloadable::Yes);
+        SetConfigValue<std::string>(EclipseConfigValues::SCRIPT_PATH, "Eclipse.ScriptPath", "lua_scripts");
+        SetConfigValue<std::string>(EclipseConfigValues::REQUIRE_PATH_EXTRA, "Eclipse.RequirePaths", "");
+        SetConfigValue<std::string>(EclipseConfigValues::REQUIRE_CPATH_EXTRA, "Eclipse.RequireCPaths", "");
     }
 }
