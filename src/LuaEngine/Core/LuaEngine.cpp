@@ -224,17 +224,8 @@ namespace Eclipse
         if (stateMapId == -1)
         {
             // Global compiler state: discover and compile all scripts
-            auto& config = EclipseConfig::GetInstance();            
-            if (config.IsParallelCompilationEnabled())
-            {
-                LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Parallel compilation enabled");
-                ScriptLoader::LoadDirectoryParallel(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
-            }
-            else
-            {
-                LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Sequential compilation");
-                ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
-            }
+            LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Sequential compilation");
+            ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
         }
         else
         {

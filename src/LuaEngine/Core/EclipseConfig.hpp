@@ -10,7 +10,7 @@ namespace Eclipse
         // Boolean configurations
         ENABLED = 0,
         COMPATIBILITY,
-        PARALLEL_COMPILATION,
+
         // String configurations  
         SCRIPT_PATH,
         REQUIRE_PATH_EXTRA,
@@ -29,7 +29,6 @@ namespace Eclipse
 
         bool IsEclipseEnabled() const { return GetConfigValue<bool>(EclipseConfigValues::ENABLED); }
         bool IsCompatibilityEnabled() const { return GetConfigValue<bool>(EclipseConfigValues::COMPATIBILITY); }
-        bool IsParallelCompilationEnabled() const { return GetConfigValue<bool>(EclipseConfigValues::PARALLEL_COMPILATION); }
         
         std::string_view GetScriptPath() const { return GetConfigValue(EclipseConfigValues::SCRIPT_PATH); }
         std::string_view GetRequirePathExtra() const { return GetConfigValue(EclipseConfigValues::REQUIRE_PATH_EXTRA); }

@@ -29,7 +29,6 @@ namespace Eclipse
         // Script discovery and loading orchestration
         static bool LoadScript(sol::state& targetState, sol::state& compilerState, const std::string& filePath);
         static bool LoadDirectory(sol::state& targetState, sol::state& compilerState, const std::string& directoryPath, std::vector<std::string>& loadedScripts, LoadStatistics* stats = nullptr);
-        static bool LoadDirectoryParallel(sol::state& targetState, sol::state& compilerState, const std::string& directoryPath, std::vector<std::string>& loadedScripts, LoadStatistics* stats = nullptr);
         
         // File discovery utilities
         static std::vector<std::string> DiscoverScripts(const std::string& directoryPath);
