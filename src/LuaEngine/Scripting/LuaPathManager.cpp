@@ -137,7 +137,7 @@ namespace Eclipse
     {
         auto& config = EclipseConfig::GetInstance();
         
-        customRequirePath = config.GetConfig(CONFIG_ECLIPSE_REQUIRE_PATH_EXTRA);
-        customRequireCPath = config.GetConfig(CONFIG_ECLIPSE_REQUIRE_CPATH_EXTRA);
+        customRequirePath = std::string(config.GetRequirePathExtra());
+        customRequireCPath = std::string(config.GetRequireCPathExtra());
     }
 }
