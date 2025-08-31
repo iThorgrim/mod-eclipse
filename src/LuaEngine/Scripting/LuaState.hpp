@@ -17,7 +17,6 @@ namespace Eclipse
         sol::state& GetState() { return luaState; }
         const sol::state& GetState() const { return luaState; }
         
-        void EnableOptimizations();
         void ConfigureLibraries();
         
         bool IsValid() const { return isInitialized; }

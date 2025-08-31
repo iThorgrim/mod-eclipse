@@ -38,15 +38,6 @@ namespace Eclipse
         }
     }
 
-    void LuaState::EnableOptimizations()
-    {
-        if (isInitialized)
-        {
-            luaState["_ECLIPSE_OPTIMIZED"] = true;
-            LOG_TRACE("server.eclipse", "[Eclipse]: LuaState optimizations enabled");
-        }
-    }
-
     void LuaState::ConfigureLibraries()
     {
         if (isInitialized)
