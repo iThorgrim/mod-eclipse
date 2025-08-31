@@ -113,7 +113,6 @@ namespace Eclipse
     void LuaCache::InvalidateAllScripts()
     {
         cache_.clear();
-        LOG_INFO("server.eclipse", "[Eclipse]: Cleared all cached scripts");
     }
 
     bool LuaCache::IsScriptModified(const std::string& filePath) const

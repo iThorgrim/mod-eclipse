@@ -13,21 +13,29 @@ class Eclipse_WorldScript : public WorldScript
 public:
     Eclipse_WorldScript() : WorldScript("Eclipse_WorldScript", { 
         WORLDHOOK_ON_BEFORE_CONFIG_LOAD,
-        WORLDHOOK_ON_SHUTDOWN
+        WORLDHOOK_ON_SHUTDOWN,
+        WORLDHOOK_ON_STARTUP
      }) { }
 
     void OnBeforeConfigLoad(bool reload) override
     {
-        Eclipse::EclipseConfig::GetInstance().Initialize();
+        Eclipse::EclipseConfig::GetInstance().Initialize(reload);
 
-        if (Eclipse::EclipseConfig::GetInstance().IsEclipseEnabled())
+        if (Eclipse::EclipseConfig::GetInstance().IsEclipseEnabled() && !reload)
         {
-            if (!reload)
-            {
-                LOG_INFO("server.eclipse", "[Eclipse]: Initialize Eclipse Engine...");
+            LOG_INFO("server.eclipse", "[Eclipse]: Initialize Eclipse Engine...");
+            LOG_INFO("server.eclipse", "[Eclipse]: Searching scripts from `lua_scripts`");
 
-                auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-                LOG_INFO("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
+            // Create global state (-1) early - required for other states
+            auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
+            
+            if (globalEngine)
+            {
+                LOG_INFO("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine initialized");
+            }
+            else
+            {
+                LOG_ERROR("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine failed to initialize");
             }
         }
     }
@@ -35,6 +43,10 @@ public:
     void OnShutdown() override
     {
         LOG_INFO("server.eclipse", "[Eclipse]: Shutting down Eclipse Engine...");
+    }
+
+    void OnStartup() override
+    {
     }
 };
 

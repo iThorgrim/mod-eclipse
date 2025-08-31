@@ -1,8 +1,7 @@
 #include "LuaEngine.hpp"
 #include "EclipseIncludes.hpp"
+#include "EclipseConfig.hpp"
 #include "EventManager.hpp"
-#include "Methods/Methods.hpp"
-#include "Methods/GlobalMethods.hpp"
 #include "MessageManager.hpp"
 #include "ScriptLoader.hpp"
 #include "LuaCompiler.hpp"
@@ -11,6 +10,9 @@
 #include <filesystem>
 #include <mutex>
 #include <chrono>
+
+#include "Methods.hpp"
+#include "GlobalMethods.hpp"
 
 namespace Eclipse
 {
@@ -94,7 +96,7 @@ namespace Eclipse
         {
             // Global state: clear all cache to force recompilation
             LuaCache::GetInstance().InvalidateAllScripts();
-            LOG_INFO("server.eclipse", "[Eclipse]: Cleared all cached scripts for reload");
+            LOG_DEBUG("server.eclipse", "[Eclipse]: Cleared all cached scripts for reload");
         }
 
         // Clear current scripts without destroying the state
@@ -218,27 +220,38 @@ namespace Eclipse
     
     void LuaEngine::LoadScriptsForState()
     {
+        LoadStatistics stats;
         if (stateMapId == -1)
         {
             // Global compiler state: discover and compile all scripts
-            LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Discovering and compiling scripts");
-            LoadStatistics stats;
-            ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
-            LogScriptLoadStats(stats);
+            auto& config = EclipseConfig::GetInstance();            
+            if (config.IsParallelCompilationEnabled())
+            {
+                LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Parallel compilation enabled");
+                ScriptLoader::LoadDirectoryParallel(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
+            }
+            else
+            {
+                LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Sequential compilation");
+                ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
+            }
         }
         else
         {
             // Specific states: load from pre-compiled cache only
             LOG_DEBUG("server.eclipse", "[Eclipse]: State {}: Loading pre-compiled scripts from cache", stateMapId);
+
             auto startTime = std::chrono::high_resolution_clock::now();
-            
             LoadCachedScriptsFromGlobalState();
-            
             auto endTime = std::chrono::high_resolution_clock::now();
-            uint32 durationUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
-            
-            LogCacheLoadStats(loadedScripts.size(), durationUs);
+
+            stats.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+            stats.durationMs = stats.durationUs * 1000;
+            stats.compiled = 0;
+            stats.cached = loadedScripts.size();
+            stats.precompiled = 0;
         }
+        LogScriptLoadStats(stats);
     }
 
     std::pair<uint32, std::string> LuaEngine::FormatDuration(uint32 microseconds)
@@ -253,7 +266,8 @@ namespace Eclipse
 
     void LuaEngine::LogScriptLoadStats(const LoadStatistics& stats) const
     {
-        auto [duration, unit] = FormatDuration(stats.durationMs * 1000);
+        uint32 displayDuration = (stats.durationUs > 0) ? stats.durationUs : (stats.durationMs * 1000);
+        auto [duration, unit] = FormatDuration(displayDuration);
         LOG_INFO("server.eclipse", "[Eclipse]: Loaded {} scripts ({} compiled, {} cached, {} pre-compiled) in {}{} for state {}",
             stats.GetSuccessful(), stats.compiled, stats.cached, stats.precompiled, duration, unit, stateMapId);
     }
