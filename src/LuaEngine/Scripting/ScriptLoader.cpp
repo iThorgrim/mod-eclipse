@@ -201,7 +201,7 @@ namespace Eclipse
             ProcessSubdirectories(targetState, compilerState, directoryPath, loadedScripts, stats);
             
             auto endTime = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
             
             if (stats)
             {
