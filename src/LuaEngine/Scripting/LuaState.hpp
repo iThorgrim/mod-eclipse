@@ -27,7 +27,6 @@ namespace Eclipse
         bool isInitialized;
         
         void OpenStandardLibraries();
-        void SetupLuaJIT();
     };
 }
 

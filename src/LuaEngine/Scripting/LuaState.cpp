@@ -15,7 +15,6 @@ namespace Eclipse
         {
             luaState = sol::state();
             OpenStandardLibraries();
-            SetupLuaJIT();
             
             isInitialized = true;
             LOG_TRACE("server.eclipse", "[Eclipse]: LuaState initialized successfully");
@@ -70,33 +69,9 @@ namespace Eclipse
             sol::lib::bit32,
             sol::lib::io,
             sol::lib::utf8
-        );
-    }
-
-    void LuaState::SetupLuaJIT()
-    {
 #ifdef SOL_LUAJIT
-        try 
-        {
-            lua_State* L = luaState.lua_state();
-            lua_getglobal(L, "require");
-            lua_pushstring(L, "jit");
-            if (lua_pcall(L, 1, 1, 0) == 0) 
-            {
-                lua_setglobal(L, "jit");
-                luaState.script("if jit and jit.opt then jit.opt.start(3) end");
-                LOG_TRACE("server.eclipse", "[Eclipse]: LuaJIT optimizations enabled");
-            } 
-            else 
-            {
-                lua_pop(L, 1);
-                LOG_DEBUG("server.eclipse", "[Eclipse]: LuaJIT not available, using standard Lua");
-            }
-        } 
-        catch (const std::exception& e) 
-        {
-            LOG_DEBUG("server.eclipse", "[Eclipse]: LuaJIT setup failed: {}", e.what());
-        }
+            , sol::lib::jit
 #endif
+        );
     }
 }
