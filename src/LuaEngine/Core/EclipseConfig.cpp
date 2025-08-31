@@ -15,6 +15,7 @@ namespace Eclipse
         // Bool
         SetConfig(CONFIG_ECLIPSE_ENABLED, "Eclipse.Enabled", false);
         SetConfig(CONFIG_ECLIPSE_COMPATIBILITY, "Eclipse.Compatibility", true);
+        SetConfig(CONFIG_ECLIPSE_MONITOR_ENABLED, "Eclipse.Monitor", true);
 
         // String
         SetConfig(CONFIG_ECLIPSE_SCRIPT_PATH, "Eclipse.ScriptPath", "lua_scripts");

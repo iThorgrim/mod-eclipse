@@ -1,5 +1,6 @@
 #include "MapStateManager.hpp"
 #include "EclipseIncludes.hpp"
+#include "EclipseConfig.hpp"
 #include <chrono>
 
 namespace Eclipse
@@ -12,6 +13,13 @@ namespace Eclipse
 
     LuaEngine* MapStateManager::GetStateForMap(int32 mapId)
     {
+        // In compatibility mode, always return global state (-1) except when explicitly requested
+        if (mapId != -1 && EclipseConfig::GetInstance().IsEclipseCompatiblityEnabled())
+        {
+            LOG_DEBUG("server.eclipse", "[Eclipse]: Compatibility mode: redirecting map {} to global state (-1)", mapId);
+            return GetStateForMap(-1);
+        }
+        
         auto [it, inserted] = mapStates.try_emplace(mapId, nullptr);
         if (!inserted) return it->second.get();
         
@@ -24,7 +32,7 @@ namespace Eclipse
         }
         
         mapStates.erase(it);
-        LOG_ERROR("server.eclipse", "Failed to create Lua state for map: {}", mapId);
+        LOG_ERROR("server.eclipse", "[Eclipse]: Failed to create Lua state for map: {}", mapId);
         return nullptr;
     }
 
@@ -51,7 +59,7 @@ namespace Eclipse
             engine->Shutdown();
         }
         mapStates.clear();
-        LOG_INFO("server.eclipse", "Unloaded all Lua states");
+        LOG_INFO("server.eclipse", "[Eclipse]: Unloaded all Lua states");
     }
 
     void MapStateManager::ReloadAllScripts()

@@ -18,12 +18,12 @@ namespace Eclipse
             SetupLuaJIT();
             
             isInitialized = true;
-            LOG_TRACE("server.eclipse", "LuaState initialized successfully");
+            LOG_TRACE("server.eclipse", "[Eclipse]: LuaState initialized successfully");
             return true;
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("server.eclipse", "Failed to initialize LuaState: {}", e.what());
+            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to initialize LuaState: {}", e.what());
             isInitialized = false;
             return false;
         }
@@ -35,7 +35,7 @@ namespace Eclipse
         {
             luaState = sol::state();
             isInitialized = false;
-            LOG_TRACE("server.eclipse", "LuaState reset");
+            LOG_TRACE("server.eclipse", "[Eclipse]: LuaState reset");
         }
     }
 
@@ -44,7 +44,7 @@ namespace Eclipse
         if (isInitialized)
         {
             luaState["_ECLIPSE_OPTIMIZED"] = true;
-            LOG_TRACE("server.eclipse", "LuaState optimizations enabled");
+            LOG_TRACE("server.eclipse", "[Eclipse]: LuaState optimizations enabled");
         }
     }
 
@@ -85,17 +85,17 @@ namespace Eclipse
             {
                 lua_setglobal(L, "jit");
                 luaState.script("if jit and jit.opt then jit.opt.start(3) end");
-                LOG_TRACE("server.eclipse", "LuaJIT optimizations enabled");
+                LOG_TRACE("server.eclipse", "[Eclipse]: LuaJIT optimizations enabled");
             } 
             else 
             {
                 lua_pop(L, 1);
-                LOG_DEBUG("server.eclipse", "LuaJIT not available, using standard Lua");
+                LOG_DEBUG("server.eclipse", "[Eclipse]: LuaJIT not available, using standard Lua");
             }
         } 
         catch (const std::exception& e) 
         {
-            LOG_DEBUG("server.eclipse", "LuaJIT setup failed: {}", e.what());
+            LOG_DEBUG("server.eclipse", "[Eclipse]: LuaJIT setup failed: {}", e.what());
         }
 #endif
     }

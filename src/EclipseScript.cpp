@@ -24,17 +24,17 @@ public:
         {
             if (!reload)
             {
-                LOG_INFO("server.eclipse", "Initialize Eclipse Engine...");
+                LOG_INFO("server.eclipse", "[Eclipse]: Initialize Eclipse Engine...");
+
                 auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
-                LOG_INFO("server.eclipse", "Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
+                LOG_INFO("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine {}", globalEngine ? "initialized" : "failed");
             }
         }
     }
 
     void OnShutdown() override
     {
-        LOG_INFO("server.eclipse", "Shutting down Eclipse Engine...");
-        Eclipse::MapStateManager::GetInstance().UnloadAllStates();
+        LOG_INFO("server.eclipse", "[Eclipse]: Shutting down Eclipse Engine...");
     }
 };
 
@@ -114,6 +114,7 @@ public:
         if (globalEngine)
             globalEngine->ProcessMessages();
         
+        // Process map-specific engine (will return global engine in compatibility mode)
         auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(map->GetId());
         if (mapEngine && mapEngine != globalEngine)
             mapEngine->ProcessMessages();

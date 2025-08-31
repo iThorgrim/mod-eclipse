@@ -7,6 +7,7 @@ namespace Eclipse
     {
         CONFIG_ECLIPSE_ENABLED,
         CONFIG_ECLIPSE_COMPATIBILITY,
+        CONFIG_ECLIPSE_MONITOR_ENABLED,
         CONFIG_ECLIPSE_BOOL_COUNT
     };
 
@@ -30,6 +31,7 @@ namespace Eclipse
 
         bool IsEclipseEnabled() { return GetConfig(CONFIG_ECLIPSE_ENABLED); }
         bool IsEclipseCompatiblityEnabled() { return GetConfig(CONFIG_ECLIPSE_COMPATIBILITY); }
+        bool IsEclipseMonitorEnabled() { return GetConfig(CONFIG_ECLIPSE_MONITOR_ENABLED); }
 
     private:
         bool _configBoolValues[CONFIG_ECLIPSE_BOOL_COUNT];

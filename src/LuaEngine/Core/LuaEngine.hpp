@@ -2,7 +2,6 @@
 #define ECLIPSE_LUA_ENGINE_HPP
 
 #include "LuaState.hpp"
-#include "LuaCompiler.hpp"
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,6 +23,9 @@ namespace Eclipse
         bool LoadScript(const std::string& scriptPath);
         bool ExecuteScript(const std::string& script);
         
+        // Access to global compiler state (state -1)
+        static sol::state& GetGlobalCompilerState();
+        
         sol::state& GetState() { return luaState.GetState(); }
         class EventManager* GetEventManager() const noexcept { return eventManager.get(); }
         
@@ -31,7 +33,6 @@ namespace Eclipse
 
     private:
         LuaState luaState;
-        LuaCompiler compiler;
         bool isInitialized;
         std::vector<std::string> loadedScripts;
         std::string scriptsDirectory;
@@ -41,6 +42,7 @@ namespace Eclipse
         void InitializeComponents();
         void RegisterBindings();
         void ShutdownComponents();
+        bool LoadCachedScriptsFromGlobalState();
     };
 }
 

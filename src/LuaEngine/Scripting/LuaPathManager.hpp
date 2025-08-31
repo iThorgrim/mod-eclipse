@@ -17,10 +17,15 @@ namespace Eclipse
             return instance;
         }
 
+        void InitializeDefaultPaths();
         void AddSearchPath(const std::string& path);
         void ApplyPaths(sol::state& lua);
         void Reset();
         bool HasPath(const std::string& path) const;
+        
+        // Get the computed paths without applying them
+        const std::string& GetLuaPath() const { return luaRequirePath; }
+        const std::string& GetLuaCPath() const { return luaRequireCPath; }
 
     private:
         LuaPathManager() = default;
@@ -31,8 +36,13 @@ namespace Eclipse
         std::set<std::string> processedPaths;
         std::string luaRequirePath;
         std::string luaRequireCPath;
+        std::string customRequirePath;
+        std::string customRequireCPath;
+        bool initialized = false;
 
         void BuildPaths();
+        void DiscoverLuaScriptDirectories();
+        void AddConfigPaths();
     };
 }
 

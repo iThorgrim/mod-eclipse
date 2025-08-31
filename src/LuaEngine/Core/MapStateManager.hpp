@@ -21,6 +21,9 @@ namespace Eclipse
         void UnloadAllStates();
         void ReloadAllScripts();
         
+        // Statistics
+        size_t GetActiveStateCount() const { return mapStates.size(); }
+        
     private:
         MapStateManager() = default;
         ~MapStateManager() = default;

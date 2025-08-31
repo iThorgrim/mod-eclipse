@@ -72,7 +72,7 @@ namespace Eclipse
             }
             catch (const std::exception& e)
             {
-                LOG_ERROR("server.eclipse", "Error in message handler: {}", e.what());
+                LOG_ERROR("server.eclipse", "[Eclipse]: Error in message handler: {}", e.what());
             }
         }
         
