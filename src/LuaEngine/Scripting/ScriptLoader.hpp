@@ -18,6 +18,7 @@ namespace Eclipse
         int total = 0;
         int failed = 0;
         uint32 durationMs = 0;
+        uint32 durationUs = 0;
         
         int GetSuccessful() const { return compiled + cached + precompiled; }
     };
@@ -28,6 +29,7 @@ namespace Eclipse
         // Script discovery and loading orchestration
         static bool LoadScript(sol::state& targetState, sol::state& compilerState, const std::string& filePath);
         static bool LoadDirectory(sol::state& targetState, sol::state& compilerState, const std::string& directoryPath, std::vector<std::string>& loadedScripts, LoadStatistics* stats = nullptr);
+        static bool LoadDirectoryParallel(sol::state& targetState, sol::state& compilerState, const std::string& directoryPath, std::vector<std::string>& loadedScripts, LoadStatistics* stats = nullptr);
         
         // File discovery utilities
         static std::vector<std::string> DiscoverScripts(const std::string& directoryPath);

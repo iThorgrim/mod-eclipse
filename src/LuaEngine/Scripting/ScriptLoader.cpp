@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <set>
 #include <chrono>
+#include <future>
+#include <mutex>
+#include <thread>
 #include <boost/filesystem.hpp>
 
 namespace Eclipse
@@ -213,6 +216,112 @@ namespace Eclipse
         catch (const std::exception& e)
         {
             LOG_ERROR("server.eclipse", "[Eclipse]: Exception loading directory '{}': {}", directoryPath, e.what());
+            return false;
+        }
+    }
+
+    bool ScriptLoader::LoadDirectoryParallel(sol::state& targetState, sol::state& compilerState, const std::string& directoryPath, std::vector<std::string>& loadedScripts, LoadStatistics* stats)
+    {
+        try
+        {
+            auto startTime = std::chrono::high_resolution_clock::now();
+            
+            auto scripts = DiscoverScripts(directoryPath);
+            if (scripts.empty())
+            {
+                LOG_DEBUG("server.eclipse", "[Eclipse]: No scripts found in {}", directoryPath);
+                return false;
+            }
+            
+            std::vector<std::future<std::pair<std::string, std::vector<char>>>> futures;
+            std::mutex statsMutex;
+            
+            LoadStatistics tempStats;
+            if (stats) tempStats = *stats;
+            
+            for (const auto& scriptPath : scripts)
+            {
+                auto future = std::async(std::launch::async, [scriptPath, &tempStats, &statsMutex]() -> std::pair<std::string, std::vector<char>> {
+                    try
+                    {
+                        // First, check if already in cache (thread-safe)
+                        auto& cache = LuaCache::GetInstance();
+                        auto cachedBytecode = cache.GetBytecode(scriptPath);
+                        
+                        if (cachedBytecode.has_value())
+                        {
+                            std::lock_guard<std::mutex> lock(statsMutex);
+                            tempStats.cached++;
+                            return {scriptPath, cachedBytecode.value()};
+                        }
+                        
+                        // Not in cache, compile it
+                        sol::state threadCompilerState;
+                        threadCompilerState.open_libraries();
+                        
+                        auto bytecode = LuaCompiler::CompileFileTobytecode(threadCompilerState, scriptPath);
+                        
+                        if (!bytecode.empty())
+                        {
+                            cache.StoreBytecode(scriptPath, std::vector<char>(bytecode), true);
+                            
+                            std::lock_guard<std::mutex> lock(statsMutex);
+                            tempStats.compiled++;
+                            return {scriptPath, bytecode};
+                        }
+                        else
+                        {
+                            std::lock_guard<std::mutex> lock(statsMutex);
+                            tempStats.failed++;
+                            return {scriptPath, {}};
+                        }
+                    }
+                    catch (const std::exception& e)
+                    {
+                        LOG_ERROR("server.eclipse", "[Eclipse]: Failed to compile script '{}': {}", scriptPath, e.what());
+                        std::lock_guard<std::mutex> lock(statsMutex);
+                        tempStats.failed++;
+                        return {scriptPath, {}};
+                    }
+                });
+                
+                futures.push_back(std::move(future));
+            }
+            
+            // Sequential loading phase (Lua states are not thread-safe for loading)
+            for (auto& future : futures)
+            {
+                auto [scriptPath, bytecode] = future.get();
+                
+                if (!bytecode.empty())
+                {
+                    if (LoadBytecodeIntoState(targetState, bytecode, scriptPath))
+                    {
+                        loadedScripts.push_back(scriptPath);
+                        LOG_DEBUG("server.eclipse", "[Eclipse]: Loaded compiled script: {}", scriptPath);
+                    }
+                }
+            }
+            
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+            
+            if (stats)
+            {
+                *stats = tempStats;
+                stats->durationUs = static_cast<uint32>(duration.count());
+                stats->durationMs = static_cast<uint32>(duration.count() / 1000);
+                stats->total = scripts.size();
+            }
+            
+            LOG_INFO("server.eclipse", "[Eclipse]: Parallel loading completed: {} scripts processed in {}μs", 
+                scripts.size(), duration.count());
+            
+            return !loadedScripts.empty();
+        }
+        catch (const std::exception& e)
+        {
+            LOG_ERROR("server.eclipse", "[Eclipse]: Exception in parallel loading '{}': {}", directoryPath, e.what());
             return false;
         }
     }

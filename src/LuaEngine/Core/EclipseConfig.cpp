@@ -23,6 +23,7 @@ namespace Eclipse
         // Boolean configurations
         SetConfigValue<bool>(EclipseConfigValues::ENABLED, "Eclipse.Enabled", false);
         SetConfigValue<bool>(EclipseConfigValues::COMPATIBILITY, "Eclipse.Compatibility", true);
+        SetConfigValue<bool>(EclipseConfigValues::PARALLEL_COMPILATION, "Eclipse.ParallelCompilation", true);
 
         // String configurations  
         SetConfigValue<std::string>(EclipseConfigValues::SCRIPT_PATH, "Eclipse.ScriptPath", "lua_scripts");
