@@ -29,32 +29,65 @@
 
 // beginning of sol/config.hpp
 
-/* Configuration for Eclipse Sol3 integration */
+// ============================================================================
+// PERFORMANCE OPTIMIZATIONS
+// ============================================================================
 
-// Disable ALL automatic comparison operators generation
+// Enable LuaJIT optimizations
+#ifdef LUAJIT_VERSION
+#define SOL_LUAJIT 1
+#define SOL_USING_CXX_LUAJIT 1
+#else
+#define SOL_LUAJIT 0
+#define SOL_USING_CXX_LUAJIT 0
+#endif
+
+// Disable expensive safety checks in release builds
+#ifdef NDEBUG
+  #define SOL_ALL_SAFETIES_ON 0
+  #define SOL_SAFE_USERTYPE 0
+  #define SOL_SAFE_STACK_CHECK 0
+  #define SOL_SAFE_FUNCTION_CALLS 0
+  #define SOL_SAFE_FUNCTION_OBJECTS 0
+  #define SOL_SAFE_PROXIES 0
+  #define SOL_SAFE_NUMERICS 0
+  #define SOL_SAFE_GETTER 0
+  #define SOL_SAFE_REFERENCES 0
+#else
+  // Keep safety checks in debug builds
+  #define SOL_ALL_SAFETIES_ON 1
+  #define SOL_SAFE_USERTYPE 1
+  #define SOL_SAFE_STACK_CHECK 1
+#endif
+
+// Disable automatic usertype features for performance
 #define SOL_NO_DEFAULT_USERTYPE_TRAITS 1
-
-// Disable automatic metatable generation 
 #define SOL_NO_OVERRIDE 1
 
-// Completely disable usertype automatic operators
-// Dynamic configuration via CMake
-#ifndef SOL_USING_CXX_LUA
-  #define SOL_USING_CXX_LUA 0
+// Enable function call optimizations
+#define SOL_FUNCTION_CALL_TRAMPOLINE 1
+#define SOL_OPTIMIZE_FOR_SINGLE_RETURN 1
+
+// Enable string optimizations  
+#define SOL_STRING_VIEW_LITERALS 1
+
+// Disable expensive runtime type checking
+#define SOL_NO_CHECK_NUMBER_PRECISION 1
+
+// Enable stack optimizations
+#define SOL_STACK_STRING_OPTIMIZATION_SIZE 1024
+
+// Memory optimizations
+#define SOL_CONTAINER_TRAITS 1
+
+// Enable compile-time optimizations
+#define SOL_CONTAINERS_START 1
+
+// Performance: Disable exception handling overhead where possible
+#ifdef __cpp_exceptions
+  #define SOL_NO_EXCEPTIONS 0
+#else
+  #define SOL_NO_EXCEPTIONS 1
 #endif
-
-#ifndef SOL_USING_CXX_LUAJIT  
-  #define SOL_USING_CXX_LUAJIT 0
-#endif
-
-#ifndef SOL_LUAJIT
-  #define SOL_LUAJIT 0
-#endif
-
-// Use minimal safe operations only
-#define SOL_SAFE_USERTYPE 1
-#define SOL_SAFE_STACK_CHECK 1
-
-// end of sol/config.hpp
 
 #endif // SOL_SINGLE_CONFIG_HPP
