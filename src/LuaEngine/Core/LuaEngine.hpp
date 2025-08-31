@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace Eclipse { struct LoadStatistics; }
+
 namespace Eclipse
 {
     class LuaEngine
@@ -30,7 +32,6 @@ namespace Eclipse
         
         void ProcessMessages();
 
-        void LogScriptStats(uint32 success, uint32 compiled, uint32 cached, uint32 precompiled, uint32 durationUs, int32 mapId);
 
     private:
         LuaState luaState;
@@ -40,10 +41,16 @@ namespace Eclipse
         int32 stateMapId; // -1 = global/world state, >=0 = specific map
         std::unique_ptr<class EventManager> eventManager;
         
-        void InitializeComponents();
         void RegisterBindings();
         void ShutdownComponents();
+        void ClearStateData();
+        void LoadScriptsForState();
         bool LoadCachedScriptsFromGlobalState();
+        
+        // Helper methods
+        static std::pair<uint32, std::string> FormatDuration(uint32 microseconds);
+        void LogScriptLoadStats(const LoadStatistics& stats) const;
+        void LogCacheLoadStats(size_t scriptCount, uint32 durationUs) const;
     };
 }
 
