@@ -11,613 +11,1106 @@ namespace Eclipse
     {
 
         // ========== WRAPPER FUNCTIONS ==========
-        auto CanStoreNewItemWrapper = [](Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count) -> std::tuple<InventoryResult, uint32>
+
+        // Static method wrappers - consistent player:Method() API
+
+        /**
+         *
+         */
+        bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z, float orientation, uint32 options, Unit* target, bool forced)
+        {
+            return player->TeleportTo(mapId, x, y, z, orientation, options, target, forced);
+        }
+
+        /**
+         *
+         */
+        bool TeleportToEntryPoint(Player* player)
+        {
+            return player->TeleportToEntryPoint();
+        }
+
+        /**
+         *
+         */
+        void SetSummonPoint(Player* player, uint32 mapId, float x, float y, float z, uint32 zoneId, bool asSpectator)
+        {
+            player->SetSummonPoint(mapId, x, y, z, zoneId, asSpectator);
+        }
+
+        /**
+         *
+         */
+        bool IsSummonAsSpectator(Player* player)
+        {
+            return player->IsSummonAsSpectator();
+        }
+
+        /**
+         *
+         */
+        void SetSummonAsSpectator(Player* player, bool spectator)
+        {
+            player->SetSummonAsSpectator(spectator);
+        }
+
+        /**
+         *
+         */
+        void SummonIfPossible(Player* player, bool asSpectator, ObjectGuid summoner)
+        {
+            player->SummonIfPossible(asSpectator, summoner);
+        }
+
+        /**
+         *
+         */
+        time_t GetSummonExpireTimer(Player* player)
+        {
+            return player->GetSummonExpireTimer();
+        }
+
+        /**
+         *
+         */
+        PlayerFlags GetPlayerFlags(Player* player)
+        {
+            return player->GetPlayerFlags();
+        }
+
+        /**
+         *
+         */
+        bool HasPlayerFlag(Player* player, PlayerFlags flag)
+        {
+            return player->HasPlayerFlag(flag);
+        }
+
+        /**
+         *
+         */
+        void SetPlayerFlag(Player* player, PlayerFlags flag)
+        {
+            player->SetPlayerFlag(flag);
+        }
+
+        /**
+         *
+         */
+        void RemovePlayerFlag(Player* player, PlayerFlags flag)
+        {
+            player->RemovePlayerFlag(flag);
+        }
+
+        /**
+         *
+         */
+        void ReplaceAllPlayerFlags(Player* player, PlayerFlags flags)
+        {
+            player->ReplaceAllPlayerFlags(flags);
+        }
+
+        /**
+         *
+         */
+        bool IsClass(Player* player, Classes clss, ClassContext context)
+        {
+            return player->IsClass(clss, context);
+        }
+
+        /**
+         *
+         */
+        void SetInWater(Player* player, bool apply)
+        {
+            player->SetInWater(apply);
+        }
+
+        /**
+         *
+         */
+        bool IsInWater(Player* player)
+        {
+            return player->IsInWater();
+        }
+
+        /**
+         *
+         */
+        bool IsFalling(Player* player)
+        {
+            return player->IsFalling();
+        }
+
+        /**
+         *
+         */
+        bool IsInAreaTriggerRadius(Player* player, const AreaTrigger* at, float delta)
+        {
+            return player->IsInAreaTriggerRadius(at, delta);
+        }
+
+        /**
+         *
+         */
+        bool CanInteractWithQuestGiver(Player* player, Object* questGiver)
+        {
+            return player->CanInteractWithQuestGiver(questGiver);
+        }
+
+        /**
+         *
+         */
+        Creature* GetNPCIfCanInteractWith(Player* player, ObjectGuid guid, uint32 npcflagmask)
+        {
+            return player->GetNPCIfCanInteractWith(guid, npcflagmask);
+        }
+
+        /**
+         *
+         */
+        GameObject* GetGameObjectIfCanInteractWith(Player* player, ObjectGuid guid, GameobjectTypes type)
+        {
+            return player->GetGameObjectIfCanInteractWith(guid, type);
+        }
+
+        /**
+         *
+         */
+        void ToggleAFK(Player* player)
+        {
+            player->ToggleAFK();
+        }
+
+        /**
+         *
+         */
+        void ToggleDND(Player* player)
+        {
+            player->ToggleDND();
+        }
+
+        /**
+         *
+         */
+        bool IsAFK(Player* player)
+        {
+            return player->isAFK();
+        }
+
+        /**
+         *
+         */
+        bool IsDND(Player* player)
+        {
+            return player->isDND();
+        }
+
+        /**
+         *
+         */
+        uint8 GetChatTag(Player* player)
+        {
+            return player->GetChatTag();
+        }
+
+        /**
+         *
+         */
+        uint32 GetBarberShopCost(Player* player, uint8 newHairStyle, uint8 newHairColor, uint8 newFacialHair, const BarberShopStyleEntry* newSkin)
+        {
+            return player->GetBarberShopCost(newHairStyle, newHairColor, newFacialHair, newSkin);
+        }
+
+        /**
+         *
+         */
+        PlayerSocial* GetSocial(Player* player)
+        {
+            return player->GetSocial();
+        }
+
+        /**
+         *
+         */
+        void InitTaxiNodesForLevel(Player* player)
+        {
+            player->InitTaxiNodesForLevel();
+        }
+
+        /**
+         *
+         */
+        bool ActivateTaxiPathToByVector(Player* player, const std::vector<uint32>& nodes, Creature* npc, uint32 spellid)
+        {
+            return player->ActivateTaxiPathTo(nodes, npc, spellid);
+        }
+
+        /**
+         *
+         */
+        bool ActivateTaxiPathToByNodes(Player* player, uint32 taxi_path_id, uint32 spellid)
+        {
+            return player->ActivateTaxiPathTo(taxi_path_id, spellid);
+        }
+
+        /**
+         *
+         */
+        void CleanupAfterTaxiFlight(Player* player)
+        {
+            player->CleanupAfterTaxiFlight();
+        }
+
+        /**
+         *
+         */
+        void ContinueTaxiFlight(Player* player)
+        {
+            player->ContinueTaxiFlight();
+        }
+
+        /**
+         *
+         */
+        void SendTaxiNodeStatusMultiple(Player* player)
+        {
+            player->SendTaxiNodeStatusMultiple();
+        }
+
+        /**
+         *
+         */
+        bool IsCommentator(Player* player)
+        {
+            return player->IsCommentator();
+        }
+
+        /**
+         *
+         */
+        void SetCommentator(Player* player, bool on)
+        {
+            player->SetCommentator(on);
+        }
+
+        /**
+         *
+         */
+        bool IsDeveloper(Player* player)
+        {
+            return player->IsDeveloper();
+        }
+
+        /**
+         *
+         */
+        void SetDeveloper(Player* player, bool on)
+        {
+            player->SetDeveloper(on);
+        }
+
+        /**
+         *
+         */
+        bool IsAcceptWhispers(Player* player)
+        {
+            return player->isAcceptWhispers();
+        }
+
+        /**
+         *
+         */
+        void SetAcceptWhispers(Player* player, bool on)
+        {
+            player->SetAcceptWhispers(on);
+        }
+
+        /**
+         *
+         */
+        bool IsGameMaster(Player* player)
+        {
+            return player->IsGameMaster();
+        }
+
+        /**
+         *
+         */
+        void SetGameMaster(Player* player, bool on)
+        {
+            player->SetGameMaster(on);
+        }
+
+        /**
+         *
+         */
+        bool IsGMChat(Player* player)
+        {
+            return player->isGMChat();
+        }
+
+        /**
+         *
+         */
+        void SetGMChat(Player* player, bool on)
+        {
+            player->SetGMChat(on);
+        }
+
+        /**
+         *
+         */
+        bool IsGMSpectator(Player* player)
+        {
+            return player->IsGMSpectator();
+        }
+
+        /**
+         *
+         */
+        void SetGMSpectator(Player* player, bool on)
+        {
+            player->SetGMSpectator(on);
+        }
+
+        /**
+         *
+         */
+        bool IsTaxiCheater(Player* player)
+        {
+            return player->isTaxiCheater();
+        }
+
+        /**
+         *
+         */
+        void SetTaxiCheater(Player* player, bool on)
+        {
+            player->SetTaxiCheater(on);
+        }
+
+        /**
+         *
+         */
+        bool IsGMVisible(Player* player)
+        {
+            return player->isGMVisible();
+        }
+
+        /**
+         *
+         */
+        void SetGMVisible(Player* player, bool on)
+        {
+            player->SetGMVisible(on);
+        }
+
+        /**
+         *
+         */
+        bool Has310Flyer(Player* player, bool checkAllSpells, uint32 excludeSpellId)
+        {
+            return player->Has310Flyer(checkAllSpells, excludeSpellId);
+        }
+
+        /**
+         *
+         */
+        void SetHas310Flyer(Player* player, bool on)
+        {
+            player->SetHas310Flyer(on);
+        }
+
+        /**
+         *
+         */
+        void SetPvPDeath(Player* player, bool on)
+        {
+            player->SetPvPDeath(on);
+        }
+
+        /**
+         *
+         */
+        void GiveXP(Player* player, uint32 xp, Unit* victim, float group_rate, bool use_group_rate)
+        {
+            player->GiveXP(xp, victim, group_rate, use_group_rate);
+        }
+
+        /**
+         *
+         */
+        void GiveLevel(Player* player, uint8 level)
+        {
+            player->GiveLevel(level);
+        }
+
+        /**
+         *
+         */
+        void InitStatsForLevel(Player* player, bool reapplyMods)
+        {
+            player->InitStatsForLevel(reapplyMods);
+        }
+
+        /**
+         *
+         */
+        bool HasActivePowerType(Player* player, Powers power)
+        {
+            return player->HasActivePowerType(power);
+        }
+
+        /**
+         *
+         */
+        bool GetCommandStatus(Player* player, uint32 command)
+        {
+            return player->GetCommandStatus(command);
+        }
+
+        /**
+         *
+         */
+        void SetCommandStatusOn(Player* player, uint32 command)
+        {
+            player->SetCommandStatusOn(command);
+        }
+
+        /**
+         *
+         */
+        void SetCommandStatusOff(Player* player, uint32 command)
+        {
+            player->SetCommandStatusOff(command);
+        }
+
+        /**
+         *
+         */
+        uint32 GetTotalPlayedTime(Player* player)
+        {
+            return player->GetTotalPlayedTime();
+        }
+
+        /**
+         *
+         */
+        uint32 GetLevelPlayedTime(Player* player)
+        {
+            return player->GetLevelPlayedTime();
+        }
+
+        /**
+         *
+         */
+        void SetDeathState(Player* player, DeathState s, bool despawn)
+        {
+            player->setDeathState(s, despawn);
+        }
+
+        /**
+         *
+         */
+        void SetRestState(Player* player, uint32 triggerId)
+        {
+            player->SetRestState(triggerId);
+        }
+
+        /**
+         *
+         */
+        void RemoveRestState(Player* player)
+        {
+            player->RemoveRestState();
+        }
+
+        /**
+         *
+         */
+        uint32 GetXPRestBonus(Player* player, uint32 xp)
+        {
+            return player->GetXPRestBonus(xp);
+        }
+
+        /**
+         *
+         */
+        float GetRestBonus(Player* player)
+        {
+            return player->GetRestBonus();
+        }
+
+        /**
+         *
+         */
+        void SetRestBonus(Player* player, float rest_bonus_new)
+        {
+            player->SetRestBonus(rest_bonus_new);
+        }
+
+        /**
+         *
+         */
+        bool HasRestFlag(Player* player, RestFlag flag)
+        {
+            return player->HasRestFlag(flag);
+        }
+
+        /**
+         *
+         */
+        void SetRestFlag(Player* player, RestFlag flag, uint32 triggerId)
+        {
+            player->SetRestFlag(flag, triggerId);
+        }
+
+        /**
+         *
+         */
+        void RemoveRestFlag(Player* player, RestFlag flag)
+        {
+            player->RemoveRestFlag(flag);
+        }
+
+        /**
+         *
+         */
+        uint32 GetInnTriggerId(Player* player)
+        {
+            return player->GetInnTriggerId();
+        }
+
+        /**
+         *
+         */
+        PetStable* GetPetStable(Player* player)
+        {
+            return player->GetPetStable();
+        }
+
+        /**
+         *
+         */
+        const PetStable* GetPetStableConst(Player* player)
+        {
+            return player->GetPetStable();
+        }
+
+        /**
+         *
+         */
+        PetStable& GetOrInitPetStable(Player* player)
+        {
+            return player->GetOrInitPetStable();
+        }
+
+        /**
+         *
+         */
+        Pet* GetPet(Player* player)
+        {
+            return player->GetPet();
+        }
+
+        /**
+         *
+         */
+        Pet* SummonPet(Player* player, uint32 entry, float x, float y, float z, float ang, PetType petType, Milliseconds duration, uint32 spellId)
+        {
+            return player->SummonPet(entry, x, y, z, ang, petType, duration, spellId);
+        }
+
+        /**
+         *
+         */
+        void RemovePet(Player* player, Pet* pet, PetSaveMode mode, bool returnreagent)
+        {
+            player->RemovePet(pet, mode, returnreagent);
+        }
+
+        /**
+         *
+         */
+        bool CanPetResurrect(Player* player)
+        {
+            return player->CanPetResurrect();
+        }
+
+        /**
+         *
+         */
+        bool IsExistPet(Player* player)
+        {
+            return player->IsExistPet();
+        }
+
+        /**
+         *
+         */
+        Pet* CreatePetFromCreature(Player* player, Creature* creature, uint32 spell_id)
+        {
+            return player->CreatePet(creature, spell_id);
+        }
+
+        /**
+         *
+         */
+        Pet* CreatePetFromEntry(Player* player, uint32 entry, uint32 spell_id)
+        {
+            return player->CreatePet(entry, spell_id);
+        }
+
+        /**
+         *
+         */
+        uint32 GetPhaseMaskForSpawn(Player* player)
+        {
+            return player->GetPhaseMaskForSpawn();
+        }
+
+        /**
+         *
+         */
+        void SetVirtualItemSlot(Player* player, uint8 i, Item* item)
+        {
+            player->SetVirtualItemSlot(i, item);
+        }
+
+        /**
+         *
+         */
+        uint8 FindEquipSlot(Player* player, const ItemTemplate* proto, uint32 slot, bool swap)
+        {
+            return player->FindEquipSlot(proto, slot, swap);
+        }
+
+        /**
+         *
+         */
+        uint32 GetItemCount(Player* player, uint32 item, bool inBankAlso, Item* skipItem)
+        {
+            return player->GetItemCount(item, inBankAlso, skipItem);
+        }
+
+        /**
+         *
+         */
+        uint32 GetItemCountWithLimitCategory(Player* player, uint32 limitCategory, Item* skipItem)
+        {
+            return player->GetItemCountWithLimitCategory(limitCategory, skipItem);
+        }
+
+        /**
+         *
+         */
+        Item* GetItemByGuid(Player* player, ObjectGuid itemGuid)
+        {
+            return player->GetItemByGuid(itemGuid);
+        }
+
+        /**
+         *
+         */
+        Item* GetItemByEntry(Player* player, uint32 item)
+        {
+            return player->GetItemByEntry(item);
+        }
+
+        /**
+         *
+         */
+        Item* GetItemByPosSlot(Player* player, uint16 pos)
+        {
+            return player->GetItemByPos(pos);
+        }
+
+        /**
+         *
+         */
+        Item* GetItemByPosBagSlot(Player* player, uint8 bag, uint8 slot)
+        {
+            return player->GetItemByPos(bag, slot);
+        }
+
+        /**
+         *
+         */
+        Bag* GetBagByPos(Player* player, uint8 slot)
+        {
+            return player->GetBagByPos(slot);
+        }
+
+        /**
+         *
+         */
+        uint32 GetFreeInventorySpace(Player* player)
+        {
+            return player->GetFreeInventorySpace();
+        }
+
+        /**
+         *
+         */
+        Item* GetUseableItemByPos(Player* player, uint8 bag, uint8 slot)
+        {
+            return player->GetUseableItemByPos(bag, slot);
+        }
+
+        /**
+         *
+         */
+        Item* GetWeaponForAttack(Player* player, WeaponAttackType attackType, bool useable)
+        {
+            return player->GetWeaponForAttack(attackType, useable);
+        }
+
+        /**
+         *
+         */
+        bool HasWeapon(Player* player, WeaponAttackType attackType)
+        {
+            return player->HasWeapon(attackType);
+        }
+
+        /**
+         *
+         */
+        bool HasWeaponForAttack(Player* player, WeaponAttackType attackType)
+        {
+            return player->HasWeaponForAttack(attackType);
+        }
+
+        /**
+         *
+         */
+        Item* GetShield(Player* player, bool useable)
+        {
+            return player->GetShield(useable);
+        }
+
+        /**
+         *
+         */
+        uint8 GetAttackBySlot(Player* player, uint8 slot)
+        {
+            (void)player; // unused parameter
+            return Player::GetAttackBySlot(slot);
+        }
+
+        /**
+         *
+         */
+        std::vector<Item*>& GetItemUpdateQueue(Player* player)
+        {
+            return player->GetItemUpdateQueue();
+        }
+
+        /**
+         *
+         */
+        bool IsInventoryPosBySlot(Player* player, uint16 pos)
+        {
+            (void)player; // Unused parameter
+            return Player::IsInventoryPos(pos);
+        }
+
+        /**
+         *
+         */
+        bool IsInventoryPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        {
+            (void)player; // Unused parameter
+            return Player::IsInventoryPos(bag, slot);
+        }
+
+        /**
+         *
+         */
+        bool IsEquipmentPosBySlot(Player* player, uint16 pos)
+        {
+            (void)player; // Unused parameter
+            return Player::IsEquipmentPos(pos);
+        }
+
+        /**
+         *
+         */
+        bool IsEquipmentPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        {
+            (void)player; // Unused parameter
+            return Player::IsEquipmentPos(bag, slot);
+        }
+
+        /**
+         *
+         */
+        bool IsBagPos(Player* player, uint8 pos)
+        {
+            return player->IsBagPos(pos);
+        }
+
+        /**
+         *
+         */
+        bool IsBankPosBySlot(Player* player, uint16 pos)
+        {
+            (void)player; // Unused parameter
+            return Player::IsBankPos(pos);
+        }
+
+        /**
+         *
+         */
+        bool IsBankPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        {
+            (void)player; // Unused parameter
+            return Player::IsBankPos(bag, slot);
+        }
+
+        /**
+         *
+         */
+        bool IsValidPosBySlot(Player* player, uint16 pos, bool explicit_pos)
+        {
+            return player->IsValidPos(pos, explicit_pos);
+        }
+
+        /**
+         *
+         */
+        bool IsValidPosByBagSlot(Player* player, uint8 bag, uint8 slot, bool explicit_pos)
+        {
+            return player->IsValidPos(bag, slot, explicit_pos);
+        }
+
+        /**
+         *
+         */
+        uint8 GetBankBagSlotCount(Player* player)
+        {
+            return player->GetBankBagSlotCount();
+        }
+
+        /**
+         *
+         */
+        void SetBankBagSlotCount(Player* player, uint8 count)
+        {
+            player->SetBankBagSlotCount(count);
+        }
+
+        /**
+         *
+         */
+        bool HasItemCount(Player* player, uint32 item, uint32 count, bool inBankAlso)
+        {
+            return player->HasItemCount(item, count, inBankAlso);
+        }
+
+        /**
+         *
+         */
+        bool HasItemFitToSpellRequirements(Player* player, const SpellInfo* spellInfo, const Item* ignoreItem)
+        {
+            return player->HasItemFitToSpellRequirements(spellInfo, ignoreItem);
+        }
+
+        /**
+         *
+         */
+        bool CanNoReagentCast(Player* player, const SpellInfo* spellInfo)
+        {
+            return player->CanNoReagentCast(spellInfo);
+        }
+
+        /**
+         *
+         */
+        bool HasItemOrGemWithIdEquipped(Player* player, uint32 item, uint32 count, uint8 except_slot)
+        {
+            return player->HasItemOrGemWithIdEquipped(item, count, except_slot);
+        }
+
+        /**
+         *
+         */
+        bool HasItemOrGemWithLimitCategoryEquipped(Player* player, uint32 limitCategory, uint32 count, uint8 except_slot)
+        {
+            return player->HasItemOrGemWithLimitCategoryEquipped(limitCategory, count, except_slot);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanTakeMoreSimilarItemsByItem(Player* player, Item* pItem)
+        {
+            return player->CanTakeMoreSimilarItems(pItem);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanTakeMoreSimilarItemsByEntry(Player* player, uint32 entry, uint32 count)
+        {
+            return player->CanTakeMoreSimilarItems(entry, count);
+        }
+
+        /**
+         *
+         */
+        std::tuple<InventoryResult, uint32> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count)
         {
             uint32 no_space_count = 0;
             InventoryResult result = player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count);
             return std::make_tuple(result, no_space_count);
-        };
+        }
 
-        auto CanStoreItemsWrapper = [](Player* player, const std::vector<Item*>& items, int count) -> InventoryResult
+        /**
+         *
+         */
+        InventoryResult CanStoreItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap)
+        {
+            return player->CanStoreItem(bag, slot, dest, pItem, swap);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanStoreItems(Player* player, const std::vector<Item*>& items, int count)
         {
             std::vector<Item*> item_ptrs = items;
             return player->CanStoreItems(item_ptrs.data(), count);
-        };
+        }
+
+
 
         // ========== LUA REGISTRATION ==========
         template<typename T>
         void RegisterPlayerMethods(sol::usertype<T>& type)
         {
-            /**
-             *
-             */
-            type["TeleportTo"] = static_cast<bool(Player::*)(uint32, float, float, float, float, uint32, Unit*, bool)>(&Player::TeleportTo);
 
-            /**
-             *
-             */
-            type["TeleportToEntryPoint"] = static_cast<bool(Player::*)()>(&Player::TeleportToEntryPoint);
+            // Getters
+            type["GetSummonExpireTimer"] = &GetSummonExpireTimer;
+            type["GetPlayerFlags"] = &GetPlayerFlags;
+            type["GetNPCIfCanInteractWith"] = &GetNPCIfCanInteractWith;
+            type["GetGameObjectIfCanInteractWith"] = &GetGameObjectIfCanInteractWith;
+            type["GetChatTag"] = &GetChatTag;
+            type["GetBarberShopCost"] = &GetBarberShopCost;
+            type["GetSocial"] = &GetSocial;
+            type["GetCommandStatus"] = &GetCommandStatus;
+            type["GetTotalPlayedTime"] = &GetTotalPlayedTime;
+            type["GetLevelPlayedTime"] = &GetLevelPlayedTime;
+            type["GetXPRestBonus"] = &GetXPRestBonus;
+            type["GetRestBonus"] = &GetRestBonus;
+            type["GetInnTriggerId"] = &GetInnTriggerId;
+            type["GetPetStable"] = sol::overload(&GetPetStable, &GetPetStableConst);
+            type["GetOrInitPetStable"] = &GetOrInitPetStable;
+            type["GetPet"] = &GetPet;
+            type["GetPhaseMaskForSpawn"] = &GetPhaseMaskForSpawn;
+            type["GetItemCount"] = &GetItemCount;
+            type["GetItemCountWithLimitCategory"] = &GetItemCountWithLimitCategory;
+            type["GetItemByGuid"] = &GetItemByGuid;
+            type["GetItemByEntry"] = &GetItemByEntry;
+            type["GetItemByPos"] = sol::overload(&GetItemByPosSlot, &GetItemByPosBagSlot);
+            type["GetBagByPos"] = &GetBagByPos;
+            type["GetFreeInventorySpace"] = &GetFreeInventorySpace;
+            type["GetUseableItemByPos"] = &GetUseableItemByPos;
+            type["GetWeaponForAttack"] = &GetWeaponForAttack;
+            type["GetShield"] = &GetShield;
+            type["GetAttackBySlot"] = &GetAttackBySlot;
+            type["GetItemUpdateQueue"] = &GetItemUpdateQueue;
+            type["GetBankBagSlotCount"] = &GetBankBagSlotCount;
+
+            type["FindEquipSlot"] = &FindEquipSlot;
+            
+            // Setters
+            type["SetSummonPoint"] = &SetSummonPoint;
+            type["SetSummonAsSpectator"] = &SetSummonAsSpectator;
+            type["SetPlayerFlag"] = &SetPlayerFlag;
+            type["SetInWater"] = &SetInWater;
+            type["SetBankBagSlotCount"] = &SetBankBagSlotCount;
+            type["SetCommentator"] = &SetCommentator;
+            type["SetDeveloper"] = &SetDeveloper;
+            type["SetAcceptWhispers"] = &SetAcceptWhispers;
+            type["SetGameMaster"] = &SetGameMaster;
+            type["SetGMChat"] = &SetGMChat;
+            type["SetGMSpectator"] = &SetGMSpectator;
+            type["SetTaxiCheater"] = &SetTaxiCheater;
+            type["SetGMVisible"] = &SetGMVisible;
+            type["SetHas310Flyer"] = &SetHas310Flyer;
+            type["SetPvPDeath"] = &SetPvPDeath;
+            type["SetCommandStatusOn"] = &SetCommandStatusOn;
+            type["SetCommandStatusOff"] = &SetCommandStatusOff;
+            type["SetDeathState"] = &SetDeathState;
+            type["SetRestState"] = &SetRestState;
+            type["SetRestBonus"] = &SetRestBonus;
+            type["SetRestFlag"] = &SetRestFlag;
+            type["SetVirtualItemSlot"] = &SetVirtualItemSlot;
+            
+            // Booleans
+            type["IsSummonAsSpectator"] = &IsSummonAsSpectator;
+            type["HasPlayerFlag"] = &HasPlayerFlag;
+            type["IsClass"] = &IsClass;
+            type["IsInWater"] = &IsInWater;
+            type["IsFalling"] = &IsFalling;
+            type["IsInAreaTriggerRadius"] = &IsInAreaTriggerRadius;
+            type["CanInteractWithQuestGiver"] = &CanInteractWithQuestGiver;
+            type["IsAFK"] = &IsAFK;
+            type["IsDND"] = &IsDND;
+            type["IsCommentator"] = &IsCommentator;
+            type["IsDeveloper"] = &IsDeveloper;
+            type["IsAcceptWhispers"] = &IsAcceptWhispers;
+            type["IsGameMaster"] = &IsGameMaster;
+            type["IsGMChat"] = &IsGMChat;
+            type["IsGMSpectator"] = &IsGMSpectator;
+            type["IsTaxiCheater"] = &IsTaxiCheater;
+            type["IsGMVisible"] = &IsGMVisible;
+            type["Has310Flyer"] = &Has310Flyer;
+            type["HasActivePowerType"] = &HasActivePowerType;
+            type["HasRestFlag"] = &HasRestFlag;
+            type["CanPetResurrect"] = &CanPetResurrect;
+            type["IsExistPet"] = &IsExistPet;
+            type["HasWeapon"] = &HasWeapon;
+            type["HasWeaponForAttack"] = &HasWeaponForAttack;
+            type["IsInventoryPos"] = sol::overload(&IsInventoryPosBySlot, &IsInventoryPosByBagSlot);
+            type["IsEquipmentPos"] = sol::overload(&IsEquipmentPosBySlot, &IsEquipmentPosByBagSlot);
+            type["IsBagPos"] = &IsBagPos;
+            type["IsBankPos"] = sol::overload(&IsBankPosBySlot, &IsBankPosByBagSlot);
+            type["IsValidPos"] = sol::overload(&IsValidPosBySlot, &IsValidPosByBagSlot);
+            type["HasItemCount"] = &HasItemCount;
+            type["HasItemFitToSpellRequirements"] = &HasItemFitToSpellRequirements;
+            type["CanNoReagentCast"] = &CanNoReagentCast;
+            type["HasItemOrGemWithIdEquipped"] = &HasItemOrGemWithIdEquipped;
+            type["HasItemOrGemWithLimitCategoryEquipped"] = &HasItemOrGemWithLimitCategoryEquipped;
+            type["CanTakeMoreSimilarItems"] = sol::overload(&CanTakeMoreSimilarItemsByItem, &CanTakeMoreSimilarItemsByEntry);
+            type["CanStoreNewItem"] = &CanStoreNewItem;
+            type["CanStoreItem"] = &CanStoreItem;
+            type["CanStoreItems"] = &CanStoreItems;
+            
+            // Actions
+            type["TeleportTo"] = &TeleportTo;
+            type["TeleportToEntryPoint"] = &TeleportToEntryPoint;
+            type["SummonIfPossible"] = &SummonIfPossible;
+            type["RemovePlayerFlag"] = &RemovePlayerFlag;
+            type["ReplaceAllPlayerFlags"] = &ReplaceAllPlayerFlags;
+            type["ToggleAFK"] = &ToggleAFK;
+            type["ToggleDND"] = &ToggleDND;
+            type["InitTaxiNodesForLevel"] = &InitTaxiNodesForLevel;
+            type["ActivateTaxiPathTo"] = sol::overload(&ActivateTaxiPathToByVector, &ActivateTaxiPathToByNodes);
+            type["CleanupAfterTaxiFlight"] = &CleanupAfterTaxiFlight;
+            type["ContinueTaxiFlight"] = &ContinueTaxiFlight;
+            type["SendTaxiNodeStatusMultiple"] = &SendTaxiNodeStatusMultiple;
+            type["GiveXP"] = &GiveXP;
+            type["GiveLevel"] = &GiveLevel;
+            type["InitStatsForLevel"] = &InitStatsForLevel;
+            type["RemoveRestState"] = &RemoveRestState;
+            type["RemoveRestFlag"] = &RemoveRestFlag;
+            type["SummonPet"] = &SummonPet;
+            type["RemovePet"] = &RemovePet;
+            type["CreatePet"] = sol::overload(&CreatePetFromCreature, &CreatePetFromEntry);
 
-            /**
-             *
-             */
-            type["SetSummonPoint"] = static_cast<void(Player::*)(uint32, float, float, float, uint32, bool)>(&Player::SetSummonPoint);
-
-            /**
-             *
-             */
-            type["IsSummonAsSpectator"] = static_cast<bool(Player::*)() const>(&Player::IsSummonAsSpectator);
-
-            /**
-             *
-             */
-            type["SetSummonAsSpectator"] = static_cast<void(Player::*)(bool)>(&Player::SetSummonAsSpectator);
-
-            /**
-             *
-             */
-            type["SummonIfPossible"] = static_cast<void(Player::*)(bool, ObjectGuid)>(&Player::SummonIfPossible);
-
-            /**
-             *
-             */
-            type["GetSummonExpireTimer"] = static_cast<time_t(Player::*)() const>(&Player::GetSummonExpireTimer);
-
-            /**
-             *
-             */
-            type["GetPlayerFlags"] = static_cast<PlayerFlags(Player::*)() const>(&Player::GetPlayerFlags);
-
-            /**
-             *
-             */
-            type["HasPlayerFlag"] = static_cast<bool(Player::*)(PlayerFlags) const>(&Player::HasPlayerFlag);
-
-            /**
-             *
-             */
-            type["SetPlayerFlag"] = static_cast<void(Player::*)(PlayerFlags)>(&Player::SetPlayerFlag);
-
-            /**
-             *
-             */
-            type["RemovePlayerFlag"] = static_cast<void(Player::*)(PlayerFlags)>(&Player::RemovePlayerFlag);
-
-            /**
-             *
-             */
-            type["ReplaceAllPlayerFlags"] = static_cast<void(Player::*)(PlayerFlags)>(&Player::ReplaceAllPlayerFlags);
-
-            /**
-             *
-             */
-            type["IsClass"] = static_cast<bool(Player::*)(Classes, ClassContext) const>(&Player::IsClass);
-
-            /**
-             *
-             */
-            type["SetInWater"] = static_cast<void(Player::*)(bool)>(&Player::SetInWater);
-
-            /**
-             *
-             */
-            type["IsInWater"] = static_cast<bool(Player::*)() const>(&Player::IsInWater);
-
-            /**
-             *
-             */
-            type["IsFalling"] = static_cast<bool(Player::*)() const>(&Player::IsFalling);
-
-            /**
-             *
-             */
-            type["IsInAreaTriggerRadius"] = static_cast<bool(Player::*)(const AreaTrigger *, float) const>(&Player::IsInAreaTriggerRadius);
-
-            /**
-             *
-             */
-            type["CanInteractWithQuestGiver"] = static_cast<bool(Player::*)(Object*)>(&Player::CanInteractWithQuestGiver);
-
-            /**
-             *
-             */
-            type["GetNPCIfCanInteractWith"] = static_cast<Creature*(Player::*)(ObjectGuid, uint32)>(&Player::GetNPCIfCanInteractWith);
-
-            /**
-             *
-             */
-            type["GetGameObjectIfCanInteractWith"] = static_cast<GameObject*(Player::*)(ObjectGuid, GameobjectTypes) const>(&Player::GetGameObjectIfCanInteractWith);
-
-            /**
-             *
-             */
-            type["ToggleAFK"] = static_cast<void(Player::*)()>(&Player::ToggleAFK);
-
-            /**
-             *
-             */
-            type["ToggleDND"] = static_cast<void(Player::*)()>(&Player::ToggleDND);
-
-            /**
-             *
-             */
-            type["IsAFK"] = static_cast<bool(Player::*)() const>(&Player::isAFK);
-
-            /**
-             *
-             */
-            type["IsDND"] = static_cast<bool(Player::*)() const>(&Player::isDND);
-
-            /**
-             *
-             */
-            type["GetChatTag"] = static_cast<uint8(Player::*)() const>(&Player::GetChatTag);
-
-            /**
-             *
-             */
-            type["GetBarberShopCost"] = static_cast<uint32(Player::*)(uint8, uint8, uint8, const BarberShopStyleEntry*)>(&Player::GetBarberShopCost);
-
-            /**
-             *
-             */
-            type["GetSocial"] = static_cast<PlayerSocial*(Player::*)()>(&Player::GetSocial);
-
-            /**
-             *
-             */
-            type["InitTaxiNodesForLevel"] = static_cast<void(Player::*)()>(&Player::InitTaxiNodesForLevel);
-
-            /**
-             *
-             */
-            type["ActivateTaxiPathTo"] = sol::overload(
-                static_cast<bool(Player::*)(const std::vector<uint32>&, Creature*, uint32)>(&Player::ActivateTaxiPathTo),
-
-                static_cast<bool(Player::*)(uint32, uint32)>(&Player::ActivateTaxiPathTo)
-            );
-
-            /**
-             *
-             */
-            type["CleanupAfterTaxiFlight"] = static_cast<void(Player::*)()>(&Player::CleanupAfterTaxiFlight);
-
-            /**
-             *
-             */
-            type["ContinueTaxiFlight"] = static_cast<void(Player::*)()>(&Player::ContinueTaxiFlight);
-
-            /**
-             *
-             */
-            type["SendTaxiNodeStatusMultiple"] = static_cast<void(Player::*)()>(&Player::SendTaxiNodeStatusMultiple);
-
-            /**
-             *
-             */
-            type["IsCommentator"] = static_cast<bool(Player::*)() const>(&Player::IsCommentator);
-
-            /**
-             *
-             */
-            type["SetCommentator"] = static_cast<void(Player::*)(bool)>(&Player::SetCommentator);
-
-            /**
-             *
-             */
-            type["IsDeveloper"] = static_cast<bool(Player::*)() const>(&Player::IsDeveloper);
-
-            /**
-             *
-             */
-            type["SetDeveloper"] = static_cast<void(Player::*)(bool)>(&Player::SetDeveloper);
-
-            /**
-             *
-             */
-            type["IsAcceptWhispers"] = static_cast<bool(Player::*)() const>(&Player::isAcceptWhispers);
-
-            /**
-             *
-             */
-            type["SetAcceptWhispers"] = static_cast<void(Player::*)(bool)>(&Player::SetAcceptWhispers);
-
-            /**
-             *
-             */
-            type["IsGameMaster"] = static_cast<bool(Player::*)() const>(&Player::IsGameMaster);
-
-            /**
-             *
-             */
-            type["SetGameMaster"] = static_cast<void(Player::*)(bool)>(&Player::SetGameMaster);
-
-            /**
-             *
-             */
-            type["IsGMChat"] = static_cast<bool(Player::*)() const>(&Player::isGMChat);
-
-            /**
-             *
-             */
-            type["SetGMChat"] = static_cast<void(Player::*)(bool)>(&Player::SetGMChat);
-
-            /**
-             *
-             */
-            type["IsGMSpectator"] = static_cast<bool(Player::*)() const>(&Player::IsGMSpectator);
-
-            /**
-             *
-             */
-            type["SetGMSpectator"] = static_cast<void(Player::*)(bool)>(&Player::SetGMSpectator);
-
-            /**
-             *
-             */
-            type["IsTaxiCheater"] = static_cast<bool(Player::*)() const>(&Player::isTaxiCheater);
-
-            /**
-             *
-             */
-            type["SetTaxiCheater"] = static_cast<void(Player::*)(bool)>(&Player::SetTaxiCheater);
-
-            /**
-             *
-             */
-            type["IsGMVisible"] = static_cast<bool(Player::*)() const>(&Player::isGMVisible);
-
-            /**
-             *
-             */
-            type["SetGMVisible"] = static_cast<void(Player::*)(bool)>(&Player::SetGMVisible);
-
-            /**
-             *
-             */
-            type["Has310Flyer"] = static_cast<bool(Player::*)(bool, uint32)>(&Player::Has310Flyer);
-
-            /**
-             *
-             */
-            type["SetHas310Flyer"] = static_cast<void(Player::*)(bool)>(&Player::SetHas310Flyer);
-
-            /**
-             *
-             */
-            type["SetPvPDeath"] = static_cast<void(Player::*)(bool)>(&Player::SetPvPDeath);
-
-            /**
-             *
-             */
-            type["GiveXP"] = static_cast<void(Player::*)(uint32, Unit*, float, bool)>(&Player::GiveXP);
-
-            /**
-             *
-             */
-            type["GiveLevel"] = static_cast<void(Player::*)(uint8)>(&Player::GiveLevel);
-
-            /**
-             *
-             */
-            type["InitStatsForLevel"] = static_cast<void(Player::*)(bool)>(&Player::InitStatsForLevel);
-
-            /**
-             *
-             */
-            type["HasActivePowerType"] = static_cast<bool(Player::*)(Powers)>(&Player::HasActivePowerType);
-
-            /**
-             *
-             */
-            type["GetCommandStatus"] = static_cast<bool(Player::*)(uint32) const>(&Player::GetCommandStatus);
-
-            /**
-             *
-             */
-            type["SetCommandStatusOn"] = static_cast<void(Player::*)(uint32)>(&Player::SetCommandStatusOn);
-
-            /**
-             *
-             */
-            type["SetCommandStatusOff"] = static_cast<void(Player::*)(uint32)>(&Player::SetCommandStatusOff);
-
-            /**
-             *
-             */
-            type["GetTotalPlayedTime"] = static_cast<uint32(Player::*)()>(&Player::GetTotalPlayedTime);
-
-            /**
-             *
-             */
-            type["GetLevelPlayedTime"] = static_cast<uint32(Player::*)()>(&Player::GetLevelPlayedTime);
-
-            /**
-             *
-             */
-            type["SetDeathState"] = static_cast<void(Player::*)(DeathState, bool)>(&Player::setDeathState);
-
-            /**
-             *
-             */
-            type["SetRestState"] = static_cast<void(Player::*)(uint32)>(&Player::SetRestState);
-
-            /**
-             *
-             */
-            type["RemoveRestState"] = static_cast<void(Player::*)()>(&Player::RemoveRestState);
-
-            /**
-             *
-             */
-            type["GetXPRestBonus"] = static_cast<uint32(Player::*)(uint32)>(&Player::GetXPRestBonus);
-
-            /**
-             *
-             */
-            type["GetRestBonus"] = static_cast<float(Player::*)() const>(&Player::GetRestBonus);
-
-            /**
-             *
-             */
-            type["SetRestBonus"] = static_cast<void(Player::*)(float)>(&Player::SetRestBonus);
-
-            /**
-             *
-             */
-            type["HasRestFlag"] = static_cast<bool(Player::*)(RestFlag) const>(&Player::HasRestFlag);
-
-            /**
-             *
-             */
-            type["SetRestFlag"] = static_cast<void(Player::*)(RestFlag, uint32)>(&Player::SetRestFlag);
-
-            /**
-             *
-             */
-            type["RemoveRestFlag"] = static_cast<void(Player::*)(RestFlag)>(&Player::RemoveRestFlag);
-
-            /**
-             *
-             */
-            type["GetInnTriggerId"] = static_cast<uint32(Player::*)() const>(&Player::GetInnTriggerId);
-
-            /**
-             *
-             */
-            type["GetPetStable"] = sol::overload(
-                static_cast<PetStable*(Player::*)()>(&Player::GetPetStable),
-
-                static_cast<const PetStable*(Player::*)() const>(&Player::GetPetStable)
-            );
-
-            /**
-             *
-             */
-            type["GetOrInitPetStable"] = static_cast<PetStable&(Player::*)()>(&Player::GetOrInitPetStable);
-
-            /**
-             *
-             */
-            type["GetPet"] = static_cast<Pet*(Player::*)() const>(&Player::GetPet);
-
-            /**
-             *
-             */
-            type["SummonPet"] = static_cast<Pet*(Player::*)(uint32, float, float, float, float, PetType, Milliseconds, uint32)>(&Player::SummonPet);
-
-            /**
-             *
-             */
-            type["RemovePet"] = static_cast<void(Player::*)(Pet*, PetSaveMode, bool)>(&Player::RemovePet);
-
-            /**
-             *
-             */
-            type["CanPetResurrect"] = static_cast<bool(Player::*)()>(&Player::CanPetResurrect);
-
-            /**
-             *
-             */
-            type["IsExistPet"] = static_cast<bool(Player::*)()>(&Player::IsExistPet);
-
-            /**
-             *
-             */
-            type["CreatePet"] = sol::overload(
-                static_cast<Pet*(Player::*)(Creature*, uint32)>(&Player::CreatePet),
-
-                static_cast<Pet*(Player::*)(uint32, uint32)>(&Player::CreatePet)
-            );
-
-            /**
-             *
-             */
-            type["GetPhaseMaskForSpawn"] = static_cast<uint32(Player::*)() const>(&Player::GetPhaseMaskForSpawn);
-
-            /**
-             *
-             */
-            type["SetVirtualItemSlot"] = static_cast<void(Player::*)(uint8, Item*)>(&Player::SetVirtualItemSlot);
-
-            /**
-             *
-             */
-            type["FindEquipSlot"] = static_cast<uint8(Player::*)(const ItemTemplate*, uint32, bool) const>(&Player::FindEquipSlot);
-
-            /**
-             *
-             */
-            type["GetItemCount"] = static_cast<uint32(Player::*)(uint32, bool, Item*) const>(&Player::GetItemCount);
-
-            /**
-             *
-             */
-            type["GetItemCountWithLimitCategory"] = static_cast<uint32(Player::*)(uint32, Item*) const>(&Player::GetItemCountWithLimitCategory);
-
-            /**
-             *
-             */
-            type["GetItemByGuid"] = static_cast<Item*(Player::*)(ObjectGuid) const>(&Player::GetItemByGuid);
-
-            /**
-             *
-             */
-            type["GetItemByEntry"] = static_cast<Item*(Player::*)(uint32) const>(&Player::GetItemByEntry);
-
-            /**
-             *
-             */
-            type["GetItemByPos"] = sol::overload(
-                static_cast<Item*(Player::*)(uint16) const>(&Player::GetItemByPos),
-
-                static_cast<Item*(Player::*)(uint8, uint8) const>(&Player::GetItemByPos)
-            );
-
-            /**
-             *
-             */
-            type["GetBagByPos"] = static_cast<Bag*(Player::*)(uint8) const>(&Player::GetBagByPos);
-
-            /**
-             *
-             */
-            type["GetFreeInventorySpace"] = static_cast<uint32(Player::*)() const>(&Player::GetFreeInventorySpace);
-
-            /**
-             *
-             */
-            type["GetUseableItemByPos"] = static_cast<Item*(Player::*)(uint8, uint8) const>(&Player::GetUseableItemByPos);
-
-            /**
-             *
-             */
-            type["GetWeaponForAttack"] = static_cast<Item*(Player::*)(WeaponAttackType, bool) const>(&Player::GetWeaponForAttack);
-
-            /**
-             *
-             */
-            type["HasWeapon"] = static_cast<bool(Player::*)(WeaponAttackType) const>(&Player::HasWeapon);
-
-            /**
-             *
-             */
-            type["HasWeaponForAttack"] = static_cast<bool(Player::*)(WeaponAttackType) const>(&Player::HasWeaponForAttack);
-
-            /**
-             *
-             */
-            type["GetShield"] = static_cast<Item*(Player::*)(bool) const>(&Player::GetShield);
-
-            /**
-             *
-             */
-            type["GetAttackBySlot"] = &Player::GetAttackBySlot;
-
-            /**
-             *
-             */
-            type["GetItemUpdateQueue"] = static_cast<std::vector<Item*>&(Player::*)()>(&Player::GetItemUpdateQueue);
-
-            /**
-             *
-             */
-            type["IsInventoryPos"] = sol::overload(
-                static_cast<bool(*)(uint16)>(&Player::IsInventoryPos),
-
-                static_cast<bool(*)(uint8, uint8)>(&Player::IsInventoryPos)
-            );
-
-            /**
-             *
-             */
-            type["IsEquipmentPos"] = sol::overload(
-                static_cast<bool(*)(uint16)>(&Player::IsEquipmentPos),
-
-                static_cast<bool(*)(uint8, uint8)>(&Player::IsEquipmentPos)
-            );
-
-            /**
-             *
-             */
-            type["IsBagPos"] = &Player::IsBagPos;
-
-            /**
-             *
-             */
-            type["IsBankPos"] = sol::overload(
-                static_cast<bool(*)(uint16)>(&Player::IsBankPos),
-
-                static_cast<bool(*)(uint8, uint8)>(&Player::IsBankPos)
-            );
-
-            /**
-             *
-             */
-            type["IsValidPos"] = sol::overload(
-                static_cast<bool(Player::*)(uint16, bool)>(&Player::IsValidPos),
-
-                static_cast<bool(Player::*)(uint8, uint8, bool)>(&Player::IsValidPos)
-            );
-
-            /**
-             *
-             */
-            type["GetBankBagSlotCount"] = static_cast<uint8(Player::*)() const>(&Player::GetBankBagSlotCount);
-
-            /**
-             *
-             */
-            type["SetBankBagSlotCount"] = static_cast<void(Player::*)(uint8)>(&Player::SetBankBagSlotCount);
-
-            /**
-             *
-             */
-            type["HasItemCount"] = static_cast<bool(Player::*)(uint32, uint32, bool) const>(&Player::HasItemCount);
-
-            /**
-             *
-             */
-            type["HasItemFitToSpellRequirements"] = static_cast<bool(Player::*)(const SpellInfo*, const Item*) const>(&Player::HasItemFitToSpellRequirements);
-
-            /**
-             *
-             */
-            type["CanNoReagentCast"] = static_cast<bool(Player::*)(const SpellInfo*) const>(&Player::CanNoReagentCast);
-
-            /**
-             *
-             */
-            type["HasItemOrGemWithIdEquipped"] = static_cast<bool(Player::*)(uint32, uint32, uint8) const>(&Player::HasItemOrGemWithIdEquipped);
-
-            /**
-             *
-             */
-            type["HasItemOrGemWithLimitCategoryEquipped"] = static_cast<bool(Player::*)(uint32, uint32, uint8) const>(&Player::HasItemOrGemWithLimitCategoryEquipped);
-
-            /**
-             *
-             */
-            type["CanTakeMoreSimilarItems"] = sol::overload(
-                static_cast<InventoryResult(Player::*)(Item*) const>(&Player::CanTakeMoreSimilarItems),
-
-                static_cast<InventoryResult(Player::*)(uint32, uint32) const>(&Player::CanTakeMoreSimilarItems)
-            );
-
-            /**
-             *
-             */
-            type["CanStoreNewItem"] = CanStoreNewItemWrapper;
-
-            /**
-             *
-             */
-            type["CanStoreItem"] = static_cast<InventoryResult(Player::*)(uint8, uint8, ItemPosCountVec&, Item*, bool) const>(&Player::CanStoreItem);
-
-            /**
-             *
-             */
-            type["CanStoreItems"] = CanStoreItemsWrapper;
         }
     }
 }
