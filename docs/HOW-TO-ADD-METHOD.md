@@ -16,110 +16,173 @@ Welcome to the **Eclipse Lua Engine** method binding guide! This comprehensive t
 
 Method bindings are organized in dedicated files like `PlayerMethods.hpp`, `CreatureMethods.hpp`, etc. These files contain everything you need to expose class methods to Lua scripts.
 
-### The Magic Formula
+### The Magic Formula (NEW APPROACH)
+
+**Eclipse now uses wrapper functions for ALL methods to ensure complete API consistency:**
 
 ```cpp
-type["MethodName"] = static_cast<signature>(&ClassName::MethodName);
+// 1. Create wrapper function:
+/**
+ *
+ */
+ReturnType MethodName(Object* object, params...)
+{
+    return object->MethodName(params...);
+}
+
+// 2. Register wrapper:
+type["MethodName"] = &MethodName;
 ```
 
-That's it! But there's more to the story... 📚
+That's it! Clean, simple, and completely consistent! 📚
 
 ## 🔧 Basic Method Binding
 
 ### Regular Methods
 
-For standard methods, use the basic pattern:
+For standard methods, create wrapper functions:
 
 ```cpp
 // C++ Method: bool HasItemCount(uint32 item, uint32 count, bool includeBank) const;
-type["HasItemCount"] = static_cast<bool(ClassName::*)(uint32, uint32, bool) const>(&ClassName::HasItemCount);
+
+// Wrapper function:
+/**
+ *
+ */
+bool HasItemCount(Player* player, uint32 item, uint32 count, bool includeBank)
+{
+    return player->HasItemCount(item, count, includeBank);
+}
+
+// Registration:
+type["HasItemCount"] = &HasItemCount;
 ```
 
 **Lua Usage:**
 ```lua
-if object:HasItemCount(12345, 5, true) then
-    print("Object has 5+ of item 12345!")
+if player:HasItemCount(12345, 5, true) then
+    print("Player has 5+ of item 12345!")
 end
 ```
 
-### Signature Examples
+### Wrapper Function Examples
 
-| C++ Method | Sol2 Signature |
-|------------|---------------|
-| `bool IsActive() const` | `bool(ClassName::*)() const` |
-| `void SetLevel(uint8 level)` | `void(ClassName::*)(uint8)` |
-| `uint32 GetHealth() const` | `uint32(ClassName::*)() const` |
-| `void MoveTo(float x, float y, float z)` | `void(ClassName::*)(float, float, float)` |
+| C++ Method | Wrapper Function |
+|------------|-----------------|
+| `bool IsActive() const` | `bool IsActive(Player* player) { return player->IsActive(); }` |
+| `void SetLevel(uint8 level)` | `void SetLevel(Player* player, uint8 level) { player->SetLevel(level); }` |
+| `uint32 GetHealth() const` | `uint32 GetHealth(Player* player) { return player->GetHealth(); }` |
+| `void MoveTo(float x, float y, float z)` | `void MoveTo(Player* player, float x, float y, float z) { player->MoveTo(x, y, z); }` |
 
-### 🔑 The const Rule
+### 🔑 The Wrapper Rule
 
-Always include `const` in your signature if the C++ method is const!
+Always create wrapper functions for ALL methods!
 
 ```cpp
-// ✅ Correct
-type["GetLevel"] = static_cast<uint8(ClassName::*)() const>(&ClassName::GetLevel);
+/**
+ *
+ */
+uint8 GetLevel(Player* player)
+{
+    return player->GetLevel();
+}
 
-// ❌ Wrong - missing const
-type["GetLevel"] = static_cast<uint8(ClassName::*)()>(&ClassName::GetLevel);
+type["GetLevel"] = &GetLevel;
 ```
 
 ## 🎭 Advanced Cases
 
-### Static Methods
+### Static Methods with Wrapper Functions
 
-Static methods are special - they don't need the complex casting:
+For consistency, ALL methods (including static ones) use wrapper functions to ensure uniform `object:Method()` API:
 
 ```cpp
 // C++: static uint8 GetAttackBySlot(uint8 slot);
-type["GetAttackBySlot"] = &ClassName::GetAttackBySlot;
+// Wrapper function:
+/**
+ *
+ */
+uint8 GetAttackBySlot(Player* player, uint8 slot)
+{
+    (void)player; // Unused parameter for static methods
+    return Player::GetAttackBySlot(slot);
+}
+
+// Registration:
+type["GetAttackBySlot"] = &GetAttackBySlot;
 ```
 
 **Lua Usage:**
 ```lua
-local attack = ClassName.GetAttackBySlot(5)  -- Note: ClassName.method, not object:method
+local attack = player:GetAttackBySlot(5)  -- Consistent player:method syntax
 ```
 
-### Method Overloads
+### Method Overloads with Wrapper Functions
 
-When you have multiple methods with the same name but different parameters, use `sol::overload`:
+When you have multiple methods with the same name but different parameters, create descriptively named wrapper functions:
 
 ```cpp
 // C++ has two versions:
 // bool IsValidPos(uint16 pos);
-// bool IsValidPos(uint8 x, uint8 y);
+// bool IsValidPos(uint8 bag, uint8 slot);
 
+// Create two wrapper functions with descriptive names:
+/**
+ *
+ */
+bool IsValidPosBySlot(Player* player, uint16 pos, bool explicit_pos)
+{
+    return player->IsValidPos(pos, explicit_pos);
+}
+
+/**
+ *
+ */
+bool IsValidPosByBagSlot(Player* player, uint8 bag, uint8 slot, bool explicit_pos)
+{
+    return player->IsValidPos(bag, slot, explicit_pos);
+}
+
+// Register with sol::overload:
 type["IsValidPos"] = sol::overload(
-    static_cast<bool(*)(uint16)>(&ClassName::IsValidPos),
-    static_cast<bool(*)(uint8, uint8)>(&ClassName::IsValidPos)
+    &IsValidPosBySlot,
+    &IsValidPosByBagSlot
 );
 ```
 
 **Lua Usage:**
 ```lua
 -- Sol2 automatically chooses the right overload!
-local result1 = ClassName.IsValidPos(256)        -- Uses first overload
-local result2 = ClassName.IsValidPos(1, 0)       -- Uses second overload
+local result1 = player:IsValidPos(256, true)        -- Uses first wrapper
+local result2 = player:IsValidPos(1, 0, true)       -- Uses second wrapper
 ```
 
 ### Static Method Overloads
 
-For static method overloads, use function pointer syntax `return_type(*)(params)`:
+For static method overloads, follow the same pattern but use `(void)object;`:
 
 ```cpp
-type["StaticMethod"] = sol::overload(
-    static_cast<bool(*)(uint16)>(&ClassName::StaticMethod),
-    static_cast<bool(*)(uint8, uint8)>(&ClassName::StaticMethod)
-);
-```
+/**
+ *
+ */
+bool IsInventoryPosBySlot(Player* player, uint16 pos)
+{
+    (void)player; // Unused parameter
+    return Player::IsInventoryPos(pos);
+}
 
-### Instance Method Overloads
+/**
+ *
+ */
+bool IsInventoryPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+{
+    (void)player; // Unused parameter
+    return Player::IsInventoryPos(bag, slot);
+}
 
-For instance method overloads, use member function pointer syntax `return_type(ClassName::*)(params)`:
-
-```cpp
-type["InstanceMethod"] = sol::overload(
-    static_cast<bool(ClassName::*)(uint16)>(&ClassName::InstanceMethod),
-    static_cast<bool(ClassName::*)(uint8, uint8)>(&ClassName::InstanceMethod)
+type["IsInventoryPos"] = sol::overload(
+    &IsInventoryPosBySlot,
+    &IsInventoryPosByBagSlot
 );
 ```
 
@@ -130,8 +193,7 @@ Sometimes C++ methods aren't Lua-friendly. That's where wrapper functions save t
 ### Problem: Primitive Output Parameters
 
 ```cpp
-// C++ Method: InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemContainer& dest, 
-//                                          uint32 entry, uint32 count, uint32* no_space_count) const;
+// C++ Method: InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemContainer& dest, uint32 entry, uint32 count, uint32* no_space_count) const;
 ```
 
 **Problem:** Lua can't handle `uint32*` parameters.
@@ -139,20 +201,20 @@ Sometimes C++ methods aren't Lua-friendly. That's where wrapper functions save t
 **Solution:** Create a wrapper that returns a tuple:
 
 ```cpp
-auto CanStoreItemWrapper = [](ClassName* object, uint8 bag, uint8 slot, ItemContainer& dest, 
-                             uint32 entry, uint32 count) -> std::tuple<InventoryResult, uint32>
+std::tuple<InventoryResult, uint32> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count)
 {
     uint32 no_space_count = 0;
-    InventoryResult result = object->CanStoreItem(bag, slot, dest, entry, count, &no_space_count);
+    InventoryResult result = player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count);
     return std::make_tuple(result, no_space_count);
+}
 };
 
-type["CanStoreItem"] = CanStoreItemWrapper;
+type["CanStoreNewItem"] = &CanStoreNewItem;
 ```
 
 **Lua Usage:**
 ```lua
-local result, no_space = object:CanStoreItem(bag, slot, dest, entry, count)
+local result, no_space = player:CanStoreNewItem(bag, slot, dest, entry, count)
 if result == SUCCESS then
     print("Success!")
 else
@@ -163,7 +225,7 @@ end
 ### Problem: Object Pointer Arrays
 
 ```cpp
-// C++ Method: InventoryResult ProcessItems(Item** pItems, int count) const;
+// C++ Method: InventoryResult CanStoreItems(Item** pItems, int count) const;
 ```
 
 **Problem:** Lua can't create `Item**` arrays.
@@ -171,125 +233,196 @@ end
 **Solution:** Use vector conversion:
 
 ```cpp
-auto ProcessItemsWrapper = [](ClassName* object, const std::vector<Item*>& items, int count) -> InventoryResult
+InventoryResult CanStoreItems(Player* player, const std::vector<Item*>& items, int count)
 {
     std::vector<Item*> item_ptrs = items;
-    return object->ProcessItems(item_ptrs.data(), count);
-};
+    return player->CanStoreItems(item_ptrs.data(), count);
+}
 
-type["ProcessItems"] = ProcessItemsWrapper;
+type["CanStoreItems"] = &CanStoreItems;
 ```
 
 **Lua Usage:**
 ```lua
 local items = {item1, item2, item3}
-local result = object:ProcessItems(items, 3)
+local result = player:ProcessItems(items, 3)
 ```
 
 ## 🌟 Examples from the Wild
 
-Here are some real examples from method binding files:
+Here are some real examples from the new Eclipse method binding approach:
 
 ### Simple Getters/Setters
 ```cpp
-type["IsActive"] = static_cast<bool(Player::*)() const>(&Player::IsActive);
-type["SetGameMaster"] = static_cast<void(Player::*)(bool)>(&Player::SetGameMaster);
+// Wrapper functions:
+/**
+ *
+ */
+bool IsGameMaster(Player* player)
+{
+    return player->IsGameMaster();
+}
+
+/**
+ *
+ */
+void SetGameMaster(Player* player, bool gm)
+{
+    player->SetGameMaster(gm);
+}
+
+// Registration:
+type["IsGameMaster"] = &IsGameMaster;
+type["SetGameMaster"] = &SetGameMaster;
 ```
 
 ### Complex Methods
 ```cpp
-type["TeleportTo"] = static_cast<bool(Player::*)(uint32, float, float, float, float, uint32, Unit*, bool)>(&Player::TeleportTo);
+/**
+ *
+ */
+bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z, float orientation, uint32 options, Unit* target, bool forced)
+{
+    return player->TeleportTo(mapId, x, y, z, orientation, options, target, forced);
+}
+
+type["TeleportTo"] = &TeleportTo;
 ```
 
 ### Overloaded Methods
 ```cpp
+// Multiple wrapper functions:
+/**
+ *
+ */
+Item* GetItemByPosSlot(Player* player, uint16 pos)
+{
+    return player->GetItemByPos(pos);
+}
+
+/**
+ *
+ */
+Item* GetItemByPosBagSlot(Player* player, uint8 bag, uint8 slot)
+{
+    return player->GetItemByPos(bag, slot);
+}
+
+// Registration with sol::overload:
 type["GetItemByPos"] = sol::overload(
-    static_cast<Item*(Player::*)(uint16) const>(&Player::GetItemByPos),
-    static_cast<Item*(Player::*)(uint8, uint8) const>(&Player::GetItemByPos)
+    &GetItemByPosSlot,
+    &GetItemByPosBagSlot
 );
 ```
 
 ## 🚨 Troubleshooting
 
-### Common Errors and Solutions
+### Common Issues with Wrapper Functions
 
-#### "no type named 'function_pointer_type'"
-**Problem:** Wrong signature, usually missing `const` or wrong parameter types.
+#### "unused parameter 'player'" warning
+**Problem:** Compiler warning for static method wrappers.
 ```cpp
-// ❌ Wrong
-type["GetLevel"] = static_cast<uint8(ClassName::*)()>(&ClassName::GetLevel);
+// ❌ Warning
+bool IsInventoryPos(Player* player, uint16 pos)
+{
+    return Player::IsInventoryPos(pos);
+}
 
-// ✅ Correct (added const)
-type["GetLevel"] = static_cast<uint8(ClassName::*)() const>(&ClassName::GetLevel);
+// ✅ Correct (suppress warning)
+bool IsInventoryPos(Player* player, uint16 pos)
+{
+    (void)player; // Unused parameter
+    return Player::IsInventoryPos(pos);
+}
 ```
 
-#### "static_cast from X to Y is not allowed"
-**Problem:** Trying to cast a static method as an instance method.
+#### "forward declaration of 'SomeClass'" error
+**Problem:** Missing include for a type used in the wrapper function signature.
 ```cpp
-// ❌ Wrong
-type["GetAttackBySlot"] = static_cast<uint8(ClassName::*)(uint8)>(&ClassName::GetAttackBySlot);
-
-// ✅ Correct
-type["GetAttackBySlot"] = &ClassName::GetAttackBySlot;
-```
-
-#### "forward declaration of 'SomeClass'"
-**Problem:** Missing include for a type used in the method signature.
-```cpp
-// Add the missing include at the top
+// Add the missing include at the top of PlayerMethods.hpp
 #include "SomeClass.h"
+```
+
+#### Wrapper function compilation error
+**Problem:** Wrapper function signature doesn't match the actual C++ method.
+```cpp
+// ❌ Wrong parameter types or count
+bool HasItem(Player* player, uint32 item)
+{
+    return player->HasItem(item, 1, false); // Method actually needs 3 parameters
+}
+
+// ✅ Correct - match the real C++ method signature
+bool HasItem(Player* player, uint32 item, uint32 count, bool includeBank)
+{
+    return player->HasItem(item, count, includeBank);
+}
 ```
 
 ## ✨ Best Practices
 
 ### 1. 📝 Document Your Methods
-Always add JavaDoc-style comments above your bindings:
+Always add JavaDoc-style comments above your wrapper functions:
 
 ```cpp
 /**
- * Teleports the object to the specified location
+ * Teleports the player to the specified location
+ * @param player The player instance  
  * @param mapId The map ID to teleport to
  * @param x X coordinate
  * @param y Y coordinate  
  * @param z Z coordinate
- * @param orientation Object orientation
+ * @param orientation Player orientation
  */
-type["TeleportTo"] = static_cast<bool(ClassName::*)(uint32, float, float, float, float)>(&ClassName::TeleportTo);
+bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z, float orientation)
+{
+    return player->TeleportTo(mapId, x, y, z, orientation);
+}
 ```
 
 ### 2. 🎯 Use Descriptive Names
-Choose clear, descriptive names for wrapper functions:
+Choose clear, descriptive names for overloaded wrapper functions:
 
 ```cpp
-// ✅ Good
-auto CanStoreItemWrapper = [](ClassName* object, ...) { /* ... */ };
+// ✅ Good - descriptive names
+bool GetItemByPosSlot(Player* player, uint16 pos) { /* ... */ }
+bool GetItemByPosBagSlot(Player* player, uint8 bag, uint8 slot) { /* ... */ }
 
-// ❌ Bad
-auto Wrapper1 = [](ClassName* object, ...) { /* ... */ };
+// ❌ Bad - generic names
+bool GetItemByPos1(Player* player, uint16 pos) { /* ... */ }
+bool GetItemByPos2(Player* player, uint8 bag, uint8 slot) { /* ... */ }
 ```
 
 ### 3. 🔍 Group Related Methods
-Organize your methods in logical groups:
+Organize your wrapper functions and registrations in logical groups:
 
 ```cpp
-// ========== INVENTORY METHODS ==========
-type["GetItemCount"] = /* ... */;
-type["CanStoreItem"] = /* ... */;
-type["ProcessItems"] = /* ... */;
+bool GetItemCount(Player* player, uint32 item) { /* ... */ }
+void MoveTo(Player* player, float x, float y, float z) { /* ... */ }
+bool CanStoreItem(Player* player, uint8 bag, uint8 slot) { /* ... */ }
+bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z) { /* ... */ }
 
-// ========== MOVEMENT METHODS ==========
-type["MoveTo"] = /* ... */;
-type["TeleportTo"] = /* ... */;
+// ========== LUA REGISTRATION ==========
+
+// Getters
+type["GetItemCount"] = &GetItemCount;
+
+// Booleans
+type["CanStoreItem"] = &CanStoreItem;
+
+// Actions
+type["MoveTo"] = &MoveTo;
+type["TeleportTo"] = &TeleportTo;
 ```
 
 ### 4. 🧪 Test Your Bindings
-Always test your method bindings with simple Lua scripts:
+Always test your wrapper functions with simple Lua scripts:
 
 ```lua
 -- Test script
-local object = GetObject() -- however you get the object
-print("Object level: " .. object:GetLevel())
-print("Object is active: " .. tostring(object:IsActive()))
+print("Player level: " .. player:GetLevel())
+print("Player is GM: " .. tostring(player:IsGameMaster()))
+print("Player can store item: " .. tostring(player:CanStoreItem(255, 0, {}, someItem, false)))
 ```
 
 ### 5. 📂 File Organization
@@ -303,32 +436,35 @@ Keep method bindings organized in dedicated files:
 
 ### Method Types Cheat Sheet
 
-| Method Type | Syntax | Example |
-|-------------|--------|---------|
-| Instance method | `return_type(Class::*)(params)` | `bool(Player::*)(uint32) const` |
-| Static method | `&Class::Method` | `&Player::GetAttackBySlot` |
-| Instance overload | `sol::overload(cast1, cast2)` | See examples above |
-| Static overload | `sol::overload(cast1, cast2)` | See examples above |
+| Method Type | Wrapper Function | Registration |
+|-------------|-----------------|-------------|
+| Instance method | `ReturnType Method(Player* player, params) { return player->Method(params); }` | `type["Method"] = &Method;` |
+| Static method | `ReturnType Method(Player* player, params) { (void)player; return Player::Method(params); }` | `type["Method"] = &Method;` |
+| Instance overload | `ReturnType Method1(...) { ... } ReturnType Method2(...) { ... }` | `sol::overload(&Method1, &Method2)` |
+| Static overload | `ReturnType Method1(...) { (void)player; ... } ReturnType Method2(...) { (void)player; ... }` | `sol::overload(&Method1, &Method2)` |
 
-### When to Use Wrappers
+### When to Use Wrapper Functions
 
-- ✅ Methods with primitive output parameters (`uint32*`, `int*`, `bool*`)
-- ✅ Methods with object pointer arrays (`Item**`, `Creature**`)  
-- ✅ Methods with complex signatures that Lua can't handle
-- ❌ Simple methods that Sol2 can bind directly
+**ALL methods now use wrapper functions for consistency:**
+
+- ✅ **Always use wrappers** - provides uniform `player:Method()` API
+- ✅ Instance methods - direct `player->Method()` call
+- ✅ Static methods - use `(void)player;` and `Player::Method()` call  
+- ✅ Overloaded methods - create descriptively named wrappers
+- ✅ Complex signatures - wrapper functions handle any complexity
 
 ## 🎉 Congratulations!
 
-You're now ready to bind C++ class methods to Lua like a pro! Remember:
+You're now ready to bind C++ class methods to Lua using Eclipse's new unified approach! Remember:
 
-- ✅ Use `static_cast` for instance methods
-- ✅ Use `&Class::Method` for static methods  
-- ✅ Include `const` when needed
-- ✅ Use `sol::overload` for method overloads
-- ✅ Create wrappers for complex parameter types
-- ✅ Document everything!
+- ✅ **Always create wrapper functions** for ALL methods
+- ✅ Use `/**\n *\n */` JavaDoc comments above each wrapper  
+- ✅ Use `(void)player;` for static method wrappers
+- ✅ Use descriptive names for overloaded method wrappers
+- ✅ Register with simple `type["Method"] = &WrapperFunction;`
+- ✅ Everything uses `player:Method()` syntax in Lua!
 
-Happy coding! 🚀✨
+**The result: A completely uniform, predictable API that's easy to use and maintain!** 🚀✨
 
 ---
 
