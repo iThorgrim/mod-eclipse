@@ -18,6 +18,9 @@ namespace Eclipse
         void TriggerEvent(uint32 eventId, Args&&... args);
         
         template<typename... Args>
+        bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args);
+        
+        template<typename... Args>
         void TriggerKeyedEvent(uint32 eventId, Args&&... args);
         
     private:
@@ -29,6 +32,9 @@ namespace Eclipse
         
         template<typename T, typename... Args>
         void TriggerOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Args&&... args);
+        
+        template<typename T, typename... Args>
+        bool TriggerWithRetValueOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Args&&... args);
         
         template<EventType Type, typename... Args>
         void TriggerKeyedEventHelper(const std::vector<LuaEngine*>& engines, uint32 objectId, uint32 eventId, Args&&... args);

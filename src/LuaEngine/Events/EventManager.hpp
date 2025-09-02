@@ -22,6 +22,12 @@ namespace Eclipse
         template<typename... Args>
         void TriggerEvent(uint32 eventId, Args&&... args);
         
+        template<typename... Args>
+        bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args);
+        
+        template<typename... Args>
+        bool HasCallbacksFor(uint32 eventId) const;
+        
         template<EventType Type>
         void ClearEvents();
         
@@ -97,6 +103,67 @@ namespace Eclipse
                 }
             }
         }
+    }
+
+    template<typename... Args>
+    bool EventManager::TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
+    {
+        static_assert(sizeof...(args) > 0, "At least one argument required");
+        
+        constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
+        auto& eventContainer = GetEventContainer<eventType>();
+        
+        auto it = eventContainer.find(eventId);
+        if (it == eventContainer.end())
+        {
+            // No callbacks registered, allow by default
+            return true;
+        }
+
+        const auto& callbacks = it->second;
+        
+        // Check all callbacks - if any returns false, block the action
+        for (const auto& callback : callbacks)
+        {
+            if (callback.valid())
+            {
+                try
+                {
+                    sol::protected_function_result result = callback(std::forward<Args>(args)...);
+                    
+                    // Fast path: check if result is valid and boolean in one go
+                    if (result.valid() && result.get_type() == sol::type::boolean)
+                    {
+                        // Direct cast to bool - more efficient than intermediate assignment
+                        if (!result.get<bool>())
+                        {
+                            // At least one callback returned false - block the action
+                            return false;
+                        }
+                    }
+                    // If callback returns non-boolean, nil, or true, continue (treat as allow)
+                }
+                catch (const std::exception&) 
+                {
+                    // If callback throws, treat as allowing the action
+                }
+            }
+        }
+        
+        // All callbacks either returned true or nothing - allow the action
+        return true;
+    }
+
+    template<typename... Args>
+    bool EventManager::HasCallbacksFor(uint32 eventId) const
+    {
+        static_assert(sizeof...(Args) > 0, "At least one argument required");
+        
+        constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
+        const auto& eventContainer = const_cast<EventManager*>(this)->GetEventContainer<eventType>();
+        
+        auto it = eventContainer.find(eventId);
+        return (it != eventContainer.end() && !it->second.empty());
     }
 
     template<EventType Type>

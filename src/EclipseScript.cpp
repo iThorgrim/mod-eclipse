@@ -54,10 +54,34 @@ class Eclipse_PlayerScript : public PlayerScript
 {
 public:
     Eclipse_PlayerScript() : PlayerScript("Eclipse_PlayerScript", {
+        PLAYERHOOK_ON_PLAYER_RESURRECT,
+        PLAYERHOOK_CAN_PLAYER_USE_CHAT,
         PLAYERHOOK_ON_LOGIN,
         PLAYERHOOK_ON_LOGOUT,
         PLAYERHOOK_ON_LOOT_ITEM
     }) { }
+
+    // void OnPlayerResurrect(Player* player, float restore_percent, bool applySickness) override
+    // {
+    //     Eclipse::EventDispatcher::GetInstance().TriggerEvent(
+    //         Eclipse::PLAYERHOOK_ON_PLAYER_RESURRECT, 
+    //         player,
+    //         restore_percent,
+    //         applySickness
+    //     );
+    // }
+
+    bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& msg) override
+    {
+        if (type != CHAT_MSG_SAY && type != CHAT_MSG_YELL && type != CHAT_MSG_EMOTE)
+            return true;
+
+
+        if(!Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(Eclipse::PLAYERHOOK_CAN_PLAYER_USE_CHAT, player, type, language, msg))
+            return false;
+
+        return true;
+    }
 
     void OnPlayerLogin(Player* player) override
     {

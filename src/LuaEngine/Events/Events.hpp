@@ -13,6 +13,7 @@ namespace Eclipse
         PLAYER_EVENT_ON_LOOT_ITEM = 3,
         PLAYER_EVENT_ON_LEVEL_CHANGED = 4,
         PLAYER_EVENT_ON_KILL_PLAYER = 5,
+        PLAYERHOOK_CAN_PLAYER_USE_CHAT = 6,
     };
 
     enum MapEvents : uint32
