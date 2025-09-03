@@ -89,7 +89,7 @@ git clone https://github.com/iThorgrim/mod-eclipse.git
 
 **Step 2: Apply CMake Patch**
 ```bash
-git apply mod-eclipse/cmake-patch.diff
+git apply mod-eclipse/cmake_patch.diff
 ```
 
 **Step 3: Configure & Build**
