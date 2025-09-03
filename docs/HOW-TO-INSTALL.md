@@ -79,7 +79,7 @@ You should now see a new `mod-eclipse` folder in your modules directory.
 This is the **magic step** that makes everything work:
 
 ```bash
-git apply mod-eclipse/cmake-patch.diff
+git apply mod-eclipse/cmake_patch.diff
 ```
 
 **What does this do?** 🤔  
