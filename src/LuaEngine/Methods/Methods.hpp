@@ -9,20 +9,20 @@
 namespace Eclipse
 {
     namespace Methods
-    {       
+    {
         template<typename T>
         void RegisterWorldObjectMethods(sol::usertype<T>& type)
         {
             WorldObjectMethods::RegisterWorldObjectMethods(type);
         }
-        
+
         template<typename T>
         void RegisterUnitMethods(sol::usertype<T>& type)
         {
             WorldObjectMethods::RegisterWorldObjectMethods(type);
             UnitMethods::RegisterUnitMethods(type);
         }
-        
+
         template<typename T>
         void RegisterPlayerMethods(sol::usertype<T>& type)
         {
@@ -30,15 +30,15 @@ namespace Eclipse
             UnitMethods::RegisterUnitMethods(type);
             PlayerMethods::RegisterPlayerMethods(type);
         }
-        
+
         void RegisterAll(sol::state& lua)
         {
             auto player_type = lua.new_usertype<Player>("Player");
             RegisterPlayerMethods(player_type);
-            
+
             auto unit_type = lua.new_usertype<Unit>("Unit");
             RegisterUnitMethods(unit_type);
-            
+
             auto creature_type = lua.new_usertype<Creature>("Creature");
             RegisterUnitMethods(creature_type);
         }

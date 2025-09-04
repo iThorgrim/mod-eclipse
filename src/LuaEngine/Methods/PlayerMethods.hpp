@@ -960,19 +960,62 @@ namespace Eclipse
         /**
          *
          */
-        std::tuple<InventoryResult, uint32> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count)
+        std::tuple<InventoryResult, uint32, sol::table> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, sol::this_state s)
         {
+            sol::state_view lua(s);
+            ItemPosCountVec dest;
             uint32 no_space_count = 0;
             InventoryResult result = player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count);
-            return std::make_tuple(result, no_space_count);
+
+            sol::table dest_table = lua.create_table();
+            for (size_t i = 0; i < dest.size(); ++i) {
+                sol::table pos_info = lua.create_table();
+                pos_info["pos"] = dest[i].pos;
+                pos_info["count"] = dest[i].count;
+                dest_table[i + 1] = pos_info;
+            }
+
+            return std::make_tuple(result, no_space_count, dest_table);
         }
 
         /**
          *
          */
-        InventoryResult CanStoreItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap)
+        std::tuple<InventoryResult, sol::table> CanStoreItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, sol::this_state s)
         {
-            return player->CanStoreItem(bag, slot, dest, pItem, swap);
+            sol::state_view lua(s);
+            ItemPosCountVec dest;
+            InventoryResult result = player->CanStoreItem(bag, slot, dest, pItem, swap);
+
+            sol::table dest_table = lua.create_table();
+            for (size_t i = 0; i < dest.size(); ++i) {
+                sol::table pos_info = lua.create_table();
+                pos_info["pos"] = dest[i].pos;
+                pos_info["count"] = dest[i].count;
+                dest_table[i + 1] = pos_info;
+            }
+
+            return std::make_tuple(result, dest_table);
+        }
+
+        /**
+         *
+         */
+        std::tuple<InventoryResult, sol::table> CanStoreItemWithEntry(Player* player, uint8 bag, uint8 slot, uint32 pItem, bool swap, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec dest;
+            InventoryResult result = player->CanStoreItem(bag, slot, dest, pItem, swap);
+
+            sol::table dest_table = lua.create_table();
+            for (size_t i = 0; i < dest.size(); ++i) {
+                sol::table pos_info = lua.create_table();
+                pos_info["pos"] = dest[i].pos;
+                pos_info["count"] = dest[i].count;
+                dest_table[i + 1] = pos_info;
+            }
+
+            return std::make_tuple(result, dest_table);
         }
 
         /**
@@ -982,6 +1025,264 @@ namespace Eclipse
         {
             std::vector<Item*> item_ptrs = items;
             return player->CanStoreItems(item_ptrs.data(), count);
+        }
+
+        /**
+         *
+         */
+        std::tuple<InventoryResult, uint16> CanEquipNewItem(Player* player, uint8 slot, uint32 item, bool swap)
+        {
+            uint16 dest = 0;
+            InventoryResult result = player->CanEquipNewItem(slot, dest, item, swap);
+            return std::make_tuple(result, dest);
+        }
+
+        /**
+         *
+         */
+        std::tuple<InventoryResult, uint16> CanEquipItem(Player* player, uint8 slot, Item* pItem, bool swap, bool not_loading)
+        {
+            uint16 dest = 0;
+            InventoryResult result = player->CanEquipItem(slot, dest, pItem, swap, not_loading);
+            return std::make_tuple(result, dest);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanEquipUniqueItem(Player* player, Item* pItem, uint8 except_slot, uint32 limit_count)
+        {
+            return player->CanEquipUniqueItem(pItem, except_slot, limit_count);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanEquipUniqueItemTemplate(Player* player, ItemTemplate const* itemProto, uint8 except_slot, uint32 limit_count)
+        {
+            return player->CanEquipUniqueItem(itemProto, except_slot, limit_count);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanUnequipItems(Player* player, uint32 item, uint32 count)
+        {
+            return player->CanUnequipItems(item, count);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanUnequipItem(Player* player, uint16 src, bool swap)
+        {
+            return player->CanUnequipItem(src, swap);
+        }
+
+        /**
+         *
+         */
+        std::tuple<InventoryResult, sol::table> CanBankItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, bool not_loading, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec dest;
+            InventoryResult result = player->CanBankItem(bag, slot, dest, pItem, swap, not_loading);
+
+            sol::table dest_table = lua.create_table();
+            for (size_t i = 0; i < dest.size(); ++i) {
+                sol::table pos_info = lua.create_table();
+                pos_info["pos"] = dest[i].pos;
+                pos_info["count"] = dest[i].count;
+                dest_table[i + 1] = pos_info;
+            }
+
+            return std::make_tuple(result, dest_table);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanUseItem(Player* player, Item* pItem, bool not_loading)
+        {
+            return player->CanUseItem(pItem, not_loading);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanUseItemByTemplate(Player* player, ItemTemplate const* pItem)
+        {
+            return player->CanUseItem(pItem);
+        }
+
+        /**
+         *
+         */
+        bool HasItemTotemCategory(Player* player, uint32 totemCategory)
+        {
+            return player->HasItemTotemCategory(totemCategory);
+        }
+
+        /**
+         *
+         */
+        bool IsTotemCategoryCompatiableWith(Player* player, ItemTemplate const* pProto, uint32 requiredTotemCategoryId)
+        {
+            return player->IsTotemCategoryCompatiableWith(pProto, requiredTotemCategoryId);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanUseAmmo(Player* player, uint32 item)
+        {
+            return player->CanUseAmmo(item);
+        }
+
+        /**
+         *
+         */
+        InventoryResult CanRollForItemInLFG(Player* player, ItemTemplate const* item, WorldObject const* lootedObject)
+        {
+            return player->CanRollForItemInLFG(item, lootedObject);
+        }
+
+        /**
+         *
+         */
+        Item* StoreNewItem(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec pos;
+            for (auto& pair : pos_table) {
+                if (pair.second.is<sol::table>()) {
+                    sol::table pos_info = pair.second;
+                    uint16 pos_val = pos_info["pos"];
+                    uint32 count_val = pos_info["count"];
+                    pos.push_back(ItemPosCount(pos_val, count_val));
+                }
+            }
+
+            return player->StoreNewItem(pos, item, update, randomPropertyId);
+        }
+
+        /**
+         *
+         */
+        Item* StoreNewItemWithAllowedLooters(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::table allowedLooters_table, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec pos;
+            for (auto& pair : pos_table) {
+                if (pair.second.is<sol::table>()) {
+                    sol::table pos_info = pair.second;
+                    uint16 pos_val = pos_info["pos"];
+                    uint32 count_val = pos_info["count"];
+                    pos.push_back(ItemPosCount(pos_val, count_val));
+                }
+            }
+
+            AllowedLooterSet allowedLooters;
+            for (auto& pair : allowedLooters_table) {
+                if (pair.second.is<ObjectGuid>()) {
+                    allowedLooters.insert(pair.second.as<ObjectGuid>());
+                }
+            }
+
+            return player->StoreNewItem(pos, item, update, randomPropertyId, allowedLooters);
+        }
+
+        /**
+         *
+         */
+        Item* StoreItem(Player* player, sol::table pos_table, Item* pItem, bool update, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec pos;
+            for (auto& pair : pos_table) {
+                if (pair.second.is<sol::table>()) {
+                    sol::table pos_info = pair.second;
+                    uint16 pos_val = pos_info["pos"];
+                    uint32 count_val = pos_info["count"];
+                    pos.push_back(ItemPosCount(pos_val, count_val));
+                }
+            }
+
+            return player->StoreItem(pos, pItem, update);
+        }
+
+        /**
+         *
+         */
+        Item* EquipNewItem(Player* player, uint16 pos, uint32 item, bool update)
+        {
+            return player->EquipNewItem(pos, item, update);
+        }
+
+        /**
+         *
+         */
+        Item* EquipItem(Player* player, uint16 pos, Item* pItem, bool update)
+        {
+            return player->EquipItem(pos, pItem, update);
+        }
+
+        /**
+         *
+         */
+        void AutoUnequipOffhandIfNeed(Player* player, bool force)
+        {
+            player->AutoUnequipOffhandIfNeed(force);
+        }
+
+        /**
+         *
+         */
+        bool StoreNewItemInBestSlots(Player* player, uint32 item_id, uint32 item_count)
+        {
+            return player->StoreNewItemInBestSlots(item_id, item_count);
+        }
+
+        /**
+         *
+         */
+        void AutoStoreLootWithBagSlot(Player* player, uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast)
+        {
+            player->AutoStoreLoot(bag, slot, loot_id, store, broadcast);
+        }
+
+        /**
+         *
+         */
+        void AutoStoreLoot(Player* player, uint32 loot_id, LootStore const& store, bool broadcast)
+        {
+            player->AutoStoreLoot(loot_id, store, broadcast);
+        }
+
+        /**
+         *
+         */
+        std::tuple<LootItem*, InventoryResult> StoreLootItem(Player* player, uint8 lootSlot, Loot* loot)
+        {
+            InventoryResult msg = EQUIP_ERR_OK;
+            LootItem* result = player->StoreLootItem(lootSlot, loot, msg);
+            return std::make_tuple(result, msg);
+        }
+
+        /**
+         *
+         */
+        void UpdateLootAchievements(Player* player, LootItem* item, Loot* loot)
+        {
+            player->UpdateLootAchievements(item, loot);
+        }
+
+        /**
+         *
+         */
+        void UpdateTitansGrip(Player* player)
+        {
+            player->UpdateTitansGrip();
         }
 
 
@@ -1024,7 +1325,7 @@ namespace Eclipse
             type["GetBankBagSlotCount"] = &GetBankBagSlotCount;
 
             type["FindEquipSlot"] = &FindEquipSlot;
-            
+
             // Setters
             type["SetSummonPoint"] = &SetSummonPoint;
             type["SetSummonAsSpectator"] = &SetSummonAsSpectator;
@@ -1048,7 +1349,7 @@ namespace Eclipse
             type["SetRestBonus"] = &SetRestBonus;
             type["SetRestFlag"] = &SetRestFlag;
             type["SetVirtualItemSlot"] = &SetVirtualItemSlot;
-            
+
             // Booleans
             type["IsSummonAsSpectator"] = &IsSummonAsSpectator;
             type["HasPlayerFlag"] = &HasPlayerFlag;
@@ -1086,9 +1387,20 @@ namespace Eclipse
             type["HasItemOrGemWithLimitCategoryEquipped"] = &HasItemOrGemWithLimitCategoryEquipped;
             type["CanTakeMoreSimilarItems"] = sol::overload(&CanTakeMoreSimilarItemsByItem, &CanTakeMoreSimilarItemsByEntry);
             type["CanStoreNewItem"] = &CanStoreNewItem;
-            type["CanStoreItem"] = &CanStoreItem;
+            type["CanStoreItem"] = sol::overload(&CanStoreItem, &CanStoreItemWithEntry);
             type["CanStoreItems"] = &CanStoreItems;
-            
+            type["CanBankItem"] = &CanBankItem;
+            type["CanEquipNewItem"] = &CanEquipNewItem;
+            type["CanEquipItem"] = &CanEquipItem;
+            type["CanEquipUniqueItem"] = sol::overload(&CanEquipUniqueItem, &CanEquipUniqueItemTemplate);
+            type["CanUnequipItems"] = &CanUnequipItems;
+            type["CanUnequipItem"] = &CanUnequipItem;
+            type["CanUseItem"] = sol::overload(&CanUseItem, &CanUseItemByTemplate);
+            type["HasItemTotemCategory"] = &HasItemTotemCategory;
+            type["IsTotemCategoryCompatiableWith"] = &IsTotemCategoryCompatiableWith;
+            type["CanUseAmmo"] = &CanUseAmmo;
+            type["CanRollForItemInLFG"] = &CanRollForItemInLFG;
+
             // Actions
             type["TeleportTo"] = &TeleportTo;
             type["TeleportToEntryPoint"] = &TeleportToEntryPoint;
@@ -1110,6 +1422,16 @@ namespace Eclipse
             type["SummonPet"] = &SummonPet;
             type["RemovePet"] = &RemovePet;
             type["CreatePet"] = sol::overload(&CreatePetFromCreature, &CreatePetFromEntry);
+            type["StoreNewItem"] = sol::overload(&StoreNewItem, &StoreNewItemWithAllowedLooters);
+            type["StoreItem"] = &StoreItem;
+            type["EquipNewItem"] = &EquipNewItem;
+            type["EquipItem"] = &EquipItem;
+            type["AutoUnequipOffhandIfNeed"] = &AutoUnequipOffhandIfNeed;
+            type["StoreNewItemInBestSlots"] = &StoreNewItemInBestSlots;
+            type["AutoStoreLoot"] = sol::overload(&AutoStoreLoot, &AutoStoreLootWithBagSlot);
+            type["StoreLootItem"] = &StoreLootItem;
+            type["UpdateLootAchievements"] = &UpdateLootAchievements;
+            type["UpdateTitansGrip"] = &UpdateTitansGrip;
 
         }
     }
