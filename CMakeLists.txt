@@ -20,6 +20,16 @@ else()
   add_subdirectory(src/lualib/lua)
 endif()
 
-add_library(sol3 INTERFACE)
-target_include_directories(sol3 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/sol)
-target_link_libraries(sol3 INTERFACE lualib)
+# Download and configure Sol2 automatically
+include(FetchContent)
+
+FetchContent_Declare(
+    sol2
+    GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+    GIT_TAG c1f95a773c6f8f4fde8ca3efe872e7286afe4444
+)
+
+FetchContent_MakeAvailable(sol2)
+
+# Link sol2 with lualib
+target_link_libraries(sol2 INTERFACE lualib)
