@@ -1,9 +1,5 @@
 #include "LuaCache.hpp"
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <openssl/evp.h>
+#include <boost/filesystem.hpp>
 
 namespace Eclipse
 {
@@ -13,54 +9,18 @@ namespace Eclipse
         return instance;
     }
 
-    std::string LuaCache::CalculateFileMD5(const std::string& filePath) const
+    boost::filesystem::path::time_type LuaCache::GetFileWriteTime(const std::string& filePath) const
     {
-        std::ifstream file(filePath, std::ios::binary);
-        if (!file.is_open())
+        boost::system::error_code ec;
+        auto writeTime = boost::filesystem::last_write_time(filePath, ec);
+        
+        if (ec)
         {
-            return "";
+            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to get write time for file {}: {}", filePath, ec.message());
+            return boost::filesystem::path::time_type();
         }
 
-        EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
-        if (!mdctx)
-        {
-            return "";
-        }
-
-        if (EVP_DigestInit_ex(mdctx, EVP_md5(), nullptr) != 1)
-        {
-            EVP_MD_CTX_free(mdctx);
-            return "";
-        }
-
-        char buffer[8192];
-        while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0)
-        {
-            if (EVP_DigestUpdate(mdctx, buffer, file.gcount()) != 1)
-            {
-                EVP_MD_CTX_free(mdctx);
-                return "";
-            }
-        }
-
-        unsigned char hash[EVP_MAX_MD_SIZE];
-        unsigned int hash_len;
-        if (EVP_DigestFinal_ex(mdctx, hash, &hash_len) != 1)
-        {
-            EVP_MD_CTX_free(mdctx);
-            return "";
-        }
-
-        EVP_MD_CTX_free(mdctx);
-
-        std::stringstream hashStream;
-        hashStream << std::hex << std::setfill('0');
-        for (unsigned int i = 0; i < hash_len; ++i)
-        {
-            hashStream << std::setw(2) << static_cast<int>(hash[i]);
-        }
-
-        return hashStream.str();
+        return writeTime;
     }
 
     std::optional<std::vector<char>> LuaCache::GetBytecode(const std::string& filePath)
@@ -72,7 +32,7 @@ namespace Eclipse
         }
 
         auto& entry = it->second;
-        
+
         if (IsScriptModified(filePath))
         {
             InvalidateScript(filePath);
@@ -89,14 +49,14 @@ namespace Eclipse
 
     void LuaCache::StoreBytecode(const std::string& filePath, std::vector<char>&& bytecode, bool success)
     {
-        std::string md5 = CalculateFileMD5(filePath);
-        
-        CacheEntry entry(std::move(bytecode), md5);
+        auto writeTime = GetFileWriteTime(filePath);
+
+        CacheEntry entry(std::move(bytecode), writeTime);
         entry.compilationSuccess = success;
 
         cache_[filePath] = std::move(entry);
 
-        LOG_TRACE("server.eclipse", "[Eclipse]: Cached script: {} (success: {}, MD5: {})", filePath, success, md5.substr(0, 8));
+        LOG_DEBUG("server.eclipse", "[Eclipse]: Cached script: {} (success: {})", filePath, success);
     }
 
     void LuaCache::InvalidateScript(const std::string& filePath)
@@ -105,7 +65,7 @@ namespace Eclipse
         if (it != cache_.end())
         {
             cache_.erase(it);
-            
+
             LOG_TRACE("server.eclipse", "[Eclipse]: Invalidated cache for script: {}", filePath);
         }
     }
@@ -124,9 +84,9 @@ namespace Eclipse
         }
 
         const auto& entry = it->second;
-        
-        std::string currentMD5 = CalculateFileMD5(filePath);
-        if (currentMD5.empty() || currentMD5 != entry.fileMD5)
+
+        auto currentWriteTime = GetFileWriteTime(filePath);
+        if (currentWriteTime == boost::filesystem::path::time_type() || currentWriteTime != entry.lastWriteTime)
         {
             return true;
         }
@@ -137,7 +97,7 @@ namespace Eclipse
     std::vector<std::string> LuaCache::GetModifiedScripts() const
     {
         std::vector<std::string> modifiedScripts;
-        
+
         for (const auto& [filePath, entry] : cache_)
         {
             if (IsScriptModified(filePath))
@@ -145,7 +105,7 @@ namespace Eclipse
                 modifiedScripts.push_back(filePath);
             }
         }
-        
+
         return modifiedScripts;
     }
 
@@ -153,7 +113,7 @@ namespace Eclipse
     {
         std::vector<std::string> scripts;
         scripts.reserve(cache_.size());
-        
+
         for (const auto& [filePath, entry] : cache_)
         {
             if (entry.compilationSuccess)
@@ -161,7 +121,7 @@ namespace Eclipse
                 scripts.push_back(filePath);
             }
         }
-        
+
         return scripts;
     }
 
