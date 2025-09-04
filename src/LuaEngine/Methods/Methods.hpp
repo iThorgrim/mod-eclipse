@@ -5,6 +5,7 @@
 #include "UnitMethods.hpp"
 #include "PlayerMethods.hpp"
 #include "GlobalMethods.hpp"
+#include "ObjectGuidMethods.hpp"
 
 namespace Eclipse
 {
@@ -41,6 +42,10 @@ namespace Eclipse
 
             auto creature_type = lua.new_usertype<Creature>("Creature");
             RegisterUnitMethods(creature_type);
+
+            auto objectguid_type = lua.new_usertype<ObjectGuid>("ObjectGuid");
+            ObjectMethods::RegisterObjectGuidMethods(objectguid_type);
+
         }
     }
 }
