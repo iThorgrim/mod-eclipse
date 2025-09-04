@@ -1285,6 +1285,138 @@ namespace Eclipse
             player->UpdateTitansGrip();
         }
 
+        /**
+         * Check if player can store item in specific bag and slot
+         */
+        uint8 CanStoreItemInSlot(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, Item* pItem, bool swap)
+        {
+            ItemPosCountVec dest;
+            return static_cast<uint8>(player->CanStoreItem(bag, slot, dest, entry, count, pItem, swap, nullptr));
+        }
+
+        /**
+         * Check if player can store item anywhere
+         */
+        uint8 CanStoreItemAnywhere(Player* player, uint32 entry, uint32 count, Item* pItem, bool swap)
+        {
+            ItemPosCountVec dest;
+            return static_cast<uint8>(player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry, count, pItem, swap, nullptr));
+        }
+
+        /**
+         * Add refund reference for item
+         */
+        void AddRefundReference(Player* player, ObjectGuid itemGUID)
+        {
+            player->AddRefundReference(itemGUID);
+        }
+
+        /**
+         * Delete refund reference for item
+         */
+        void DeleteRefundReference(Player* player, ObjectGuid itemGUID)
+        {
+            player->DeleteRefundReference(itemGUID);
+        }
+
+        /**
+         * Apply equip cooldown for item
+         */
+        void ApplyEquipCooldown(Player* player, Item* pItem)
+        {
+            player->ApplyEquipCooldown(pItem);
+        }
+
+        /**
+         * Set ammo
+         */
+        void SetAmmo(Player* player, uint32 item)
+        {
+            player->SetAmmo(item);
+        }
+
+        /**
+         * Remove ammo
+         */
+        void RemoveAmmo(Player* player)
+        {
+            player->RemoveAmmo();
+        }
+
+        /**
+         * Get ammo DPS
+         */
+        float GetAmmoDPS(Player* player)
+        {
+            return player->GetAmmoDPS();
+        }
+
+        /**
+         * Check ammo compatibility
+         */
+        bool CheckAmmoCompatibility(Player* player, ItemTemplate const* ammo_proto)
+        {
+            return player->CheckAmmoCompatibility(ammo_proto);
+        }
+
+        /**
+         * Quick equip item
+         */
+        void QuickEquipItem(Player* player, uint16 pos, Item* pItem)
+        {
+            player->QuickEquipItem(pos, pItem);
+        }
+
+        /**
+         * Visualize item
+         */
+        void VisualizeItem(Player* player, uint8 slot, Item* pItem)
+        {
+            player->VisualizeItem(slot, pItem);
+        }
+
+        /**
+         * Set visible item slot
+         */
+        void SetVisibleItemSlot(Player* player, uint8 slot, Item* pItem)
+        {
+            player->SetVisibleItemSlot(slot, pItem);
+        }
+
+        /**
+         * Bank item at position
+         */
+        Item* BankItem(Player* player, Item* pItem, uint32 count, bool update, sol::this_state s)
+        {
+            sol::state_view lua(s);
+            ItemPosCountVec dest;
+            return player->BankItem(dest, pItem, update);
+        }
+
+        /**
+         * Remove item from bag/slot
+         */
+        void RemoveItem(Player* player, uint8 bag, uint8 slot, bool update, bool swap)
+        {
+            player->RemoveItem(bag, slot, update, swap);
+        }
+
+        /**
+         * Remove item from bag/slot without swap
+         */
+        void RemoveItemSimple(Player* player, uint8 bag, uint8 slot, bool update)
+        {
+            player->RemoveItem(bag, slot, update, false);
+        }
+
+        /**
+         * Move item from inventory
+         */
+        void MoveItemFromInventory(Player* player, uint8 bag, uint8 slot, bool update)
+        {
+            player->MoveItemFromInventory(bag, slot, update);
+        }
+
 
 
         // ========== LUA REGISTRATION ==========
@@ -1323,8 +1455,7 @@ namespace Eclipse
             type["GetAttackBySlot"] = &GetAttackBySlot;
             type["GetItemUpdateQueue"] = &GetItemUpdateQueue;
             type["GetBankBagSlotCount"] = &GetBankBagSlotCount;
-
-            type["FindEquipSlot"] = &FindEquipSlot;
+            type["GetAmmoDPS"] = &GetAmmoDPS;
 
             // Setters
             type["SetSummonPoint"] = &SetSummonPoint;
@@ -1349,6 +1480,8 @@ namespace Eclipse
             type["SetRestBonus"] = &SetRestBonus;
             type["SetRestFlag"] = &SetRestFlag;
             type["SetVirtualItemSlot"] = &SetVirtualItemSlot;
+            type["SetAmmo"] = &SetAmmo;
+            type["SetVisibleItemSlot"] = &SetVisibleItemSlot;
 
             // Booleans
             type["IsSummonAsSpectator"] = &IsSummonAsSpectator;
@@ -1387,7 +1520,7 @@ namespace Eclipse
             type["HasItemOrGemWithLimitCategoryEquipped"] = &HasItemOrGemWithLimitCategoryEquipped;
             type["CanTakeMoreSimilarItems"] = sol::overload(&CanTakeMoreSimilarItemsByItem, &CanTakeMoreSimilarItemsByEntry);
             type["CanStoreNewItem"] = &CanStoreNewItem;
-            type["CanStoreItem"] = sol::overload(&CanStoreItem, &CanStoreItemWithEntry);
+            type["CanStoreItem"] = sol::overload(&CanStoreItem, &CanStoreItemWithEntry, &CanStoreItemInSlot, &CanStoreItemAnywhere);
             type["CanStoreItems"] = &CanStoreItems;
             type["CanBankItem"] = &CanBankItem;
             type["CanEquipNewItem"] = &CanEquipNewItem;
@@ -1432,7 +1565,17 @@ namespace Eclipse
             type["StoreLootItem"] = &StoreLootItem;
             type["UpdateLootAchievements"] = &UpdateLootAchievements;
             type["UpdateTitansGrip"] = &UpdateTitansGrip;
-
+            type["AddRefundReference"] = &AddRefundReference;
+            type["DeleteRefundReference"] = &DeleteRefundReference;
+            type["FindEquipSlot"] = &FindEquipSlot;
+            type["ApplyEquipCooldown"] = &ApplyEquipCooldown;
+            type["RemoveAmmo"] = &RemoveAmmo;
+            type["CheckAmmoCompatibility"] = &CheckAmmoCompatibility;
+            type["QuickEquipItem"] = &QuickEquipItem;
+            type["VisualizeItem"] = &VisualizeItem;
+            type["BankItem"] = &BankItem;
+            type["RemoveItem"] = sol::overload(&RemoveItem, &RemoveItemSimple);
+            type["MoveItemFromInventory"] = &MoveItemFromInventory;
         }
     }
 }
