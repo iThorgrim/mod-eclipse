@@ -1,4 +1,5 @@
 #include "LuaCompiler.hpp"
+#include "EclipseLogger.hpp"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -10,10 +11,10 @@ namespace Eclipse
         std::ifstream file(filePath);
         if (!file.is_open())
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to open file: {}", filePath);
+            EclipseLogger::GetInstance().LogError("Failed to open file: " + filePath);
             return "";
         }
-        
+
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer.str();
@@ -26,7 +27,7 @@ namespace Eclipse
             sol::table moonscript = compilerState["require"]("moonscript");
             sol::function loadfile = moonscript["loadfile"];
             sol::object result = loadfile(moonFilePath);
-            
+
             if (result.valid())
             {
                 sol::function tostring = compilerState["tostring"];
@@ -34,7 +35,7 @@ namespace Eclipse
             }
             else
             {
-                LOG_ERROR("server.eclipse", "[Eclipse]: Failed to compile MoonScript file: {}", moonFilePath);
+                EclipseLogger::GetInstance().LogLuaCompilationError(moonFilePath, "Failed to compile MoonScript file");
                 return "";
             }
         }
@@ -50,7 +51,7 @@ namespace Eclipse
         try
         {
             lua_State* L = compilerState.lua_state();
-            
+
             int result = luaL_loadbuffer(L, luaSource.c_str(), luaSource.length(), chunkName.c_str());
             if (result != LUA_OK)
             {
@@ -59,28 +60,28 @@ namespace Eclipse
                 HandleCompilationError(chunkName, error);
                 return {};
             }
-            
+
             // Use lua_dump to get bytecode from compiled function
             struct BytecodeWriter {
                 std::vector<char> data;
             };
-            
+
             BytecodeWriter writer;
-            
+
             auto dumpWriter = [](lua_State* /*L*/, const void* p, size_t sz, void* ud) -> int {
                 BytecodeWriter* w = static_cast<BytecodeWriter*>(ud);
                 const char* bytes = static_cast<const char*>(p);
                 w->data.insert(w->data.end(), bytes, bytes + sz);
                 return 0;
             };
-            
+
             if (lua_dump(L, dumpWriter, &writer, 0) != 0)
             {
                 lua_pop(L, 1);
                 HandleCompilationError(chunkName, "Failed to dump bytecode");
                 return {};
             }
-            
+
             lua_pop(L, 1); // Remove the function from stack
             return writer.data;
         }
@@ -95,7 +96,7 @@ namespace Eclipse
     {
         if (!std::filesystem::exists(filePath))
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Script file not found: {}", filePath);
+            EclipseLogger::GetInstance().LogScriptNotFound(filePath, false);
             return {};
         }
 
@@ -124,16 +125,16 @@ namespace Eclipse
             std::ifstream file(filePath, std::ios::binary);
             if (!file.is_open())
             {
-                LOG_ERROR("server.eclipse", "[Eclipse]: Failed to open precompiled file: {}", filePath);
+                EclipseLogger::GetInstance().LogError("Failed to open precompiled file: " + filePath);
                 return {};
             }
-            
+
             std::vector<char> bytecode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             return bytecode;
         }
         else
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Unsupported script file extension: {}", extension);
+            EclipseLogger::GetInstance().LogError("Unsupported script file extension: " + extension);
             return {};
         }
 
@@ -142,6 +143,6 @@ namespace Eclipse
 
     void LuaCompiler::HandleCompilationError(const std::string& source, const std::string& error)
     {
-        LOG_ERROR("server.eclipse", "[Eclipse]: Compilation failed for '{}': {}", source, error);
+        EclipseLogger::GetInstance().LogLuaCompilationError(source, error);
     }
 }

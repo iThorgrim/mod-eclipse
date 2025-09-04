@@ -17,7 +17,7 @@ namespace Eclipse
         static std::vector<char> CompileTobytecode(sol::state& compilerState, const std::string& luaSource, const std::string& chunkName = "chunk");
         static std::string CompileMoonScriptToLua(sol::state& compilerState, const std::string& moonFilePath);
         static std::string ReadFileContent(const std::string& filePath);
-        
+
         // Full compilation chain for different file types
         static std::vector<char> CompileFileTobytecode(sol::state& compilerState, const std::string& filePath);
 

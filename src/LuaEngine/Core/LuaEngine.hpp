@@ -40,17 +40,12 @@ namespace Eclipse
         std::string scriptsDirectory;
         int32 stateMapId; // -1 = global/world state, >=0 = specific map
         std::unique_ptr<class EventManager> eventManager;
-        
+
         void RegisterBindings();
         void ShutdownComponents();
         void ClearStateData();
         void LoadScriptsForState();
         bool LoadCachedScriptsFromGlobalState();
-        
-        // Helper methods
-        static std::pair<uint32, std::string> FormatDuration(uint32 microseconds);
-        void LogScriptLoadStats(const LoadStatistics& stats) const;
-        void LogCacheLoadStats(size_t scriptCount, uint32 durationUs) const;
     };
 }
 

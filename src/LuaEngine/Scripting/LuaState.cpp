@@ -15,7 +15,7 @@ namespace Eclipse
         {
             luaState = sol::state();
             OpenStandardLibraries();
-            
+
             isInitialized = true;
             LOG_TRACE("server.eclipse", "[Eclipse]: LuaState initialized successfully");
             return true;

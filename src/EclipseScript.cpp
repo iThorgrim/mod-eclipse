@@ -7,6 +7,7 @@
 #include "EclipseCreatureAI.hpp"
 #include "Events.hpp"
 #include "EclipseConfig.hpp"
+#include "EclipseLogger.hpp"
 
 class Eclipse_WorldScript : public WorldScript
 {
@@ -23,30 +24,34 @@ public:
 
         if (Eclipse::EclipseConfig::GetInstance().IsEclipseEnabled() && !reload)
         {
-            LOG_INFO("server.eclipse", "[Eclipse]: Initialize Eclipse Engine...");
-            LOG_INFO("server.eclipse", "[Eclipse]: Searching scripts from `lua_scripts`");
+            Eclipse::EclipseLogger::GetInstance().LogEngineStartup();
+            Eclipse::EclipseLogger::GetInstance().LogInfo("Searching scripts from `lua_scripts`");
 
             // Create global state (-1) early - required for other states
             auto* globalEngine = Eclipse::MapStateManager::GetInstance().GetGlobalState();
             
             if (globalEngine)
             {
-                LOG_INFO("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine initialized");
+                Eclipse::EclipseLogger::GetInstance().LogInfo("Eclipse Global Lua Engine initialized");
             }
             else
             {
-                LOG_ERROR("server.eclipse", "[Eclipse]: Eclipse Global Lua Engine failed to initialize");
+                Eclipse::EclipseLogger::GetInstance().LogError("Eclipse Global Lua Engine failed to initialize");
             }
         }
     }
 
     void OnShutdown() override
     {
-        LOG_INFO("server.eclipse", "[Eclipse]: Shutting down Eclipse Engine...");
+        Eclipse::EclipseLogger::GetInstance().LogEngineShutdown();
     }
 
     void OnStartup() override
     {
+        if (Eclipse::EclipseConfig::GetInstance().IsEclipseEnabled())
+        {
+            Eclipse::EclipseLogger::GetInstance().LogTotalInitializationTime();
+        }
     }
 };
 

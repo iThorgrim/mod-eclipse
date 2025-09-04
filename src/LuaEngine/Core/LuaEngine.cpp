@@ -7,6 +7,7 @@
 #include "LuaCompiler.hpp"
 #include "LuaCache.hpp"
 #include "LuaPathManager.hpp"
+#include "EclipseLogger.hpp"
 #include <filesystem>
 #include <mutex>
 #include <chrono>
@@ -30,6 +31,7 @@ namespace Eclipse
         if (isInitialized)
             return true;
 
+        auto startTime = std::chrono::high_resolution_clock::now();
         stateMapId = mapId;
 
         try
@@ -38,18 +40,25 @@ namespace Eclipse
             {
                 throw std::runtime_error("Failed to initialize LuaState");
             }
-            
+
             RegisterBindings();
-            
+
             isInitialized = true;
-            
+
             LoadScriptsForState();
-            
+
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+
+            // Add this state's initialization time to the total
+            EclipseLogger::GetInstance().AddStateInitializationTime(duration.count());
+
             return true;
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to initialize Eclipse Lua Engine: {}", e.what());
+            EclipseLogger::GetInstance().LogStateInitialization(mapId, false);
+            EclipseLogger::GetInstance().LogError("Failed to initialize Eclipse Lua Engine: " + std::string(e.what()));
             return false;
         }
     }
@@ -67,19 +76,19 @@ namespace Eclipse
     {
         if (!isInitialized)
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Cannot load script: Engine not initialized");
+            EclipseLogger::GetInstance().LogError("Cannot load script: Engine not initialized");
             return false;
         }
 
         if (ScriptLoader::LoadScript(GetState(), GetGlobalCompilerState(), scriptPath))
         {
             loadedScripts.push_back(scriptPath);
-            LOG_DEBUG("server.eclipse", "[Eclipse]: Loaded script: {}", scriptPath);
+            EclipseLogger::GetInstance().LogScriptLoad(scriptPath, true);
             return true;
         }
         else
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to load script: {}", scriptPath);
+            EclipseLogger::GetInstance().LogScriptLoad(scriptPath, false);
             return false;
         }
     }
@@ -88,15 +97,15 @@ namespace Eclipse
     {
         if (!isInitialized)
             return;
-        
+
         int32 mapId = GetStateMapId();
-        
+
         // Invalide the cache to force recompilation of modified scripts
         if (mapId == -1)
         {
             // Global state: clear all cache to force recompilation
             LuaCache::GetInstance().InvalidateAllScripts();
-            LOG_DEBUG("server.eclipse", "[Eclipse]: Cleared all cached scripts for reload");
+            EclipseLogger::GetInstance().LogDebug("Cleared all cached scripts for reload");
         }
 
         // Clear current scripts without destroying the state
@@ -106,7 +115,7 @@ namespace Eclipse
         luaState.Reset();
         if (!luaState.Initialize())
         {
-            LOG_ERROR("server.eclipse", "[Eclipse]: Failed to reinitialize LuaState during reload");
+            EclipseLogger::GetInstance().LogError("Failed to reinitialize LuaState during reload");
             return;
         }
 
@@ -115,7 +124,7 @@ namespace Eclipse
         // Reload scripts
         LoadScriptsForState();
 
-        LOG_INFO("server.eclipse", "[Eclipse]: Scripts reloaded for state {}", stateMapId);
+        EclipseLogger::GetInstance().LogStateReload(stateMapId);
     }
 
     void LuaEngine::ProcessMessages()
@@ -133,63 +142,64 @@ namespace Eclipse
 
         // Clear all events for this state
         if (eventManager) eventManager->ClearAllEvents();
-        
+
         // Clear loaded scripts
         loadedScripts.clear();
-        
+
         // Reset Lua state
         luaState.Reset();
-        
-        LOG_DEBUG("server.eclipse", "[Eclipse]: LuaEngine components shutdown for map {}", stateMapId);
+
+        EclipseLogger::GetInstance().LogStateShutdown(stateMapId);
     }
-    
+
     sol::state& LuaEngine::GetGlobalCompilerState()
     {
         static std::unique_ptr<sol::state> globalState;
-        
+
         if (!globalState)
         {
             globalState = std::make_unique<sol::state>();
             globalState->open_libraries();
-            
+
             // Initialize paths once and apply to global state
             LuaPathManager::GetInstance().InitializeDefaultPaths();
             LuaPathManager::GetInstance().ApplyPaths(*globalState);
-            LOG_DEBUG("server.eclipse", "[Eclipse]: Global compiler state created and paths applied");
+            EclipseLogger::GetInstance().LogDebug("Global compiler state created and paths applied");
         }
-        
+
         return *globalState;
     }
-    
+
     void LuaEngine::RegisterBindings()
     {
         auto& state = luaState.GetState();
-        
+
         // Ensure paths are initialized before applying
         LuaPathManager::GetInstance().InitializeDefaultPaths();
-        
+
         // Apply pre-computed paths to this state
         LuaPathManager::GetInstance().ApplyPaths(state);
-        LOG_DEBUG("server.eclipse", "[Eclipse]: Applied paths to state {}", stateMapId);
-        
+        EclipseLogger::GetInstance().LogDebug("Applied paths to state " + std::to_string(stateMapId));
+
         Methods::RegisterAll(state);
         GlobalMethods::Register(this, state);
 
         if (eventManager)
             eventManager->Register(state);
     }
-    
+
     bool LuaEngine::LoadCachedScriptsFromGlobalState()
     {
         auto& cache = LuaCache::GetInstance();
         auto cachedScripts = cache.GetAllCachedScripts();
-        
+
         if (cachedScripts.empty())
         {
-            LOG_WARN("server.eclipse", "[Eclipse]: No cached scripts found for state {}. Global state (-1) may not be initialized yet.", stateMapId);
+            // Silent return for map states when no scripts are cached yet
+            // This is normal behavior when global state hasn't compiled scripts yet
             return false;
         }
-        
+
         int successCount = 0;
         for (const auto& scriptPath : cachedScripts)
         {
@@ -203,70 +213,44 @@ namespace Eclipse
                 }
                 else
                 {
-                    LOG_ERROR("server.eclipse", "[Eclipse]: Failed to load cached script '{}' into state {}", scriptPath, stateMapId);
+                    EclipseLogger::GetInstance().LogLuaError(scriptPath, "Failed to load cached script into state " + std::to_string(stateMapId));
                 }
             }
         }
-        
+
         return successCount > 0;
     }
-    
+
     void LuaEngine::ClearStateData()
     {
         MessageManager::GetInstance().ClearStateHandlers(stateMapId);
         if (eventManager) eventManager->ClearAllEvents();
         loadedScripts.clear();
     }
-    
+
     void LuaEngine::LoadScriptsForState()
     {
         LoadStatistics stats;
         if (stateMapId == -1)
         {
             // Global compiler state: discover and compile all scripts
-            LOG_DEBUG("server.eclipse", "[Eclipse]: Global state (-1): Sequential compilation");
+            EclipseLogger::GetInstance().LogDebug("Global state (-1): Sequential compilation");
             ScriptLoader::LoadDirectory(GetState(), GetGlobalCompilerState(), scriptsDirectory, loadedScripts, &stats);
         }
         else
         {
             // Specific states: load from pre-compiled cache only
-            LOG_DEBUG("server.eclipse", "[Eclipse]: State {}: Loading pre-compiled scripts from cache", stateMapId);
+            EclipseLogger::GetInstance().LogDebug("State " + std::to_string(stateMapId) + ": Loading pre-compiled scripts from cache");
 
             auto startTime = std::chrono::high_resolution_clock::now();
             LoadCachedScriptsFromGlobalState();
             auto endTime = std::chrono::high_resolution_clock::now();
 
-            stats.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
-            stats.durationMs = stats.durationUs * 1000;
+            stats.duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
             stats.compiled = 0;
             stats.cached = loadedScripts.size();
             stats.precompiled = 0;
         }
-        LogScriptLoadStats(stats);
-    }
-
-    std::pair<uint32, std::string> LuaEngine::FormatDuration(uint32 microseconds)
-    {
-        if (microseconds >= 1000)
-        {
-            uint32 milliseconds = microseconds / 1000;
-            return {milliseconds, "ms"};
-        }
-        return {microseconds, "μs"};
-    }
-
-    void LuaEngine::LogScriptLoadStats(const LoadStatistics& stats) const
-    {
-        uint32 displayDuration = (stats.durationUs > 0) ? stats.durationUs : (stats.durationMs * 1000);
-        auto [duration, unit] = FormatDuration(displayDuration);
-        LOG_INFO("server.eclipse", "[Eclipse]: Loaded {} scripts ({} compiled, {} cached, {} pre-compiled) in {}{} for state {}",
-            stats.GetSuccessful(), stats.compiled, stats.cached, stats.precompiled, duration, unit, stateMapId);
-    }
-
-    void LuaEngine::LogCacheLoadStats(size_t scriptCount, uint32 durationUs) const
-    {
-        auto [duration, unit] = FormatDuration(durationUs);
-        LOG_INFO("server.eclipse", "[Eclipse]: Loaded {} cached scripts in {}{} for state {}", 
-            scriptCount, duration, unit, stateMapId);
+        EclipseLogger::GetInstance().LogLoadStatistics(stateMapId, stats.GetSuccessful(), stats.compiled, stats.cached, stats.precompiled, stats.duration);
     }
 }
