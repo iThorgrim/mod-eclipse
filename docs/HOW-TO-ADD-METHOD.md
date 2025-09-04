@@ -193,30 +193,46 @@ Sometimes C++ methods aren't Lua-friendly. That's where wrapper functions save t
 ### Problem: Primitive Output Parameters
 
 ```cpp
-// C++ Method: InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemContainer& dest, uint32 entry, uint32 count, uint32* no_space_count) const;
+// C++ Method: InventoryResult CanStoreNewItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, uint32* no_space_count) const;
 ```
 
-**Problem:** Lua can't handle `uint32*` parameters.
+**Problem:** Lua can't handle `uint32*` parameters or `ItemPosCountVec&` references.
 
 **Solution:** Create a wrapper that returns a tuple:
 
 ```cpp
-std::tuple<InventoryResult, uint32> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count)
+/**
+ *
+ */
+std::tuple<InventoryResult, uint32, sol::table> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, sol::this_state s)
 {
+    sol::state_view lua(s);
+    ItemPosCountVec dest;
     uint32 no_space_count = 0;
     InventoryResult result = player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count);
-    return std::make_tuple(result, no_space_count);
+    
+    sol::table dest_table = lua.create_table();
+    for (size_t i = 0; i < dest.size(); ++i) {
+        sol::table pos_info = lua.create_table();
+        pos_info["pos"] = dest[i].pos;
+        pos_info["count"] = dest[i].count;
+        dest_table[i + 1] = pos_info;
+    }
+    
+    return std::make_tuple(result, no_space_count, dest_table);
 }
-};
 
 type["CanStoreNewItem"] = &CanStoreNewItem;
 ```
 
 **Lua Usage:**
 ```lua
-local result, no_space = player:CanStoreNewItem(bag, slot, dest, entry, count)
+local result, no_space, dest_table = player:CanStoreNewItem(bag, slot, entry, count)
 if result == SUCCESS then
-    print("Success!")
+    print("Success! Found " .. #dest_table .. " positions")
+    for i, pos_info in ipairs(dest_table) do
+        print("Position " .. i .. ": pos=" .. pos_info.pos .. ", count=" .. pos_info.count)
+    end
 else
     print("Failed! No space for " .. no_space .. " items")
 end
@@ -233,6 +249,9 @@ end
 **Solution:** Use vector conversion:
 
 ```cpp
+/**
+ *
+ */
 InventoryResult CanStoreItems(Player* player, const std::vector<Item*>& items, int count)
 {
     std::vector<Item*> item_ptrs = items;
@@ -245,7 +264,142 @@ type["CanStoreItems"] = &CanStoreItems;
 **Lua Usage:**
 ```lua
 local items = {item1, item2, item3}
-local result = player:ProcessItems(items, 3)
+local result = player:CanStoreItems(items, 3)
+```
+
+### Problem: ItemPosCountVec Reference Parameters
+
+```cpp
+// C++ Method: InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
+```
+
+**Problem:** Lua can't handle `ItemPosCountVec&` reference parameters (output parameters).
+
+**Solution:** Remove reference parameter and return tuple with destination data:
+
+```cpp
+/**
+ *
+ */
+std::tuple<InventoryResult, sol::table> CanBankItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, bool not_loading, sol::this_state s)
+{
+    sol::state_view lua(s);
+    ItemPosCountVec dest;
+    InventoryResult result = player->CanBankItem(bag, slot, dest, pItem, swap, not_loading);
+    
+    sol::table dest_table = lua.create_table();
+    for (size_t i = 0; i < dest.size(); ++i) {
+        sol::table pos_info = lua.create_table();
+        pos_info["pos"] = dest[i].pos;
+        pos_info["count"] = dest[i].count;
+        dest_table[i + 1] = pos_info;
+    }
+    
+    return std::make_tuple(result, dest_table);
+}
+
+type["CanBankItem"] = &CanBankItem;
+```
+
+**Lua Usage:**
+```lua
+local result, dest_table = player:CanBankItem(bag, slot, item, false, true)
+if result == SUCCESS then
+    print("Can bank item! Destinations:")
+    for i, pos_info in ipairs(dest_table) do
+        print("Slot " .. i .. ": pos=" .. pos_info.pos .. ", count=" .. pos_info.count)
+    end
+end
+```
+
+### Problem: ItemPosCountVec Input Parameters
+
+```cpp
+// C++ Method: Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update);
+```
+
+**Problem:** Lua can't create `ItemPosCountVec` directly.
+
+**Solution:** Accept Lua table and convert to ItemPosCountVec:
+
+```cpp
+/**
+ *
+ */
+Item* StoreItem(Player* player, sol::table pos_table, Item* pItem, bool update, sol::this_state s)
+{
+    sol::state_view lua(s);
+    ItemPosCountVec pos;
+    for (auto& pair : pos_table) {
+        if (pair.second.is<sol::table>()) {
+            sol::table pos_info = pair.second;
+            uint16 pos_val = pos_info["pos"];
+            uint32 count_val = pos_info["count"];
+            pos.push_back(ItemPosCount(pos_val, count_val));
+        }
+    }
+    
+    return player->StoreItem(pos, pItem, update);
+}
+
+type["StoreItem"] = &StoreItem;
+```
+
+**Lua Usage:**
+```lua
+local pos_table = {
+    {pos = 23, count = 1},
+    {pos = 24, count = 2}
+}
+local stored_item = player:StoreItem(pos_table, item, true)
+```
+
+### Problem: Complex Type Sets (AllowedLooterSet)
+
+```cpp
+// C++ Method: Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet& allowedLooters);
+// Where: typedef std::set<ObjectGuid> AllowedLooterSet;
+```
+
+**Problem:** Lua can't create `std::set<ObjectGuid>` directly.
+
+**Solution:** Accept Lua table and convert to set:
+
+```cpp
+/**
+ *
+ */
+Item* StoreNewItemWithAllowedLooters(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::table allowedLooters_table, sol::this_state s)
+{
+    sol::state_view lua(s);
+    ItemPosCountVec pos;
+    for (auto& pair : pos_table) {
+        if (pair.second.is<sol::table>()) {
+            sol::table pos_info = pair.second;
+            uint16 pos_val = pos_info["pos"];
+            uint32 count_val = pos_info["count"];
+            pos.push_back(ItemPosCount(pos_val, count_val));
+        }
+    }
+    
+    AllowedLooterSet allowedLooters;
+    for (auto& pair : allowedLooters_table) {
+        if (pair.second.is<ObjectGuid>()) {
+            allowedLooters.insert(pair.second.as<ObjectGuid>());
+        }
+    }
+    
+    return player->StoreNewItem(pos, item, update, randomPropertyId, allowedLooters);
+}
+
+type["StoreNewItemWithAllowedLooters"] = &StoreNewItemWithAllowedLooters;
+```
+
+**Lua Usage:**
+```lua
+local pos_table = {{pos = 23, count = 1}}
+local looters = {player1_guid, player2_guid, player3_guid}
+local item = player:StoreNewItemWithAllowedLooters(pos_table, item_id, true, 0, looters)
 ```
 
 ## 🌟 Examples from the Wild
@@ -359,6 +513,36 @@ bool HasItem(Player* player, uint32 item, uint32 count, bool includeBank)
 }
 ```
 
+#### ItemPosCount constructor error
+**Problem:** `ItemPosCount` has no default constructor.
+```cpp
+// ❌ Wrong - no default constructor
+ItemPosCount ipc;
+ipc.pos = pos_val;
+ipc.count = count_val;
+
+// ✅ Correct - use constructor with parameters
+uint16 pos_val = pos_info["pos"];
+uint32 count_val = pos_info["count"];
+pos.push_back(ItemPosCount(pos_val, count_val));
+```
+
+#### void function return statement
+**Problem:** Using `return` in void functions.
+```cpp
+// ❌ Wrong - void function with return
+void UpdateTitansGrip(Player* player)
+{
+    return player->UpdateTitansGrip();  // Wrong!
+}
+
+// ✅ Correct - no return for void functions
+void UpdateTitansGrip(Player* player)
+{
+    player->UpdateTitansGrip();
+}
+```
+
 ## ✨ Best Practices
 
 ### 1. 📝 Document Your Methods
@@ -422,7 +606,18 @@ Always test your wrapper functions with simple Lua scripts:
 -- Test script
 print("Player level: " .. player:GetLevel())
 print("Player is GM: " .. tostring(player:IsGameMaster()))
-print("Player can store item: " .. tostring(player:CanStoreItem(255, 0, {}, someItem, false)))
+
+-- Test methods with output parameters
+local result, dest_table = player:CanBankItem(255, 255, item, false, true)
+print("Can bank result: " .. result)
+if #dest_table > 0 then
+    print("Found " .. #dest_table .. " possible positions")
+end
+
+-- Test methods with input tables
+local pos_table = {{pos = 23, count = 1}}
+local stored = player:StoreItem(pos_table, item, true)
+print("Stored item: " .. tostring(stored ~= nil))
 ```
 
 ### 5. 📂 File Organization
@@ -452,6 +647,36 @@ Keep method bindings organized in dedicated files:
 - ✅ Static methods - use `(void)player;` and `Player::Method()` call  
 - ✅ Overloaded methods - create descriptively named wrappers
 - ✅ Complex signatures - wrapper functions handle any complexity
+- ✅ **Reference parameters** - convert to return tuples or input tables
+- ✅ **Output parameters** - return as tuple values
+- ✅ **Complex C++ types** - convert from/to Lua tables
+- ✅ **Default parameters** - remove defaults, make explicit in wrapper
+
+### Important: sol::this_state Usage
+
+**When you need to create Lua tables in wrapper functions:**
+
+```cpp
+/**
+ *
+ */
+std::tuple<ReturnType, sol::table> MethodName(Player* player, params..., sol::this_state s)
+{
+    sol::state_view lua(s);  // Get Lua state
+    
+    // Call C++ method
+    OutputType output_data;
+    ReturnType result = player->Method(params..., output_data);
+    
+    // Convert output to Lua table
+    sol::table lua_table = lua.create_table();
+    // ... fill table ...
+    
+    return std::make_tuple(result, lua_table);
+}
+```
+
+**Note:** `sol::this_state s` is automatically provided by Sol2 - the Lua developer never passes this parameter!
 
 ## 🎉 Congratulations!
 
