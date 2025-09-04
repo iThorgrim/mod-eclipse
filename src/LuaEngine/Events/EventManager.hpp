@@ -104,10 +104,10 @@ namespace Eclipse
     bool EventManager::TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
     {
         static_assert(sizeof...(args) > 0, "At least one argument required");
-        
+
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
-        auto& eventContainer = GetEventContainer<eventType>();
-        
+        auto& eventContainer = events[eventType];
+
         auto it = eventContainer.find(eventId);
         if (it == eventContainer.end())
         {
@@ -116,7 +116,7 @@ namespace Eclipse
         }
 
         const auto& callbacks = it->second;
-        
+
         // Check all callbacks - if any returns false, block the action
         for (const auto& callback : callbacks)
         {
@@ -125,7 +125,7 @@ namespace Eclipse
                 try
                 {
                     sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
-                    
+
                     // Fast path: check if result is valid and boolean in one go
                     if (result.valid() && result.get_type() == sol::type::boolean)
                     {
@@ -144,7 +144,7 @@ namespace Eclipse
                 }
             }
         }
-        
+
         // All callbacks either returned true or nothing - allow the action
         return true;
     }
@@ -153,12 +153,19 @@ namespace Eclipse
     bool EventManager::HasCallbacksFor(uint32 eventId) const
     {
         static_assert(sizeof...(Args) > 0, "At least one argument required");
-        
+
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
-        const auto& eventContainer = const_cast<EventManager*>(this)->GetEventContainer<eventType>();
         
-        auto it = eventContainer.find(eventId);
-        return (it != eventContainer.end() && !it->second.empty());
+        auto typeIt = events.find(eventType);
+        if (typeIt == events.end())
+        {
+            return false;
+        }
+        
+        const auto& eventContainer = typeIt->second;
+
+        auto eventIt = eventContainer.find(eventId);
+        return (eventIt != eventContainer.end() && !eventIt->second.empty());
     }
 
     template<EventType Type>
