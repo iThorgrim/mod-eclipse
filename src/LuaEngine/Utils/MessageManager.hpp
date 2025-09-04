@@ -31,8 +31,6 @@ namespace Eclipse
         void RegisterMessageEvent(int32 stateId, const std::string& messageType, sol::function callback);
         void ProcessMessages(int32 stateId);
         void ClearStateHandlers(int32 stateId);
-        void RegisterBindings(sol::state& lua, int32 stateId);
-
 
     private:
         MessageManager() = default;

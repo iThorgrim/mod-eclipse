@@ -19,18 +19,20 @@ namespace Eclipse
         bool Initialize(int32 mapId = -1);
         void Shutdown();
         void ReloadScripts();
-        
+
         int32 GetStateMapId() const { return stateMapId; }
-        
+
         bool LoadScript(const std::string& scriptPath);
-        
+
         // Access to global compiler state (state -1)
         static sol::state& GetGlobalCompilerState();
-        
+
         sol::state& GetState() { return luaState.GetState(); }
         class EventManager* GetEventManager() const noexcept { return eventManager.get(); }
-        
+
         void ProcessMessages();
+
+        void ClearAllEvents();
 
 
     private:

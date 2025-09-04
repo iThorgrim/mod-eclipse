@@ -13,8 +13,6 @@ namespace Eclipse
     {
         StateMessage message(fromStateId, toStateId, messageType, data);
         messageQueue[toStateId].push_back(message);
-        
-        
         ProcessMessages(toStateId);
     }
 
@@ -35,16 +33,15 @@ namespace Eclipse
         {
             return;
         }
-        
+
         auto& messages = queueIt->second;
-        
+
         for (const auto& message : messages)
         {
             DeliverMessage(message);
         }
-        
+
         messages.clear();
-        // Note: shrink_to_fit() removed - too expensive for frequent operations
     }
 
     void MessageManager::DeliverMessage(const StateMessage& message)
@@ -54,13 +51,13 @@ namespace Eclipse
         {
             return;
         }
-        
+
         auto typeIt = stateIt->second.find(message.messageType);
         if (typeIt == stateIt->second.end())
         {
             return;
         }
-        
+
         for (auto& handler : typeIt->second)
         {
             try
@@ -75,7 +72,7 @@ namespace Eclipse
                 LOG_ERROR("server.eclipse", "[Eclipse]: Error in message handler: {}", e.what());
             }
         }
-        
+
     }
 
     void MessageManager::ClearStateHandlers(int32 stateId)
@@ -83,4 +80,5 @@ namespace Eclipse
         messageHandlers.erase(stateId);
         messageQueue.erase(stateId);
     }
+
 }

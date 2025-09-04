@@ -15,47 +15,42 @@ namespace Eclipse
         ~EventManager() = default;
         EventManager(const EventManager&) = delete;
         EventManager& operator=(const EventManager&) = delete;
-        
+
         template<EventType Type>
         void RegisterEvent(uint32 eventId, sol::function callback);
-        
+
         template<typename... Args>
         void TriggerEvent(uint32 eventId, Args&&... args);
-        
+
         template<typename... Args>
         bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args);
-        
+
         template<typename... Args>
         bool HasCallbacksFor(uint32 eventId) const;
-        
+
         template<EventType Type>
         void ClearEvents();
-        
+
         template<EventType Type>
         void RegisterKeyedEvent(uint32 objectId, uint32 eventId, sol::function callback);
-        
+
         template<EventType Type, typename... Args>
         void TriggerKeyedEvent(uint32 objectId, uint32 eventId, Args&&... args);
-        
+
         template<EventType Type>
         void ClearKeyedEvents();
-        
+
         template<EventType Type>
         bool HasKeyedEvents(uint32 objectId) const;
-        
-        void ClearAllEvents();
-        void Register(sol::state& lua);
-        
+
+
     private:
         std::unordered_map<EventType, std::unordered_map<uint32, std::vector<sol::function>>> events;
         std::unordered_map<EventType, std::unordered_map<uint32, std::unordered_map<uint32, std::vector<sol::function>>>> keyedEvents;
-        
-        template<typename CallbackContainer>
-        PooledVector<sol::function> CollectCallbacks(const CallbackContainer& container) const;
-        
+
         template<EventType Type>
         auto& GetEventContainer();
-        
+
         template<EventType Type>
         auto& GetKeyedEventContainer();
     };
@@ -84,10 +79,10 @@ namespace Eclipse
     void EventManager::TriggerEvent(uint32 eventId, Args&&... args)
     {
         static_assert(sizeof...(args) > 0, "At least one argument required");
-        
+
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
         auto& eventContainer = GetEventContainer<eventType>();
-        
+
         auto it = eventContainer.find(eventId);
         if (it != eventContainer.end())
         {
@@ -97,7 +92,7 @@ namespace Eclipse
                 {
                     try
                     {
-                        callback(std::forward<Args>(args)...);
+                        callback(eventId, std::forward<Args>(args)...);
                     }
                     catch (const std::exception&) {}
                 }
@@ -129,7 +124,7 @@ namespace Eclipse
             {
                 try
                 {
-                    sol::protected_function_result result = callback(std::forward<Args>(args)...);
+                    sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
                     
                     // Fast path: check if result is valid and boolean in one go
                     if (result.valid() && result.get_type() == sol::type::boolean)
@@ -208,7 +203,7 @@ namespace Eclipse
                     {
                         try
                         {
-                            callback(std::forward<Args>(args)...);
+                            callback(eventId, std::forward<Args>(args)...);
                         }
                         catch (const std::exception&) {}
                     }

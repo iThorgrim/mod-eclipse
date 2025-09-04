@@ -135,13 +135,25 @@ namespace Eclipse
         }
     }
 
+    void LuaEngine::ClearAllEvents()
+    {
+        if (eventManager)
+        {
+            eventManager->ClearEvents<EventType::PLAYER>();
+            eventManager->ClearEvents<EventType::MAP>();
+            eventManager->ClearKeyedEvents<EventType::CREATURE>();
+            eventManager->ClearKeyedEvents<EventType::GAMEOBJECT>();
+            eventManager->ClearKeyedEvents<EventType::ITEM>();
+        }
+    }
+
     void LuaEngine::ShutdownComponents()
     {
         // Clean up message handlers for this state
         MessageManager::GetInstance().ClearStateHandlers(stateMapId);
 
         // Clear all events for this state
-        if (eventManager) eventManager->ClearAllEvents();
+        ClearAllEvents();
 
         // Clear loaded scripts
         loadedScripts.clear();
@@ -183,9 +195,6 @@ namespace Eclipse
 
         Methods::RegisterAll(state);
         GlobalMethods::Register(this, state);
-
-        if (eventManager)
-            eventManager->Register(state);
     }
 
     bool LuaEngine::LoadCachedScriptsFromGlobalState()
@@ -224,7 +233,7 @@ namespace Eclipse
     void LuaEngine::ClearStateData()
     {
         MessageManager::GetInstance().ClearStateHandlers(stateMapId);
-        if (eventManager) eventManager->ClearAllEvents();
+        ClearAllEvents();
         loadedScripts.clear();
     }
 
