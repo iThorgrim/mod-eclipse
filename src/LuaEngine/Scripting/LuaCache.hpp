@@ -8,17 +8,18 @@
 #include <vector>
 #include <optional>
 #include <boost/filesystem.hpp>
+#include <chrono>
 
 namespace Eclipse
 {
     struct CacheEntry
     {
         std::vector<char> bytecode;
-        boost::filesystem::path::time_type lastWriteTime;
+        std::chrono::system_clock::time_point lastWriteTime;
         bool compilationSuccess = true;
 
         CacheEntry() = default;
-        CacheEntry(std::vector<char>&& data, boost::filesystem::path::time_type writeTime)
+        CacheEntry(std::vector<char>&& data, std::chrono::system_clock::time_point writeTime)
             : bytecode(std::move(data)), lastWriteTime(writeTime) {}
     };
 
@@ -48,7 +49,7 @@ namespace Eclipse
         std::unordered_map<std::string, CacheEntry> cache_;
 
         // Helper methods
-        boost::filesystem::path::time_type GetFileWriteTime(const std::string& filePath) const;
+        std::chrono::system_clock::time_point GetFileWriteTime(const std::string& filePath) const;
     };
 }
 

@@ -9,7 +9,7 @@ namespace Eclipse
         return instance;
     }
 
-    boost::filesystem::path::time_type LuaCache::GetFileWriteTime(const std::string& filePath) const
+    std::chrono::system_clock::time_point LuaCache::GetFileWriteTime(const std::string& filePath) const
     {
         boost::system::error_code ec;
         auto writeTime = boost::filesystem::last_write_time(filePath, ec);
@@ -17,10 +17,11 @@ namespace Eclipse
         if (ec)
         {
             LOG_ERROR("server.eclipse", "[Eclipse]: Failed to get write time for file {}: {}", filePath, ec.message());
-            return boost::filesystem::path::time_type();
+            return std::chrono::system_clock::time_point{};
         }
 
-        return writeTime;
+        // Convert boost time to chrono time_point
+        return std::chrono::system_clock::from_time_t(writeTime);
     }
 
     std::optional<std::vector<char>> LuaCache::GetBytecode(const std::string& filePath)
@@ -86,7 +87,7 @@ namespace Eclipse
         const auto& entry = it->second;
 
         auto currentWriteTime = GetFileWriteTime(filePath);
-        if (currentWriteTime == boost::filesystem::path::time_type() || currentWriteTime != entry.lastWriteTime)
+        if (currentWriteTime == std::chrono::system_clock::time_point{} || currentWriteTime != entry.lastWriteTime)
         {
             return true;
         }
