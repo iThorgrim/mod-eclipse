@@ -1,5 +1,5 @@
 diff --git a/modules/CMakeLists.txt b/modules/CMakeLists.txt
-index 46c9d5e16..ad682ecf1 100644
+index 46c9d5e16..f8256593c 100644
 --- a/modules/CMakeLists.txt
 +++ b/modules/CMakeLists.txt
 @@ -35,8 +35,8 @@ CU_GET_GLOBAL("AC_ADD_SCRIPTS_INCLUDE")
@@ -47,15 +47,17 @@ index 46c9d5e16..ad682ecf1 100644
  endif()
  
  add_library(modules STATIC
-@@ -277,7 +277,7 @@ add_library(modules STATIC
+@@ -277,8 +277,8 @@ add_library(modules STATIC
      ${SCRIPT_MODULE_PRIVATE_SCRIPTLOADER}
      ${PRIVATE_SOURCES_MODULES})
  
 -if (MOD_ELUNA_FOUND)
+-    target_link_libraries(modules PUBLIC lualib)
 +if (MOD_ECLIPSE_FOUND)
-     target_link_libraries(modules PUBLIC lualib)
++    target_link_libraries(modules PUBLIC lualib sol2::sol2)
  endif()
  
+ target_link_libraries(modules
 @@ -357,7 +357,7 @@ target_compile_options(modules
    INTERFACE
      -DCONFIG_FILE_LIST=$<1:"${CONFIG_LIST}">)
