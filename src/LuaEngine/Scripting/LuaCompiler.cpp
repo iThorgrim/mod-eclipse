@@ -8,16 +8,19 @@ namespace Eclipse
 {
     std::string LuaCompiler::ReadFileContent(const std::string& filePath)
     {
-        std::ifstream file(filePath);
+        std::ifstream file(filePath, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
             EclipseLogger::GetInstance().LogError("Failed to open file: " + filePath);
             return "";
         }
 
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        return buffer.str();
+        auto size = file.tellg();
+        std::string content(size, '\0');
+        file.seekg(0);
+        file.read(content.data(), size);
+
+        return content;
     }
 
     std::string LuaCompiler::CompileMoonScriptToLua(sol::state& compilerState, const std::string& moonFilePath)
@@ -64,6 +67,7 @@ namespace Eclipse
             // Use lua_dump to get bytecode from compiled function
             struct BytecodeWriter {
                 std::vector<char> data;
+                BytecodeWriter() { data.reserve(8192); }
             };
 
             BytecodeWriter writer;
@@ -129,7 +133,11 @@ namespace Eclipse
                 return {};
             }
 
-            std::vector<char> bytecode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            file.seekg(0, std::ios::end);
+            std::vector<char> bytecode;
+            bytecode.reserve(file.tellg());
+            file.seekg(0, std::ios::beg);
+            bytecode.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
             return bytecode;
         }
         else

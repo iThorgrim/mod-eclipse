@@ -15,12 +15,12 @@ namespace Eclipse
         std::vector<LuaEngine*> engines;
         engines.reserve(2);
 
-        auto& manager = MapStateManager::GetInstance();
+        static thread_local auto& manager = MapStateManager::GetInstance();
 
         auto* globalEngine = manager.GetGlobalState();
         if (globalEngine)
         {
-            engines.push_back(globalEngine);
+            engines.emplace_back(globalEngine);
         }
 
         if (object)
@@ -58,7 +58,7 @@ namespace Eclipse
 
                 if (mapEngine && mapEngine != globalEngine)
                 {
-                    engines.push_back(mapEngine);
+                    engines.emplace_back(mapEngine);
                 }
             }
         }
@@ -72,11 +72,11 @@ namespace Eclipse
         std::vector<LuaEngine*> engines;
         engines.reserve(1);
 
-        auto& manager = MapStateManager::GetInstance();
+        static thread_local auto& manager = MapStateManager::GetInstance();
         auto* globalEngine = manager.GetGlobalState();
         if (globalEngine)
         {
-            engines.push_back(globalEngine);
+            engines.emplace_back(globalEngine);
         }
 
         return engines;

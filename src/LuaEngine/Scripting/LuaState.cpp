@@ -32,9 +32,20 @@ namespace Eclipse
     {
         if (isInitialized)
         {
-            luaState = sol::state();
-            isInitialized = false;
-            LOG_TRACE("server.eclipse", "[Eclipse]: LuaState reset");
+            try {
+                luaState.collect_garbage();
+
+                luaState = sol::state();
+                OpenStandardLibraries();
+
+                isInitialized = false;
+                LOG_TRACE("server.eclipse", "[Eclipse]: LuaState reset (optimized with GC)");
+            }
+            catch (const std::exception& e) {
+                luaState = sol::state();
+                isInitialized = false;
+                LOG_TRACE("server.eclipse", "[Eclipse]: LuaState reset (fallback)");
+            }
         }
     }
 

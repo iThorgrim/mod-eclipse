@@ -11,77 +11,74 @@ namespace Eclipse
         return instance;
     }
 
-    void EclipseLogger::LogInfo(const std::string& message)
+    void EclipseLogger::LogInfo(std::string_view message)
     {
         LOG_INFO(LOG_CATEGORY, "[Eclipse]: {}", message);
     }
 
-    void EclipseLogger::LogWarn(const std::string& message)
+    void EclipseLogger::LogWarn(std::string_view message)
     {
         LOG_WARN(LOG_CATEGORY, "[Eclipse]: {}", message);
     }
 
-    void EclipseLogger::LogError(const std::string& message)
+    void EclipseLogger::LogError(std::string_view message)
     {
         LOG_ERROR(LOG_CATEGORY, "[Eclipse]: {}", message);
     }
 
-    void EclipseLogger::LogDebug(const std::string& message)
+    void EclipseLogger::LogDebug(std::string_view message)
     {
         LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: {}", message);
     }
 
-    void EclipseLogger::LogTrace(const std::string& message)
+    void EclipseLogger::LogTrace(std::string_view message)
     {
         LOG_TRACE(LOG_CATEGORY, "[Eclipse]: {}", message);
     }
 
-    void EclipseLogger::LogLuaError(const std::string& scriptPath, const std::string& error)
+    void EclipseLogger::LogLuaError(std::string_view scriptPath, std::string_view error)
     {
         std::string formattedPath = FormatScriptPath(scriptPath);
-        std::string message = "Lua Error in '" + formattedPath + "': " + error;
-        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: Lua Error in '{}': {}", formattedPath, error);
     }
 
-    void EclipseLogger::LogLuaCompilationError(const std::string& scriptPath, const std::string& error)
+    void EclipseLogger::LogLuaCompilationError(std::string_view scriptPath, std::string_view error)
     {
         std::string formattedPath = FormatScriptPath(scriptPath);
-        std::string message = "Compilation failed for '" + formattedPath + "': " + error;
-        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: Compilation failed for '{}': {}", formattedPath, error);
     }
 
-    void EclipseLogger::LogLuaExecutionError(const std::string& scriptPath, const std::string& error)
+    void EclipseLogger::LogLuaExecutionError(std::string_view scriptPath, std::string_view error)
     {
         std::string formattedPath = FormatScriptPath(scriptPath);
-        std::string message = "Execution failed for '" + formattedPath + "': " + error;
-        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_ERROR(LOG_CATEGORY, "[Eclipse]: Execution failed for '{}': {}", formattedPath, error);
     }
 
-    void EclipseLogger::LogScriptLoad(const std::string& scriptPath, bool success)
+    void EclipseLogger::LogScriptLoad(std::string_view scriptPath, bool success)
     {
         std::string formattedPath = FormatScriptPath(scriptPath);
         if (success)
         {
-            LogTrace("Successfully loaded script: " + formattedPath);
+            LOG_TRACE(LOG_CATEGORY, "[Eclipse]: Successfully loaded script: {}", formattedPath);
         }
         else
         {
-            LogError("Failed to load script: " + formattedPath);
+            LOG_ERROR(LOG_CATEGORY, "[Eclipse]: Failed to load script: {}", formattedPath);
         }
     }
 
-    void EclipseLogger::LogScriptReload(const std::string& scriptPath)
+    void EclipseLogger::LogScriptReload(std::string_view scriptPath)
     {
         std::string formattedPath = FormatScriptPath(scriptPath);
-        LogDebug("Reloading script: " + formattedPath);
+        LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Reloading script: {}", formattedPath);
     }
 
-    void EclipseLogger::LogScriptNotFound(const std::string& scriptPath, bool silent)
+    void EclipseLogger::LogScriptNotFound(std::string_view scriptPath, bool silent)
     {
         if (!silent)
         {
             std::string formattedPath = FormatScriptPath(scriptPath);
-            LogDebug("Script not found (ignored): " + formattedPath);
+            LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Script not found (ignored): {}", formattedPath);
         }
     }
 
@@ -91,17 +88,16 @@ namespace Eclipse
         {
             if (mapId == -1)
             {
-                LogInfo("Global compiler state (-1) initialized successfully");
+                LOG_INFO(LOG_CATEGORY, "[Eclipse]: Global compiler state (-1) initialized successfully");
             }
             else
             {
-                LogInfo("Map state " + std::to_string(mapId) + " initialized successfully");
+                LOG_INFO(LOG_CATEGORY, "[Eclipse]: Map state {} initialized successfully", mapId);
             }
         }
         else
         {
-            std::string message = "Failed to initialize state " + std::to_string(mapId);
-            LogError(message);
+            LOG_ERROR(LOG_CATEGORY, "[Eclipse]: Failed to initialize state {}", mapId);
         }
     }
 
@@ -109,43 +105,40 @@ namespace Eclipse
     {
         if (mapId == -1)
         {
-            LogDebug("Global compiler state (-1) shut down");
+            LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Global compiler state (-1) shut down");
         }
         else
         {
-            LogDebug("Map state " + std::to_string(mapId) + " shut down");
+            LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Map state {} shut down", mapId);
         }
     }
 
     void EclipseLogger::LogStateReload(int32 mapId)
     {
-        LogInfo("Scripts reloaded for state " + std::to_string(mapId));
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Scripts reloaded for state {}", mapId);
     }
 
     void EclipseLogger::LogLoadStatistics(int32 mapId, uint32 totalScripts, uint32 compiled, uint32 cached, uint32 precompiled, uint32 duration)
     {
         auto [formattedDuration, unit] = FormatDuration(duration);
-        std::string message = "Loaded " + std::to_string(totalScripts) + " scripts (" + std::to_string(compiled) + " compiled, " + std::to_string(cached) + " cached, " + std::to_string(precompiled) + " pre-compiled) in " + std::to_string(formattedDuration) + unit + " for state " + std::to_string(mapId);
-
-        LOG_INFO(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Loaded {} scripts ({} compiled, {} cached, {} pre-compiled) in {}{} for state {}", 
+                 totalScripts, compiled, cached, precompiled, formattedDuration, unit, mapId);
     }
 
     void EclipseLogger::LogCacheStatistics(size_t scriptCount, uint32 duration)
     {
         auto [formattedDuration, unit] = FormatDuration(duration);
-        std::string message = "Cache loaded " + std::to_string(scriptCount) + " scripts in " + std::to_string(formattedDuration) + unit;
-
-        LOG_INFO(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Cache loaded {} scripts in {}{}", scriptCount, formattedDuration, unit);
     }
 
     void EclipseLogger::LogEngineStartup()
     {
-        LogInfo("Eclipse Lua Engine starting up...");
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Eclipse Lua Engine starting up...");
     }
 
     void EclipseLogger::LogEngineShutdown()
     {
-        LogInfo("Eclipse Lua Engine shutting down...");
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Eclipse Lua Engine shutting down...");
     }
 
     void EclipseLogger::AddStateInitializationTime(uint32 microseconds)
@@ -156,23 +149,21 @@ namespace Eclipse
     void EclipseLogger::LogTotalInitializationTime()
     {
         auto [duration, unit] = FormatDuration(totalInitializationTimeUs);
-        std::string message = "Eclipse total initialization time: " + std::to_string(duration) + unit;
-
-        LOG_INFO(LOG_CATEGORY, "[Eclipse]: {}", message);
+        LOG_INFO(LOG_CATEGORY, "[Eclipse]: Eclipse total initialization time: {}{}", duration, unit);
         totalInitializationTimeUs = 0;
     }
 
-    void EclipseLogger::LogConfigurationApplied(const std::string& setting, const std::string& value)
+    void EclipseLogger::LogConfigurationApplied(std::string_view setting, std::string_view value)
     {
-        LogDebug("Configuration applied: " + setting + " = " + value);
+        LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Configuration applied: {} = {}", setting, value);
     }
 
     void EclipseLogger::LogPathsInitialized(size_t pathCount)
     {
-        LogDebug("Lua paths initialized (" + std::to_string(pathCount) + " paths)");
+        LOG_DEBUG(LOG_CATEGORY, "[Eclipse]: Lua paths initialized ({} paths)", pathCount);
     }
 
-    std::pair<uint32, std::string> EclipseLogger::FormatDuration(uint32 microseconds)
+    std::pair<uint32, std::string_view> EclipseLogger::FormatDuration(uint32 microseconds)
     {
         if (microseconds >= 1000)
         {
@@ -182,7 +173,7 @@ namespace Eclipse
         return {microseconds, "μs"};
     }
 
-    std::string EclipseLogger::FormatScriptPath(const std::string& fullPath)
+    std::string EclipseLogger::FormatScriptPath(std::string_view fullPath)
     {
         try
         {
@@ -191,7 +182,7 @@ namespace Eclipse
         }
         catch (...)
         {
-            return fullPath;
+            return std::string(fullPath);
         }
     }
 }

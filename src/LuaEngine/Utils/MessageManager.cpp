@@ -9,56 +9,88 @@ namespace Eclipse
         return instance;
     }
 
-    void MessageManager::SendMessage(int32 fromStateId, int32 toStateId, const std::string& messageType, sol::object data)
+    void MessageManager::SendMessage(int32 fromStateId, int32 toStateId, std::string messageType, sol::object data)
     {
-        StateMessage message(fromStateId, toStateId, messageType, data);
-        messageQueue[toStateId].push_back(message);
+        {
+            std::unique_lock<std::shared_mutex> lock(messageQueueMutex);
+            messageQueue[toStateId].emplace_back(fromStateId, toStateId, std::move(messageType), std::move(data));
+        }
         ProcessMessages(toStateId);
     }
 
-    void MessageManager::RegisterMessageEvent(int32 stateId, const std::string& messageType, sol::function callback)
+    void MessageManager::BroadcastMessage(int32 fromStateId, std::string messageType, sol::object data)
+    {
+        std::vector<int32> stateIds;
+        
+        {
+            std::shared_lock<std::shared_mutex> lock(messageHandlersMutex);
+            stateIds.reserve(messageHandlers.size());
+            for (const auto& [stateId, handlers] : messageHandlers) {
+                if (handlers.find(messageType) != handlers.end()) {
+                    stateIds.emplace_back(stateId);
+                }
+            }
+        }
+        
+        for (int32 stateId : stateIds) {
+            SendMessage(fromStateId, stateId, messageType, data);
+        }
+    }
+
+    void MessageManager::RegisterMessageEvent(int32 stateId, std::string messageType, sol::function callback)
     {
         if (callback.valid())
         {
-            auto& handlers = messageHandlers[stateId][messageType];
+            std::unique_lock<std::shared_mutex> lock(messageHandlersMutex);
+            auto& handlers = messageHandlers[stateId][std::move(messageType)];
             handlers.reserve(4);
-            handlers.push_back(callback);
+            handlers.emplace_back(std::move(callback));
         }
     }
 
     void MessageManager::ProcessMessages(int32 stateId)
     {
-        auto queueIt = messageQueue.find(stateId);
-        if (queueIt == messageQueue.end() || queueIt->second.empty())
+        std::vector<StateMessage> messagesToProcess;
+        
         {
-            return;
+            std::unique_lock<std::shared_mutex> lock(messageQueueMutex);
+            auto queueIt = messageQueue.find(stateId);
+            if (queueIt == messageQueue.end() || queueIt->second.empty())
+            {
+                return;
+            }
+            messagesToProcess = std::move(queueIt->second);
+            queueIt->second.clear();
         }
 
-        auto& messages = queueIt->second;
-
-        for (const auto& message : messages)
+        for (const auto& message : messagesToProcess)
         {
             DeliverMessage(message);
         }
-
-        messages.clear();
     }
 
     void MessageManager::DeliverMessage(const StateMessage& message)
     {
-        auto stateIt = messageHandlers.find(message.toStateId);
-        if (stateIt == messageHandlers.end())
+        std::vector<sol::function> handlersToCall;
+        
         {
-            return;
+            std::shared_lock<std::shared_mutex> lock(messageHandlersMutex);
+            auto stateIt = messageHandlers.find(message.toStateId);
+            if (stateIt == messageHandlers.end())
+            {
+                return;
+            }
+
+            auto typeIt = stateIt->second.find(message.messageType);
+            if (typeIt == stateIt->second.end())
+            {
+                return;
+            }
+            
+            handlersToCall = typeIt->second;
         }
 
-        auto typeIt = stateIt->second.find(message.messageType);
-        if (typeIt == stateIt->second.end())
-        {
-            return;
-        }
-
-        for (auto& handler : typeIt->second)
+        for (auto& handler : handlersToCall)
         {
             try
             {
@@ -72,13 +104,18 @@ namespace Eclipse
                 LOG_ERROR("server.eclipse", "[Eclipse]: Error in message handler: {}", e.what());
             }
         }
-
     }
 
     void MessageManager::ClearStateHandlers(int32 stateId)
     {
-        messageHandlers.erase(stateId);
-        messageQueue.erase(stateId);
+        {
+            std::unique_lock<std::shared_mutex> lock(messageHandlersMutex);
+            messageHandlers.erase(stateId);
+        }
+        {
+            std::unique_lock<std::shared_mutex> lock(messageQueueMutex);
+            messageQueue.erase(stateId);
+        }
     }
 
 }

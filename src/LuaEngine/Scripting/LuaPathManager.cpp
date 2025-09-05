@@ -11,36 +11,31 @@ namespace Eclipse
     void LuaPathManager::InitializeDefaultPaths()
     {
         if (initialized) return;
-        
+
         LOG_DEBUG("server.eclipse", "[Eclipse]: Initializing LuaPathManager with default paths");
-        
-        // Discover all lua_scripts directories
+
         DiscoverLuaScriptDirectories();
-        
-        // Add custom require paths from config
+
         AddConfigPaths();
-        
-        // Build final paths
+
         BuildPaths();
-        
+
         initialized = true;
-        
+
         LOG_DEBUG("server.eclipse", "[Eclipse]: LuaPathManager initialized. Lua path: {}", luaRequirePath);
         LOG_DEBUG("server.eclipse", "[Eclipse]: LuaPathManager C path: {}", luaRequireCPath);
     }
-    
+
     void LuaPathManager::DiscoverLuaScriptDirectories()
     {
         std::string currentPath = boost::filesystem::current_path().string();
         std::string luaScriptsPath = currentPath + "/lua_scripts";
-        
-        // Reuse existing script discovery to find all directories containing scripts
+
         auto scripts = ScriptLoader::DiscoverScripts(luaScriptsPath);
         auto directories = ScriptLoader::ExtractDirectoriesFromScripts(scripts);
-        
-        // Also add base lua_scripts directory
+
         directories.insert(luaScriptsPath);
-        
+
         for (const auto& dir : directories)
         {
             processedPaths.insert(dir);
@@ -69,10 +64,13 @@ namespace Eclipse
     {
         try
         {
-            // Replace default paths completely with our own
+            // lazy rebuild
+            if (pathsDirty) {
+                BuildPaths();
+            }
+
             lua["package"]["path"] = luaRequirePath;
             lua["package"]["cpath"] = luaRequireCPath;
-            
         }
         catch (const std::exception& e)
         {
@@ -89,6 +87,7 @@ namespace Eclipse
         customRequirePath.clear();
         customRequireCPath.clear();
         initialized = false;
+        pathsDirty = true;
     }
 
     bool LuaPathManager::HasPath(const std::string& path) const
@@ -108,36 +107,38 @@ namespace Eclipse
 
         for (const auto& path : processedPaths)
         {
-            if (!luaRequirePath.empty()) luaRequirePath += ";";
-            luaRequirePath += path + "/?.ext;" +
-                path + "/?.lua;" +
-                path + "/?.out;" +
-                path + "/?.moon;" +
-                path + "/?/init.lua";
-            
-            if (!luaRequireCPath.empty()) luaRequireCPath += ";";
-            luaRequireCPath += path + "/?.dll;" +
-                path + "/?.so";
+            if (!luaRequirePath.empty()) luaRequirePath.append(";");
+            luaRequirePath.append(path).append("/?.ext;")
+                          .append(path).append("/?.lua;")
+                          .append(path).append("/?.out;")
+                          .append(path).append("/?.moon;");
+
+            if (!luaRequireCPath.empty()) luaRequireCPath.append(";");
+            luaRequireCPath.append(path).append("/?.dll;")
+                           .append(path).append("/?.so");
         }
-        
+
         if (!customRequirePath.empty())
         {
-            if (!luaRequirePath.empty()) luaRequirePath += ";";
-            luaRequirePath += customRequirePath;
+            if (!luaRequirePath.empty()) luaRequirePath.append(";");
+            luaRequirePath.append(customRequirePath);
         }
-        
+
         if (!customRequireCPath.empty())
         {
-            if (!luaRequireCPath.empty()) luaRequireCPath += ";";
-            luaRequireCPath += customRequireCPath;
+            if (!luaRequireCPath.empty()) luaRequireCPath.append(";");
+            luaRequireCPath.append(customRequireCPath);
         }
+
+        pathsDirty = false;
     }
-    
+
     void LuaPathManager::AddConfigPaths()
     {
         auto& config = EclipseConfig::GetInstance();
-        
+
         customRequirePath = std::string(config.GetRequirePathExtra());
         customRequireCPath = std::string(config.GetRequireCPathExtra());
+        pathsDirty = true;
     }
 }

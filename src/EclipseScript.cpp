@@ -841,7 +841,6 @@ public:
         if (globalEngine)
             globalEngine->ProcessMessages();
 
-        
         auto* mapEngine = Eclipse::MapStateManager::GetInstance().GetStateForMap(map->GetId());
         if (mapEngine && mapEngine != globalEngine)
             mapEngine->ProcessMessages();

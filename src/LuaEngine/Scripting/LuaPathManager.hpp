@@ -22,8 +22,7 @@ namespace Eclipse
         void ApplyPaths(sol::state& lua);
         void Reset();
         bool HasPath(const std::string& path) const;
-        
-        // Get the computed paths without applying them
+
         const std::string& GetLuaPath() const { return luaRequirePath; }
         const std::string& GetLuaCPath() const { return luaRequireCPath; }
 
@@ -39,6 +38,7 @@ namespace Eclipse
         std::string customRequirePath;
         std::string customRequireCPath;
         bool initialized = false;
+        mutable bool pathsDirty = true; // lazy building
 
         void BuildPaths();
         void DiscoverLuaScriptDirectories();

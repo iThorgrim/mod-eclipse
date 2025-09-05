@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <memory>
 #include "Common.h"
 
@@ -11,22 +12,22 @@ namespace Eclipse
     public:
         static EclipseLogger& GetInstance();
 
-        // Core logging methods
-        void LogInfo(const std::string& message);
-        void LogWarn(const std::string& message);
-        void LogError(const std::string& message);
-        void LogDebug(const std::string& message);
-        void LogTrace(const std::string& message);
+        // Core logging methods - now with string_view
+        void LogInfo(std::string_view message);
+        void LogWarn(std::string_view message);
+        void LogError(std::string_view message);
+        void LogDebug(std::string_view message);
+        void LogTrace(std::string_view message);
 
         // Specialized logging for Lua errors
-        void LogLuaError(const std::string& scriptPath, const std::string& error);
-        void LogLuaCompilationError(const std::string& scriptPath, const std::string& error);
-        void LogLuaExecutionError(const std::string& scriptPath, const std::string& error);
+        void LogLuaError(std::string_view scriptPath, std::string_view error);
+        void LogLuaCompilationError(std::string_view scriptPath, std::string_view error);
+        void LogLuaExecutionError(std::string_view scriptPath, std::string_view error);
 
         // Script loading logs
-        void LogScriptLoad(const std::string& scriptPath, bool success);
-        void LogScriptReload(const std::string& scriptPath);
-        void LogScriptNotFound(const std::string& scriptPath, bool silent = false);
+        void LogScriptLoad(std::string_view scriptPath, bool success);
+        void LogScriptReload(std::string_view scriptPath);
+        void LogScriptNotFound(std::string_view scriptPath, bool silent = false);
 
         // State management logs
         void LogStateInitialization(int32 mapId, bool success);
@@ -46,7 +47,7 @@ namespace Eclipse
         void LogTotalInitializationTime();
 
         // Configuration and setup logs
-        void LogConfigurationApplied(const std::string& setting, const std::string& value);
+        void LogConfigurationApplied(std::string_view setting, std::string_view value);
         void LogPathsInitialized(size_t pathCount);
 
     private:
@@ -56,8 +57,8 @@ namespace Eclipse
         EclipseLogger& operator=(const EclipseLogger&) = delete;
 
         // Internal helper methods
-        std::pair<uint32, std::string> FormatDuration(uint32 microseconds);
-        std::string FormatScriptPath(const std::string& fullPath);
+        std::pair<uint32, std::string_view> FormatDuration(uint32 microseconds);
+        std::string FormatScriptPath(std::string_view fullPath);
 
         // State timing accumulation
         uint32 totalInitializationTimeUs = 0;

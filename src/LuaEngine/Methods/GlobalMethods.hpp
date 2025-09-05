@@ -17,7 +17,7 @@ namespace Eclipse
         }
 
         /**
-         *
+         * Get the current map ID from the Lua state
          */
         inline int32 GetStateMapId(LuaEngine* lua)
         {

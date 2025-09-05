@@ -71,7 +71,7 @@ namespace Eclipse
             auto& eventList = eventContainer[eventId];
             if (eventList.empty())
                 eventList.reserve(4);
-            eventList.push_back(callback);
+            eventList.emplace_back(std::move(callback));
         }
     }
 
@@ -83,10 +83,11 @@ namespace Eclipse
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
         auto& eventContainer = GetEventContainer<eventType>();
 
-        auto it = eventContainer.find(eventId);
+        const auto it = eventContainer.find(eventId);
         if (it != eventContainer.end())
         {
-            for (auto& callback : it->second)
+            const auto& callbacks = it->second;
+            for (const auto& callback : callbacks)
             {
                 if (callback.valid())
                 {
@@ -108,7 +109,8 @@ namespace Eclipse
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
         auto& eventContainer = events[eventType];
 
-        auto it = eventContainer.find(eventId);
+
+        const auto it = eventContainer.find(eventId);
         if (it == eventContainer.end())
         {
             // No callbacks registered, allow by default
@@ -126,13 +128,10 @@ namespace Eclipse
                 {
                     sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
 
-                    // Fast path: check if result is valid and boolean in one go
                     if (result.valid() && result.get_type() == sol::type::boolean)
                     {
-                        // Direct cast to bool - more efficient than intermediate assignment
                         if (!result.get<bool>())
                         {
-                            // At least one callback returned false - block the action
                             return false;
                         }
                     }
@@ -155,13 +154,13 @@ namespace Eclipse
         static_assert(sizeof...(Args) > 0, "At least one argument required");
 
         constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
-        
+
         auto typeIt = events.find(eventType);
         if (typeIt == events.end())
         {
             return false;
         }
-        
+
         const auto& eventContainer = typeIt->second;
 
         auto eventIt = eventContainer.find(eventId);
@@ -190,7 +189,7 @@ namespace Eclipse
             auto& eventList = objectEventMap[eventId];
             if (eventList.empty())
                 eventList.reserve(4);
-            eventList.push_back(callback);
+            eventList.emplace_back(std::move(callback));
         }
     }
 

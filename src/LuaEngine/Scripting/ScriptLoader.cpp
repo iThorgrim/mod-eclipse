@@ -8,6 +8,8 @@
 #include <set>
 #include <chrono>
 #include <future>
+#include <unordered_map>
+#include <ctime>
 #include <mutex>
 #include <thread>
 #include <boost/filesystem.hpp>
@@ -21,30 +23,39 @@ namespace Eclipse
 
     std::vector<std::string> ScriptLoader::DiscoverScripts(const std::string& directoryPath)
     {
-        std::vector<std::string> scripts;
+        static std::unordered_map<std::string, std::pair<std::vector<std::string>, std::time_t>> discoverCache;
 
         if (!boost::filesystem::exists(directoryPath) || !boost::filesystem::is_directory(directoryPath))
         {
             EclipseLogger::GetInstance().LogScriptNotFound(directoryPath, true);
-            return scripts;
+            return {};
         }
+
+        auto lastWrite = boost::filesystem::last_write_time(directoryPath);
+        auto it = discoverCache.find(directoryPath);
+        if (it != discoverCache.end() && it->second.second >= lastWrite) {
+            return it->second.first;
+        }
+
+        std::vector<std::string> scripts;
+        scripts.reserve(100);
 
         try
         {
-            // Use Boost filesystem for better performance and cross-platform compatibility
             for (const auto& entry : boost::filesystem::recursive_directory_iterator(directoryPath))
             {
                 if (boost::filesystem::is_regular_file(entry))
                 {
                     std::string extension = entry.path().extension().string();
                     if (IsValidScriptExtension(extension))
-                    {
-                        scripts.push_back(entry.path().string());
-                    }
+                        scripts.emplace_back(entry.path().string());
                 }
             }
 
             std::sort(scripts.begin(), scripts.end());
+
+            discoverCache[directoryPath] = {scripts, lastWrite};
+
             EclipseLogger::GetInstance().LogDebug("[Boost] Discovered " + std::to_string(scripts.size()) + " scripts in " + directoryPath);
         }
         catch (const std::exception& e)
@@ -120,7 +131,7 @@ namespace Eclipse
         if (cachedBytecode.has_value())
         {
             EclipseLogger::GetInstance().LogTrace("Loading script from cache: " + filePath);
-            return LoadBytecodeIntoState(targetState, cachedBytecode.value(), filePath);
+            return LoadBytecodeIntoState(targetState, *cachedBytecode, filePath);
         }
 
         EclipseLogger::GetInstance().LogTrace("Compiling script: " + filePath);
@@ -157,7 +168,7 @@ namespace Eclipse
 
             if (LoadScript(targetState, compilerState, file))
             {
-                loadedScripts.push_back(file);
+                loadedScripts.emplace_back(file);
                 successCount++;
                 EclipseLogger::GetInstance().LogTrace("Successfully loaded script: " + file);
 

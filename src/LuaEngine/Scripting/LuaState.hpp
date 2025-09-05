@@ -13,18 +13,18 @@ namespace Eclipse
 
         bool Initialize();
         void Reset();
-        
+
         sol::state& GetState() { return luaState; }
         const sol::state& GetState() const { return luaState; }
-        
+
         void ConfigureLibraries();
-        
+
         bool IsValid() const { return isInitialized; }
-        
+
     private:
         sol::state luaState;
         bool isInitialized;
-        
+
         void OpenStandardLibraries();
     };
 }

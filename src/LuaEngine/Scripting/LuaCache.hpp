@@ -39,6 +39,7 @@ namespace Eclipse
         std::vector<std::string> GetAllCachedScripts() const;
 
         void Clear();
+        void ClearTimestampCache() const { timestampCache_.clear(); }
 
     private:
         LuaCache() = default;
@@ -47,6 +48,7 @@ namespace Eclipse
         LuaCache& operator=(const LuaCache&) = delete;
 
         std::unordered_map<std::string, CacheEntry> cache_;
+        mutable std::unordered_map<std::string, std::chrono::system_clock::time_point> timestampCache_;
 
         // Helper methods
         std::chrono::system_clock::time_point GetFileWriteTime(const std::string& filePath) const;

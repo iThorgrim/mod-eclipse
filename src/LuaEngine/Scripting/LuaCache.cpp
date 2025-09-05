@@ -13,7 +13,7 @@ namespace Eclipse
     {
         boost::system::error_code ec;
         auto writeTime = boost::filesystem::last_write_time(filePath, ec);
-        
+
         if (ec)
         {
             LOG_ERROR("server.eclipse", "[Eclipse]: Failed to get write time for file {}: {}", filePath, ec.message());
@@ -55,55 +55,54 @@ namespace Eclipse
         CacheEntry entry(std::move(bytecode), writeTime);
         entry.compilationSuccess = success;
 
-        cache_[filePath] = std::move(entry);
+        cache_.emplace(filePath, std::move(entry));
+        timestampCache_[filePath] = writeTime;
 
         LOG_DEBUG("server.eclipse", "[Eclipse]: Cached script: {} (success: {})", filePath, success);
     }
 
     void LuaCache::InvalidateScript(const std::string& filePath)
     {
-        auto it = cache_.find(filePath);
-        if (it != cache_.end())
-        {
-            cache_.erase(it);
-
-            LOG_TRACE("server.eclipse", "[Eclipse]: Invalidated cache for script: {}", filePath);
-        }
+        cache_.erase(filePath);
+        timestampCache_.erase(filePath);
+        LOG_TRACE("server.eclipse", "[Eclipse]: Invalidated cache for script: {}", filePath);
     }
 
     void LuaCache::InvalidateAllScripts()
     {
         cache_.clear();
+        timestampCache_.clear();
     }
 
     bool LuaCache::IsScriptModified(const std::string& filePath) const
     {
         auto it = cache_.find(filePath);
-        if (it == cache_.end())
-        {
+        if (it == cache_.end()) {
             return true;
         }
 
-        const auto& entry = it->second;
+        auto timestampIt = timestampCache_.find(filePath);
+        std::chrono::system_clock::time_point currentWriteTime;
 
-        auto currentWriteTime = GetFileWriteTime(filePath);
-        if (currentWriteTime == std::chrono::system_clock::time_point{} || currentWriteTime != entry.lastWriteTime)
-        {
-            return true;
+        if (timestampIt != timestampCache_.end()) {
+            currentWriteTime = timestampIt->second;
+        } else {
+            currentWriteTime = GetFileWriteTime(filePath);
+            timestampCache_[filePath] = currentWriteTime;
         }
 
-        return false;
+        return (currentWriteTime == std::chrono::system_clock::time_point{} || 
+                currentWriteTime != it->second.lastWriteTime);
     }
 
     std::vector<std::string> LuaCache::GetModifiedScripts() const
     {
         std::vector<std::string> modifiedScripts;
+        modifiedScripts.reserve(cache_.size() / 4);
 
-        for (const auto& [filePath, entry] : cache_)
-        {
-            if (IsScriptModified(filePath))
-            {
-                modifiedScripts.push_back(filePath);
+        for (const auto& [filePath, entry] : cache_) {
+            if (IsScriptModified(filePath)) {
+                modifiedScripts.emplace_back(filePath);
             }
         }
 
@@ -115,11 +114,9 @@ namespace Eclipse
         std::vector<std::string> scripts;
         scripts.reserve(cache_.size());
 
-        for (const auto& [filePath, entry] : cache_)
-        {
-            if (entry.compilationSuccess)
-            {
-                scripts.push_back(filePath);
+        for (const auto& [filePath, entry] : cache_) {
+            if (entry.compilationSuccess) {
+                scripts.emplace_back(filePath);
             }
         }
 
