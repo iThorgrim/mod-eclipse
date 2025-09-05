@@ -6,38 +6,34 @@
 #include "MapStateManager.hpp"
 #include "LuaEngine.hpp"
 #include "EventManager.hpp"
-#include <functional>
-#include <unordered_set>
-#include <tuple>
-#include <type_traits>
+#include <span>
+#include <vector>
 
 namespace Eclipse
 {
     class EventDispatcher
     {
     public:
-        static EventDispatcher& GetInstance();
+        static EventDispatcher& GetInstance()
+        {
+            static EventDispatcher instance;
+            return instance;
+        }
 
+        /**
+         * Trigger event with automatic type detection and optimal routing
+         */
         template<typename... Args>
+        requires(sizeof...(Args) > 0 && SupportedEventObject<std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>>)
         void TriggerEvent(uint32 eventId, Args&&... args)
         {
-            static_assert(sizeof...(args) > 0, "At least one argument required");
-
             auto firstArg = std::get<0>(std::forward_as_tuple(args...));
             using FirstArgType = std::decay_t<decltype(firstArg)>;
 
             if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
             {
-                auto engines = GetRelevantEngines<ObjectGuid>(nullptr);
-                TriggerOnEngines<FirstArgType>(engines, eventId, std::forward<Args>(args)...);
-            }
-            else if constexpr (std::is_same_v<FirstArgType, PlayerGuid> ||
-                               std::is_same_v<FirstArgType, CreatureEntry> ||
-                               std::is_same_v<FirstArgType, GameObjectEntry> ||
-                               std::is_same_v<FirstArgType, ItemEntry> ||
-                               std::is_same_v<FirstArgType, MapId>)
-            {
-                auto engines = GetRelevantEngines(firstArg);
+                // Runtime type detection for ObjectGuid
+                auto engines = GetRelevantEnginesForObjectGuid(firstArg);
                 TriggerOnEngines<FirstArgType>(engines, eventId, std::forward<Args>(args)...);
             }
             else
@@ -47,17 +43,19 @@ namespace Eclipse
             }
         }
 
+        /**
+         * Trigger event that can block actions (returns false to prevent)
+         */
         template<typename... Args>
+        requires(sizeof...(Args) > 0 && SupportedEventObject<std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>>)
         bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
         {
-            static_assert(sizeof...(args) > 0, "At least one argument required");
-
             auto firstArg = std::get<0>(std::forward_as_tuple(args...));
             using FirstArgType = std::decay_t<decltype(firstArg)>;
 
             if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
             {
-                auto engines = GetRelevantEngines<ObjectGuid>(nullptr);
+                auto engines = GetRelevantEnginesForObjectGuid(firstArg);
                 return TriggerWithRetValueOnEngines<FirstArgType>(engines, eventId, std::forward<Args>(args)...);
             }
             else
@@ -67,33 +65,19 @@ namespace Eclipse
             }
         }
 
-        template<typename... Args>
-        void TriggerKeyedEvent(uint32 eventId, Args&&... args)
+        /**
+         * Trigger keyed event (events bound to specific object IDs)
+         */
+        template<KeyedEventObject T, typename... Args>
+        void TriggerKeyedEvent(uint32 objectId, uint32 eventId, Args&&... args)
         {
-            static_assert(sizeof...(args) > 0, "At least one argument required");
-
-            auto firstArg = std::get<0>(std::forward_as_tuple(args...));
-            using FirstArgType = std::decay_t<decltype(firstArg)>;
-
-            if (firstArg)
+            constexpr auto eventType = get_event_type<T>();
+            auto engines = GetAllRelevantEngines();
+            for (auto* engine : engines)
             {
-                if constexpr (has_id<FirstArgType>())
+                if (auto* eventManager = engine->GetEventManager())
                 {
-                    uint32 objectId = get_object_id(firstArg);
-                    auto engines = GetRelevantEngines(firstArg);
-
-                    if constexpr (std::is_same_v<FirstArgType, Creature*>)
-                    {
-                        TriggerKeyedEventHelper<EventType::CREATURE>(engines, objectId, eventId, std::forward<Args>(args)...);
-                    }
-                    else if constexpr (std::is_same_v<FirstArgType, GameObject*>)
-                    {
-                        TriggerKeyedEventHelper<EventType::GAMEOBJECT>(engines, objectId, eventId, std::forward<Args>(args)...);
-                    }
-                    else if constexpr (std::is_same_v<FirstArgType, Item*>)
-                    {
-                        TriggerKeyedEventHelper<EventType::ITEM>(engines, objectId, eventId, std::forward<Args>(args)...);
-                    }
+                    eventManager->template TriggerKeyedEvent<eventType>(objectId, eventId, std::forward<Args>(args)...);
                 }
             }
         }
@@ -101,68 +85,209 @@ namespace Eclipse
     private:
         EventDispatcher() = default;
         ~EventDispatcher() = default;
+        EventDispatcher(const EventDispatcher&) = delete;
+        EventDispatcher& operator=(const EventDispatcher&) = delete;
+
+        /**
+         * Get relevant engines for pointer-based objects (Player*, Creature*, etc.)
+         */
+        template<typename T>
+        std::span<LuaEngine* const> GetRelevantEngines(T* object)
+        {
+            thread_local static std::vector<LuaEngine*> engines;
+            engines.clear();
+            engines.reserve(2);
+
+            auto& manager = MapStateManager::GetInstance();
+
+            // Always include global engine
+            if (auto* globalEngine = manager.GetGlobalState())
+            {
+                engines.emplace_back(globalEngine);
+            }
+
+            // Add map-specific engine if applicable
+            if (object)
+            {
+                if (auto* objectMap = GetObjectMap(object))
+                {
+                    if (auto* mapEngine = manager.GetStateForMap(objectMap->GetId()))
+                    {
+                        if (mapEngine != engines.front()) // Avoid duplicates
+                        {
+                            engines.emplace_back(mapEngine);
+                        }
+                    }
+                }
+            }
+
+            return std::span<LuaEngine* const>(engines);
+        }
+
+        /**
+         * Get relevant engines for ObjectGuid with runtime type detection
+         */
+        std::span<LuaEngine* const> GetRelevantEnginesForObjectGuid(const ObjectGuid& guid)
+        {
+            thread_local static std::vector<LuaEngine*> engines;
+            engines.clear();
+            engines.reserve(2);
+
+            auto& manager = MapStateManager::GetInstance();
+            Map* objectMap = nullptr;
+
+            if (auto* globalEngine = manager.GetGlobalState())
+            {
+                engines.emplace_back(globalEngine);
+            }
+
+            if (guid.IsPlayer())
+            {
+                if (auto* player = ObjectAccessor::FindPlayer(guid))
+                {
+                    objectMap = player->GetMap();
+                }
+            }
+            else if (guid.IsAnyTypeCreature() || guid.IsAnyTypeGameObject())
+            {
+                sMapMgr->DoForAllMaps([&](Map* map) {
+                    if (objectMap) return;
+
+                    WorldObject* obj = nullptr;
+
+                    if (guid.IsAnyTypeCreature())
+                    {
+                        obj = map->GetCreature(guid);
+                    }
+                    else if (guid.IsAnyTypeGameObject())
+                    {
+                        obj = map->GetGameObject(guid);
+                    }
+
+                    if (obj)
+                    {
+                        objectMap = map;
+                    }
+                });
+            }
+
+            if (objectMap)
+            {
+                if (auto* mapEngine = manager.GetStateForMap(objectMap->GetId()))
+                {
+                    if (mapEngine != engines.front())
+                    {
+                        engines.emplace_back(mapEngine);
+                    }
+                }
+            }
+
+            return std::span<LuaEngine* const>(engines);
+        }
+
+        /**
+         * Get relevant engines for wrapper types (PlayerGuid, CreatureEntry, etc.)
+         */
+        template<typename T>
+        requires std::is_same_v<T, PlayerGuid> || std::is_same_v<T, CreatureEntry> ||
+                 std::is_same_v<T, GameObjectEntry> || std::is_same_v<T, ItemEntry> ||
+                 std::is_same_v<T, MapId>
+        std::span<LuaEngine* const> GetRelevantEngines(const T& wrapper)
+        {
+            thread_local static std::vector<LuaEngine*> engines;
+            engines.clear();
+            engines.reserve(2);
+
+            auto& manager = MapStateManager::GetInstance();
+
+            // Always include global engine
+            if (auto* globalEngine = manager.GetGlobalState())
+            {
+                engines.emplace_back(globalEngine);
+            }
+
+            if constexpr (std::is_same_v<T, MapId>)
+            {
+                if (auto* mapEngine = manager.GetStateForMap(wrapper.mapId))
+                {
+                    if (mapEngine != engines.front()) // Avoid duplicates
+                    {
+                        engines.emplace_back(mapEngine);
+                    }
+                }
+            }
+
+            return std::span<LuaEngine* const>(engines);
+        }
+
+        /**
+         * Get all active engines (used for keyed events)
+         */
+        std::span<LuaEngine* const> GetAllRelevantEngines()
+        {
+            thread_local static std::vector<LuaEngine*> engines;
+
+            auto& manager = MapStateManager::GetInstance();
+
+            manager.FillActiveEngines(engines);
+
+            return std::span<LuaEngine* const>(engines);
+        }
 
         template<typename T>
-        std::vector<LuaEngine*> GetRelevantEngines(T* object);
+        Map* GetObjectMap(T* object)
+        {
+            if constexpr (std::is_same_v<T, Player>) {
+                return object->GetMap();
+            }
+            else if constexpr (std::is_same_v<T, Map>) {
+                return object;
+            }
+            else if constexpr (std::is_same_v<T, Item>) {
+                return get_map(object);
+            }
+            else if constexpr (can_get_map<T>()) {
+                return get_map(object);
+            }
+            else {
+                return nullptr;
+            }
+        }
 
-        template<typename T, typename... Args>
-        void TriggerOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Args&&... args)
+        template<typename FirstArgType, typename... Args>
+        void TriggerOnEngines(std::span<LuaEngine* const> engines, uint32 eventId, Args&&... args)
         {
             for (auto* engine : engines)
             {
-                if (engine && engine->GetEventManager())
+                if (auto* eventManager = engine->GetEventManager())
                 {
-                    if (engine->GetEventManager()->template HasCallbacksFor<Args...>(eventId))
+                    // Check if there are callbacks to avoid unnecessary work
+                    if (eventManager->template HasCallbacksFor<Args...>(eventId))
                     {
-                        engine->GetEventManager()->TriggerEvent(eventId, std::forward<Args>(args)...);
+                        eventManager->TriggerEvent(eventId, std::forward<Args>(args)...);
                     }
                 }
             }
         }
 
-        template<typename T, typename... Args>
-        bool TriggerWithRetValueOnEngines(const std::vector<LuaEngine*>& engines, uint32 eventId, Args&&... args)
-        {
-            const size_t engineCount = engines.size();
-
-            if (engineCount == 0)
-            {
-                return true;
-            }
-
-            for (int i = static_cast<int>(engineCount) - 1; i >= 0; --i)
-            {
-                auto* engine = engines[i];
-                if (engine && engine->GetEventManager())
-                {
-                    if (engine->GetEventManager()->template HasCallbacksFor<Args...>(eventId))
-                    {
-                        return engine->GetEventManager()->TriggerWithRetValueEvent(eventId, std::forward<Args>(args)...);
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        template<EventType Type, typename... Args>
-        void TriggerKeyedEventHelper(const std::vector<LuaEngine*>& engines, uint32 objectId, uint32 eventId, Args&&... args)
+        template<typename FirstArgType, typename... Args>
+        bool TriggerWithRetValueOnEngines(std::span<LuaEngine* const> engines, uint32 eventId, Args&&... args)
         {
             for (auto* engine : engines)
             {
-                if (engine && engine->GetEventManager())
+                if (auto* eventManager = engine->GetEventManager())
                 {
-                    engine->GetEventManager()->template TriggerKeyedEvent<Type>(objectId, eventId, std::forward<Args>(args)...);
+                    if (eventManager->template HasCallbacksFor<Args...>(eventId))
+                    {
+                        if (!eventManager->TriggerWithRetValueEvent(eventId, std::forward<Args>(args)...))
+                        {
+                            return false; // Event blocked
+                        }
+                    }
                 }
             }
+            return true; // Event allowed
         }
-
-        // Specializations for wrapper types
-        std::vector<LuaEngine*> GetRelevantEngines(const PlayerGuid& playerGuid);
-        std::vector<LuaEngine*> GetRelevantEngines(const CreatureEntry& creatureEntry);
-        std::vector<LuaEngine*> GetRelevantEngines(const GameObjectEntry& gameObjectEntry);
-        std::vector<LuaEngine*> GetRelevantEngines(const ItemEntry& itemEntry);
-        std::vector<LuaEngine*> GetRelevantEngines(const MapId& mapId);
     };
 }
 

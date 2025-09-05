@@ -13,5 +13,6 @@
 #include "Channel.h"
 #include "Map.h"
 #include "Item.h"
+#include "MapMgr.h"
 
 #include <sol/sol.hpp>

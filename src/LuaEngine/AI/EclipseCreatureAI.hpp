@@ -21,7 +21,7 @@ namespace Eclipse
             if (justSpawned)
             {
                 justSpawned = false;
-                EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_SPAWN, me);
+                // EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_SPAWN, me);
             }
             
             ScriptedAI::UpdateAI(diff);
@@ -29,25 +29,25 @@ namespace Eclipse
 
         void JustEngagedWith(Unit* target) override
         {
-            EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_ENTER_COMBAT, me, target);
+            // EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_ENTER_COMBAT, me, target);
             ScriptedAI::JustEngagedWith(target);
         }
 
         void JustDied(Unit* killer) override
         {
-            EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_JUST_DIED, me, killer);
+            // EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_JUST_DIED, me, killer);
             ScriptedAI::JustDied(killer);
         }
 
         void KilledUnit(Unit* victim) override
         {
-            EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_KILLED_UNIT, me, victim);
+            // EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_KILLED_UNIT, me, victim);
             ScriptedAI::KilledUnit(victim);
         }
 
         void EnterEvadeMode(EvadeReason why) override
         {
-            EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_LEAVE_COMBAT, me);
+            // EventDispatcher::GetInstance().TriggerKeyedEvent(CREATURE_EVENT_ON_LEAVE_COMBAT, me);
             ScriptedAI::EnterEvadeMode(why);
         }
 

@@ -24,6 +24,10 @@ namespace Eclipse
         // Statistics
         size_t GetActiveStateCount() const { return mapStates.size(); }
         
+        // Engine Access
+        std::vector<LuaEngine*> GetAllActiveEngines() const;
+        void FillActiveEngines(std::vector<LuaEngine*>& engines) const;
+        
     private:
         MapStateManager() = default;
         ~MapStateManager() = default;

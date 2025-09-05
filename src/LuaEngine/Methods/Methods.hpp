@@ -44,8 +44,9 @@ namespace Eclipse
             RegisterUnitMethods(creature_type);
 
             auto objectguid_type = lua.new_usertype<ObjectGuid>("ObjectGuid");
-            ObjectMethods::RegisterObjectGuidMethods(objectguid_type);
+            ObjectGuidMethods::RegisterObjectGuidMethods(objectguid_type);
 
+            Eclipse::RegisterEventKeysToLua(lua);
         }
     }
 }

@@ -6,7 +6,7 @@
 
 namespace Eclipse
 {
-    namespace ObjectMethods
+    namespace ObjectGuidMethods
     {
         /**
          * Get the raw 64-bit value of the ObjectGuid

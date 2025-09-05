@@ -95,4 +95,32 @@ namespace Eclipse
         
         EclipseLogger::GetInstance().LogInfo("All scripts reloaded successfully in " + std::to_string(totalDuration.count()) + " ms");
     }
+
+    std::vector<LuaEngine*> MapStateManager::GetAllActiveEngines() const
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(mapStates.size());
+        
+        for (const auto& [mapId, engine] : mapStates)
+        {
+            if (engine) {
+                engines.emplace_back(engine.get());
+            }
+        }
+        
+        return engines;
+    }
+
+    void MapStateManager::FillActiveEngines(std::vector<LuaEngine*>& engines) const
+    {
+        engines.clear();
+        engines.reserve(mapStates.size());
+        
+        for (const auto& [mapId, engine] : mapStates)
+        {
+            if (engine) {
+                engines.emplace_back(engine.get());
+            }
+        }
+    }
 }

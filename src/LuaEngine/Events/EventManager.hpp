@@ -87,7 +87,7 @@ namespace Eclipse
         static_assert(sizeof...(args) > 0, "At least one argument required");
 
         using FirstArgType = std::tuple_element_t<0, std::tuple<Args...>>;
-        
+
         if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
         {
             // Runtime type detection for ObjectGuid
@@ -105,18 +105,18 @@ namespace Eclipse
             if (it != eventContainer.end())
             {
                 const auto& callbacks = it->second;
-            for (const auto& callback : callbacks)
-            {
-                if (callback.valid())
+                for (const auto& callback : callbacks)
                 {
-                    try
+                    if (callback.valid())
                     {
-                        callback(eventId, std::forward<Args>(args)...);
+                        try
+                        {
+                            callback(eventId, std::forward<Args>(args)...);
+                        }
+                        catch (const std::exception&) {}
                     }
-                    catch (const std::exception&) {}
                 }
             }
-        }
         }
     }
 
@@ -126,57 +126,53 @@ namespace Eclipse
         static_assert(sizeof...(args) > 0, "At least one argument required");
 
         using FirstArgType = std::tuple_element_t<0, std::tuple<Args...>>;
-        
+
         if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
         {
-            // Runtime type detection for ObjectGuid
             auto firstArg = std::get<0>(std::forward_as_tuple(args...));
             auto eventType = get_event_type(firstArg);
             return TriggerWithRetValueEventWithRuntimeType(eventType, eventId, std::forward<Args>(args)...);
         }
         else
         {
-            // Compile-time type detection for other types
             constexpr auto eventType = get_event_type<FirstArgType>();
             auto& eventContainer = events[eventType];
 
 
-        const auto it = eventContainer.find(eventId);
-        if (it == eventContainer.end())
-        {
-            // No callbacks registered, allow by default
-            return true;
-        }
-
-        const auto& callbacks = it->second;
-
-        // Check all callbacks - if any returns false, block the action
-        for (const auto& callback : callbacks)
-        {
-            if (callback.valid())
+            const auto it = eventContainer.find(eventId);
+            if (it == eventContainer.end())
             {
-                try
-                {
-                    sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
+                return true;
+            }
 
-                    if (result.valid() && result.get_type() == sol::type::boolean)
-                    {
-                        if (!result.get<bool>())
-                        {
-                            return false;
-                        }
-                    }
-                    // If callback returns non-boolean, nil, or true, continue (treat as allow)
-                }
-                catch (const std::exception&) 
+            const auto& callbacks = it->second;
+
+            for (const auto& callback : callbacks)
+            {
+                if (callback.valid())
                 {
-                    // If callback throws, treat as allowing the action
+                    try
+                    {
+                        sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
+
+                        if (result.valid() && result.get_type() == sol::type::boolean)
+                        {
+                            if (!result.get<bool>())
+                            {
+                                return false;
+                            }
+                        }
+                        // If callback returns non-boolean, nil, or true, continue (treat as allow)
+                    }
+                    catch (const std::exception&) 
+                    {
+                        // If callback throws, treat as allowing the action
+                    }
                 }
             }
-        }
 
-        // All callbacks either returned true or nothing - allow the action
-        return true;
+            // All callbacks either returned true or nothing - allow the action
+            return true;
         }
     }
 
@@ -297,6 +293,8 @@ namespace Eclipse
             case EventType::MAP:
                 eventContainer = &GetEventContainer<EventType::MAP>();
                 break;
+            default:
+                break;
         }
 
         if (eventContainer)
@@ -324,7 +322,7 @@ namespace Eclipse
     bool EventManager::TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args)
     {
         std::unordered_map<uint32, std::vector<sol::function>>* eventContainer = nullptr;
-        
+
         switch (eventType)
         {
             case EventType::PLAYER:
@@ -341,6 +339,8 @@ namespace Eclipse
                 break;
             case EventType::MAP:
                 eventContainer = &GetEventContainer<EventType::MAP>();
+                break;
+            default:
                 break;
         }
 

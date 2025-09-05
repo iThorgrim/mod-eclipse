@@ -242,7 +242,7 @@ public:
     void OnPlayerJustDied(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_JUST_DIED,
+            Eclipse::PLAYER_EVENT_ON_JUST_DIED,
             player
         );
     }
@@ -250,7 +250,7 @@ public:
     void OnPlayerCalculateTalentsPoints(Player const* player, uint32& talentPointsForLevel) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CALCULATE_TALENTS_POINTS,
+            Eclipse::PLAYER_EVENT_ON_CALCULATE_TALENT_POINTS,
             player,
             talentPointsForLevel
         );
@@ -264,7 +264,7 @@ public:
     void OnPlayerReleasedGhost(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_RELEASED_GHOST,
+            Eclipse::PLAYER_EVENT_ON_SEND_INITIAL_PACKET_BEFORE_ADD_TO_MAP,
             player
         );
     }
@@ -272,7 +272,7 @@ public:
     void OnPlayerSendInitialPacketsBeforeAddToMap(Player* player, WorldPacket& data) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP,
+            Eclipse::PLAYER_EVENT_ON_SEND_INITIAL_PACKET_BEFORE_ADD_TO_MAP,
             player,
             data
         );
@@ -281,7 +281,7 @@ public:
     void OnPlayerBattlegroundDesertion(Player* player, BattlegroundDesertionType const desertionType) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BATTLEGROUND_DESERTION,
+            Eclipse::PLAYER_EVENT_ON_BG_DESERTION,
             player,
             desertionType
         );
@@ -290,7 +290,7 @@ public:
     void OnPlayerCompleteQuest(Player* player, Quest const* quest_id) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
+            Eclipse::PLAYER_EVENT_ON_COMPLETE_QUEST,
             player,
             quest_id
         );
@@ -299,7 +299,7 @@ public:
     void OnPlayerPVPKill(Player* killer, Player* killed) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PVP_KILL,
+            Eclipse::PLAYER_EVENT_ON_KILL_PLAYER,
             killer,
             killed
         );
@@ -308,7 +308,7 @@ public:
     void OnPlayerPVPFlagChange(Player* player, bool state) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE,
+            Eclipse::PLAYER_EVENT_ON_PVP_FLAG_CHANGE,
             player,
             state
         );
@@ -317,7 +317,7 @@ public:
     void OnPlayerCreatureKill(Player* killer, Creature* killed) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CREATURE_KILL,
+            Eclipse::PLAYER_EVENT_ON_KILL_CREATURE,
             killer,
             killed
         );
@@ -326,7 +326,7 @@ public:
     void OnPlayerCreatureKilledByPet(Player* PetOwner, Creature* killed) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CREATURE_KILLED_BY_PET,
+            Eclipse::PLAYER_EVENT_ON_PET_KILL,
             PetOwner,
             killed
         );
@@ -335,7 +335,7 @@ public:
     void OnPlayerKilledByCreature(Creature* killer, Player* killed) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE,
+            Eclipse::PLAYER_EVENT_ON_KILLED_BY_CREATURE,
             killed,
             killer
         );
@@ -344,7 +344,7 @@ public:
     void OnPlayerLevelChanged(Player* player, uint8 oldlevel) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LEVEL_CHANGED,
+            Eclipse::PLAYER_EVENT_ON_LEVEL_CHANGE,
             player,
             oldlevel
         );
@@ -353,7 +353,7 @@ public:
     void OnPlayerFreeTalentPointsChanged(Player* player, uint32 points) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_FREE_TALENT_POINTS_CHANGED,
+            Eclipse::PLAYER_EVENT_ON_TALENTS_CHANGE,
             player,
             points
         );
@@ -362,7 +362,7 @@ public:
     void OnPlayerTalentsReset(Player* player, bool noCost) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_TALENTS_RESET,
+            Eclipse::PLAYER_EVENT_ON_TALENTS_RESET,
             player,
             noCost
         );
@@ -371,7 +371,7 @@ public:
     void OnPlayerAfterSpecSlotChanged(Player* player, uint8 newSlot) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_SPEC_SLOT_CHANGED,
+            Eclipse::PLAYER_EVENT_ON_AFTER_SPEC_SLOT_CHANGED,
             player,
             newSlot
         );
@@ -380,7 +380,7 @@ public:
     void OnPlayerBeforeUpdate(Player* player, uint32 p_time) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_UPDATE,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_UPDATE,
             player,
             p_time
         );
@@ -389,7 +389,7 @@ public:
     void OnPlayerUpdate(Player* player, uint32 p_time) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE,
+            Eclipse::PLAYER_EVENT_ON_UPDATE,
             player,
             p_time
         );
@@ -398,7 +398,7 @@ public:
     void OnPlayerMoneyChanged(Player* player, int32& amount) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_MONEY_CHANGED,
+            Eclipse::PLAYER_EVENT_ON_MONEY_CHANGE,
             player,
             amount
         );
@@ -412,7 +412,7 @@ public:
     void OnPlayerBeforeLootMoney(Player* player, Loot* loot) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_LOOT_MONEY,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_LOOT_MONEY,
             player,
             loot
         );
@@ -421,7 +421,7 @@ public:
     void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GIVE_EXP,
+            Eclipse::PLAYER_EVENT_ON_GIVE_XP,
             player,
             amount,
             victim,
@@ -437,7 +437,7 @@ public:
     bool OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_REPUTATION_CHANGE,
+            Eclipse::PLAYER_EVENT_ON_REPUTATION_CHANGE,
             player,
             factionID,
             standing,
@@ -476,7 +476,7 @@ public:
     void OnPlayerReputationRankChange(Player* player, uint32 factionID, ReputationRank newRank, ReputationRank oldRank, bool increased) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_REPUTATION_RANK_CHANGE,
+            Eclipse::PLAYER_EVENT_ON_REPUTATION_RANK_CHANGE,
             player,
             factionID,
             newRank,
@@ -488,7 +488,7 @@ public:
     void OnPlayerGiveReputation(Player* player, int32 factionID, float& amount, ReputationSource repSource) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GIVE_REPUTATION,
+            Eclipse::PLAYER_EVENT_ON_GIVE_REPUTATION,
             player,
             factionID,
             amount,
@@ -504,7 +504,7 @@ public:
     void OnPlayerLearnSpell(Player* player, uint32 spellID) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LEARN_SPELL,
+            Eclipse::PLAYER_EVENT_ON_LEARN_SPELL,
             player,
             spellID
         );
@@ -513,7 +513,7 @@ public:
     void OnPlayerForgotSpell(Player* player, uint32 spellID) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_FORGOT_SPELL,
+            Eclipse::PLAYER_EVENT_ON_FORGOT_SPELL,
             player,
             spellID
         );
@@ -522,7 +522,7 @@ public:
     void OnPlayerDuelRequest(Player* target, Player* challenger) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_DUEL_REQUEST,
+            Eclipse::PLAYER_EVENT_ON_DUEL_REQUEST,
             target,
             challenger
         );
@@ -531,7 +531,7 @@ public:
     void OnPlayerDuelStart(Player* player1, Player* player2) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_DUEL_START,
+            Eclipse::PLAYER_EVENT_ON_DUEL_START,
             player1,
             player2
         );
@@ -540,7 +540,7 @@ public:
     void OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_DUEL_END,
+            Eclipse::PLAYER_EVENT_ON_DUEL_END,
             winner,
             loser,
             type
@@ -550,7 +550,7 @@ public:
     void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CHAT,
+            Eclipse::PLAYER_EVENT_ON_CHAT,
             player,
             type,
             lang,
@@ -566,7 +566,7 @@ public:
     void OnPlayerBeforeSendChatMessage(Player* player, uint32& type, uint32& lang, std::string& msg) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_SEND_CHAT_MESSAGE,
             player,
             type,
             lang,
@@ -601,7 +601,7 @@ public:
     void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CHAT_WITH_RECEIVER,
+            Eclipse::PLAYER_EVENT_ON_WHISPER,
             player,
             type,
             lang,
@@ -618,7 +618,7 @@ public:
     void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Group* group) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CHAT_WITH_GROUP,
+            Eclipse::PLAYER_EVENT_ON_GROUP_CHAT,
             player,
             type,
             lang,
@@ -635,7 +635,7 @@ public:
     void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Guild* guild) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CHAT_WITH_GUILD,
+            Eclipse::PLAYER_EVENT_ON_GUILD_CHAT,
             player,
             type,
             lang,
@@ -652,7 +652,7 @@ public:
     void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CHAT_WITH_CHANNEL,
+            Eclipse::PLAYER_EVENT_ON_CHANNEL_CHAT,
             player,
             type,
             lang,
@@ -669,7 +669,7 @@ public:
     void OnPlayerEmote(Player* player, uint32 emote) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_EMOTE,
+            Eclipse::PLAYER_EVENT_ON_EMOTE,
             player,
             emote
         );
@@ -678,7 +678,7 @@ public:
     void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emoteNum, ObjectGuid guid) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_TEXT_EMOTE,
+            Eclipse::PLAYER_EVENT_ON_TEXT_EMOTE,
             player,
             textEmote,
             emoteNum,
@@ -689,7 +689,7 @@ public:
     void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_SPELL_CAST,
+            Eclipse::PLAYER_EVENT_ON_SPELL_CAST,
             player,
             spell,
             skipCheck
@@ -699,7 +699,7 @@ public:
     void OnPlayerLoadFromDB(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LOAD_FROM_DB,
+            Eclipse::PLAYER_EVENT_ON_LOAD_FROM_DB,
             player
         );
     }
@@ -707,7 +707,7 @@ public:
     void OnPlayerLogin(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LOGIN,
+            Eclipse::PLAYER_EVENT_ON_LOGIN,
             player
         );
     }
@@ -715,7 +715,7 @@ public:
     void OnPlayerBeforeLogout(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_LOGOUT,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_LOGOUT,
             player
         );
     }
@@ -723,7 +723,7 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LOGOUT,
+            Eclipse::PLAYER_EVENT_ON_LOGOUT,
             player
         );
     }
@@ -731,7 +731,7 @@ public:
     void OnPlayerCreate(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CREATE,
+            Eclipse::PLAYER_EVENT_ON_CHARACTER_CREATE,
             player
         );
     }
@@ -739,7 +739,7 @@ public:
     void OnPlayerDelete(ObjectGuid guid, uint32 accountId) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_DELETE,
+            Eclipse::PLAYER_EVENT_ON_CHARACTER_DELETE,
             guid,
             accountId
         );
@@ -748,7 +748,7 @@ public:
     void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_FAILED_DELETE,
+            Eclipse::PLAYER_EVENT_ON_FAILED_DELETE,
             guid,
             accountId
         );
@@ -757,7 +757,7 @@ public:
     void OnPlayerSave(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_SAVE,
+            Eclipse::PLAYER_EVENT_ON_SAVE,
             player
         );
     }
@@ -765,7 +765,7 @@ public:
     void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BIND_TO_INSTANCE,
+            Eclipse::PLAYER_EVENT_ON_BIND_TO_INSTANCE,
             player,
             difficulty,
             mapId,
@@ -776,7 +776,7 @@ public:
     void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_ZONE,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_ZONE,
             player,
             newZone,
             newArea
@@ -786,7 +786,7 @@ public:
     void OnPlayerUpdateArea(Player* player, uint32 oldArea, uint32 newArea) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_AREA,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_AREA,
             player,
             oldArea,
             newArea
@@ -796,7 +796,7 @@ public:
     void OnPlayerMapChanged(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_MAP_CHANGED,
+            Eclipse::PLAYER_EVENT_ON_MAP_CHANGE,
             player
         );
     }
@@ -804,7 +804,7 @@ public:
     bool OnPlayerBeforeTeleport(Player* player, uint32 mapid, float x, float y, float z, float orientation, uint32 options, Unit* target) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_TELEPORT,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_TELEPORT,
             player,
             mapid,
             x,
@@ -825,7 +825,7 @@ public:
     void OnPlayerUpdateFaction(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_FACTION,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_FACTION,
             player
         );
     }
@@ -833,7 +833,7 @@ public:
     void OnPlayerAddToBattleground(Player* player, Battleground* bg) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_ADD_TO_BATTLEGROUND,
+            Eclipse::PLAYER_EVENT_ON_ADD_TO_BATTLEGROUND,
             player,
             bg
         );
@@ -842,7 +842,7 @@ public:
     void OnPlayerQueueRandomDungeon(Player* player, uint32& rDungeonId) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_QUEUE_RANDOM_DUNGEON,
+            Eclipse::PLAYER_EVENT_ON_QUEUE_RANDOM_DUNGEON,
             player,
             rDungeonId
         );
@@ -856,7 +856,7 @@ public:
     void OnPlayerRemoveFromBattleground(Player* player, Battleground* bg) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_REMOVE_FROM_BATTLEGROUND,
+            Eclipse::PLAYER_EVENT_ON_REMOVE_FROM_BATTLEGROUND,
             player,
             bg
         );
@@ -865,7 +865,7 @@ public:
     void OnPlayerAchievementComplete(Player* player, AchievementEntry const* achievement) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_ACHI_COMPLETE,
+            Eclipse::PLAYER_EVENT_ON_ACHI_COMPLETE,
             player,
             achievement
         );
@@ -874,7 +874,7 @@ public:
     bool OnPlayerBeforeAchievementComplete(Player* player, AchievementEntry const* achievement) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_ACHI_COMPLETE,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_ACHI_COMPLETE,
             player,
             achievement
         );
@@ -889,7 +889,7 @@ public:
     void OnPlayerCriteriaProgress(Player* player, AchievementCriteriaEntry const* criteria) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CRITERIA_PROGRESS,
+            Eclipse::PLAYER_EVENT_ON_CRITERIA_PROGRESS,
             player,
             criteria
         );
@@ -898,7 +898,7 @@ public:
     bool OnPlayerBeforeCriteriaProgress(Player* player, AchievementCriteriaEntry const* criteria) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_CRITERIA_PROGRESS,
             player,
             criteria
         );
@@ -913,7 +913,7 @@ public:
     void OnPlayerAchievementSave(CharacterDatabaseTransaction /*trans*/, Player* player, uint16 achId, CompletedAchievementData achiData) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_ACHI_SAVE,
+            Eclipse::PLAYER_EVENT_ON_ACHI_SAVE,
             player,
             achId,
             achiData
@@ -923,7 +923,7 @@ public:
     void OnPlayerCriteriaSave(CharacterDatabaseTransaction /*trans*/, Player* player, uint16 achId, CriteriaProgress criteriaData) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CRITERIA_SAVE,
+            Eclipse::PLAYER_EVENT_ON_CRITERIA_SAVE,
             player,
             achId,
             criteriaData
@@ -936,7 +936,7 @@ public:
     void OnPlayerBeingCharmed(Player* player, Unit* charmer, uint32 oldFactionId, uint32 newFactionId) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_BEING_CHARMED,
+            Eclipse::PLAYER_EVENT_ON_BEING_CHARMED,
             player,
             charmer,
             oldFactionId,
@@ -947,7 +947,7 @@ public:
     void OnPlayerAfterSetVisibleItemSlot(Player* player, uint8 slot, Item* item) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT,
+            Eclipse::PLAYER_EVENT_ON_AFTER_SET_VISIBLE_ITEM_SLOT,
             player,
             slot,
             item
@@ -957,7 +957,7 @@ public:
     void OnPlayerAfterMoveItemFromInventory(Player* player, Item* it, uint8 bag, uint8 slot, bool update) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_MOVE_ITEM_FROM_INVENTORY,
+            Eclipse::PLAYER_EVENT_ON_AFTER_MOVE_ITEM_FROM_INVENTORY,
             player,
             it,
             bag,
@@ -969,7 +969,7 @@ public:
     void OnPlayerEquip(Player* player, Item* it, uint8 bag, uint8 slot, bool update) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_EQUIP,
+            Eclipse::PLAYER_EVENT_ON_EQUIP,
             player,
             it,
             bag,
@@ -981,7 +981,7 @@ public:
     void OnPlayerJoinBG(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_JOIN_BG,
+            Eclipse::PLAYER_EVENT_ON_PLAYER_JOIN_BG,
             player
         );
     }
@@ -989,7 +989,7 @@ public:
     void OnPlayerJoinArena(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_JOIN_ARENA,
+            Eclipse::PLAYER_EVENT_ON_PLAYER_JOIN_ARENA,
             player
         );
     }
@@ -997,7 +997,7 @@ public:
     void OnPlayerGetMaxPersonalArenaRatingRequirement(Player const* player, uint32 minSlot, uint32& maxArenaRating) const override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_MAX_PERSONAL_ARENA_RATING_REQUIREMENT,
+            Eclipse::PLAYER_EVENT_ON_GET_MAX_PERSONAL_ARENA_RATING_REQUIREMENT,
             player,
             minSlot,
             maxArenaRating
@@ -1012,7 +1012,7 @@ public:
     void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_LOOT_ITEM,
+            Eclipse::PLAYER_EVENT_ON_LOOT_ITEM,
             player,
             item,
             count,
@@ -1023,7 +1023,7 @@ public:
     void OnPlayerBeforeFillQuestLootItem(Player* player, LootItem& item) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_FILL_QUEST_LOOT_ITEM,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_FILL_QUEST_LOOT_ITEM,
             player,
             item
         );
@@ -1037,7 +1037,7 @@ public:
     void OnPlayerStoreNewItem(Player* player, Item* item, uint32 count) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_STORE_NEW_ITEM,
+            Eclipse::PLAYER_EVENT_ON_STORE_NEW_ITEM,
             player,
             item,
             count
@@ -1047,7 +1047,7 @@ public:
     void OnPlayerCreateItem(Player* player, Item* item, uint32 count) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_CREATE_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CREATE_ITEM,
             player,
             item,
             count
@@ -1057,7 +1057,7 @@ public:
     void OnPlayerQuestRewardItem(Player* player, Item* item, uint32 count) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_QUEST_REWARD_ITEM,
+            Eclipse::PLAYER_EVENT_ON_QUEST_REWARD_ITEM,
             player,
             item,
             count
@@ -1067,7 +1067,7 @@ public:
     bool OnPlayerCanPlaceAuctionBid(Player* player, AuctionEntry* auction) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_PLACE_AUCTION_BID,
+            Eclipse::PLAYER_EVENT_ON_CAN_PLACE_AUCTION_BID,
             player,
             auction
         );
@@ -1082,7 +1082,7 @@ public:
     void OnPlayerGroupRollRewardItem(Player* player, Item* item, uint32 count, RollVote voteType, Roll* roll) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM,
+            Eclipse::PLAYER_EVENT_ON_GROUP_ROLL_REWARD_ITEM,
             player,
             item,
             count,
@@ -1094,7 +1094,7 @@ public:
     bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_OPEN_ITEM,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_OPEN_ITEM,
             player,
             item
         );
@@ -1109,7 +1109,7 @@ public:
     bool OnPlayerBeforeQuestComplete(Player* player, uint32 quest_id) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_QUEST_COMPLETE,
             player,
             quest_id
         );
@@ -1124,7 +1124,7 @@ public:
     void OnPlayerQuestComputeXP(Player* player, Quest const* quest, uint32& xpValue) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_QUEST_COMPUTE_EXP,
+            Eclipse::PLAYER_EVENT_ON_QUEST_COMPUTE_EXP,
             player,
             quest,
             xpValue
@@ -1139,7 +1139,7 @@ public:
     void OnPlayerBeforeDurabilityRepair(Player* player, ObjectGuid npcGUID, ObjectGuid itemGUID, float& discountMod, uint8 guildBank) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_DURABILITY_REPAIR,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_DURABILITY_REPAIR,
             player,
             npcGUID,
             itemGUID,
@@ -1156,7 +1156,7 @@ public:
     void OnPlayerBeforeBuyItemFromVendor(Player* player, ObjectGuid vendorguid, uint32 vendorslot, uint32& item, uint8 count, uint8 bag, uint8 slot) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_BUY_ITEM_FROM_VENDOR,
             player,
             vendorguid,
             vendorslot,
@@ -1175,7 +1175,7 @@ public:
     void OnPlayerBeforeStoreOrEquipNewItem(Player* player, uint32 vendorslot, uint32& item, uint8 count, uint8 bag, uint8 slot, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_STORE_OR_EQUIP_NEW_ITEM,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_STORE_OR_EQUIP_NEW_ITEM,
             player,
             vendorslot,
             item,
@@ -1197,7 +1197,7 @@ public:
     void OnPlayerAfterStoreOrEquipNewItem(Player* player, uint32 vendorslot, Item* item, uint8 count, uint8 bag, uint8 slot, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM,
+            Eclipse::PLAYER_EVENT_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM,
             player,
             vendorslot,
             item,
@@ -1214,7 +1214,7 @@ public:
     void OnPlayerAfterUpdateMaxPower(Player* player, Powers& power, float& value) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_UPDATE_MAX_POWER,
+            Eclipse::PLAYER_EVENT_ON_AFTER_UPDATE_MAX_POWER,
             player,
             power,
             value
@@ -1239,7 +1239,7 @@ public:
     void OnPlayerAfterUpdateMaxHealth(Player* player, float& value) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_UPDATE_MAX_HEALTH,
+            Eclipse::PLAYER_EVENT_ON_AFTER_UPDATE_MAX_HEALTH,
             player,
             value
         );
@@ -1253,7 +1253,7 @@ public:
     void OnPlayerBeforeUpdateAttackPowerAndDamage(Player* player, float& level, float& val2, bool ranged) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_UPDATE_ATTACK_POWER_AND_DAMAGE,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_UPDATE_ATTACK_POWER_AND_DAMAGE,
             player,
             level,
             val2,
@@ -1279,7 +1279,7 @@ public:
     void OnPlayerAfterUpdateAttackPowerAndDamage(Player* player, float& level, float& base_attPower, float& attPowerMod, float& attPowerMultiplier, bool ranged) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_UPDATE_ATTACK_POWER_AND_DAMAGE,
+            Eclipse::PLAYER_EVENT_ON_AFTER_UPDATE_ATTACK_POWER_AND_DAMAGE,
             player,
             level,
             base_attPower,
@@ -1317,7 +1317,7 @@ public:
     void OnPlayerBeforeInitTalentForLevel(Player* player, uint8& level, uint32& talentPointsForLevel) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_INIT_TALENT_FOR_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_INIT_TALENT_FOR_LEVEL,
             player,
             level,
             talentPointsForLevel
@@ -1342,7 +1342,7 @@ public:
     void OnPlayerFirstLogin(Player* player) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_FIRST_LOGIN,
+            Eclipse::PLAYER_EVENT_ON_FIRST_LOGIN,
             player
         );
     }
@@ -1350,7 +1350,7 @@ public:
     void OnPlayerSetMaxLevel(Player* player, uint32& maxPlayerLevel) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_SET_MAX_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_SET_MAX_LEVEL,
             player,
             maxPlayerLevel
         );
@@ -1364,7 +1364,7 @@ public:
     bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid BattlemasterGuid, BattlegroundTypeId BGTypeID, uint8 joinAsGroup, GroupJoinBattlegroundResult& err) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE,
+            Eclipse::PLAYER_EVENT_ON_CAN_JOIN_IN_BATTLEGROUND_QUEUE,
             player,
             BattlemasterGuid,
             BGTypeID,
@@ -1404,7 +1404,7 @@ public:
     bool OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(Player* player) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_SHOULD_BE_REWARDED_WITH_MONEY_INSTEAD_OF_EXP,
+            Eclipse::PLAYER_EVENT_SHOULD_BE_REWARDED_WITH_MONEY_INSTEAD_OF_EXP,
             player
         );
 
@@ -1419,7 +1419,7 @@ public:
     void OnPlayerBeforeTempSummonInitStats(Player* player, TempSummon* tempSummon, uint32& duration) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_TEMP_SUMMON_INIT_STATS,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_TEMP_SUMMON_INIT_STATS,
             player,
             tempSummon,
             duration
@@ -1434,7 +1434,7 @@ public:
     void OnPlayerBeforeGuardianInitStatsForLevel(Player* player, Guardian* guardian, CreatureTemplate const* cinfo, PetType& petType) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_GUARDIAN_INIT_STATS_FOR_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_GUARDIAN_INIT_STATS_FOR_LEVEL,
             player,
             guardian,
             cinfo,
@@ -1450,7 +1450,7 @@ public:
     void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL,
             player,
             guardian
         );
@@ -1459,7 +1459,7 @@ public:
     void OnPlayerBeforeLoadPetFromDB(Player* player, uint32& petentry, uint32& petnumber, bool& current, bool& forceLoadFromDB) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_BEFORE_LOAD_PET_FROM_DB,
+            Eclipse::PLAYER_EVENT_ON_BEFORE_LOAD_PET_FROM_DB,
             player,
             petentry,
             petnumber,
@@ -1496,7 +1496,7 @@ public:
     bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid BattlemasterGuid, uint8 arenaslot, BattlegroundTypeId BGTypeID, uint8 joinAsGroup, uint8 IsRated, GroupJoinBattlegroundResult& err) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE,
+            Eclipse::PLAYER_EVENT_ON_CAN_JOIN_IN_ARENA_QUEUE,
             player,
             BattlemasterGuid,
             arenaslot,
@@ -1538,7 +1538,7 @@ public:
     bool OnPlayerCanBattleFieldPort(Player* player, uint8 arenaType, BattlegroundTypeId BGTypeID, uint8 action) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_BATTLEFIELD_PORT,
+            Eclipse::PLAYER_EVENT_ON_CAN_BATTLEFIELD_PORT,
             player,
             arenaType,
             BGTypeID,
@@ -1555,7 +1555,7 @@ public:
     bool OnPlayerCanGroupInvite(Player* player, std::string& membername) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_GROUP_INVITE,
+            Eclipse::PLAYER_EVENT_ON_CAN_GROUP_INVITE,
             player,
             membername
         );
@@ -1592,7 +1592,7 @@ public:
     bool OnPlayerCanGroupAccept(Player* player, Group* group) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_GROUP_ACCEPT,
+            Eclipse::PLAYER_EVENT_ON_CAN_GROUP_ACCEPT,
             player,
             group
         );
@@ -1608,7 +1608,7 @@ public:
     bool OnPlayerCanSellItem(Player* player, Item* item, Creature* creature) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_SELL_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_SELL_ITEM,
             player,
             item,
             creature
@@ -1625,7 +1625,7 @@ public:
     bool OnPlayerCanSendMail(Player* player, ObjectGuid receiverGuid, ObjectGuid mailbox, std::string& subject, std::string& body, uint32 money, uint32 COD, Item* item) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_SEND_MAIL,
+            Eclipse::PLAYER_EVENT_ON_CAN_SEND_MAIL,
             player,
             receiverGuid,
             mailbox,
@@ -1669,7 +1669,7 @@ public:
     void OnPlayerPetitionBuy(Player* player, Creature* creature, uint32& charterid, uint32& cost, uint32& type) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_PETITION_BUY,
+            Eclipse::PLAYER_EVENT_PETITION_BUY,
             player,
             creature,
             charterid,
@@ -1701,7 +1701,7 @@ public:
     void OnPlayerPetitionShowList(Player* player, Creature* creature, uint32& CharterEntry, uint32& CharterDispayID, uint32& CharterCost) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_PETITION_SHOW_LIST,
+            Eclipse::PLAYER_EVENT_PETITION_SHOW_LIST,
             player,
             creature,
             CharterEntry,
@@ -1733,7 +1733,7 @@ public:
     void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool isDungeon, float& rate) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_REWARD_KILL_REWARDER,
+            Eclipse::PLAYER_EVENT_ON_REWARD_KILL_REWARDER,
             player,
             rewarder,
             isDungeon,
@@ -1749,7 +1749,7 @@ public:
     bool OnPlayerCanGiveMailRewardAtGiveLevel(Player* player, uint8 level) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_GIVE_MAIL_REWARD_AT_GIVE_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_CAN_GIVE_MAIL_REWARD_AT_GIVE_LEVEL,
             player,
             level
         );
@@ -1765,7 +1765,7 @@ public:
     void OnPlayerDeleteFromDB(CharacterDatabaseTransaction /*trans*/, uint32 guid) override
     {
         Eclipse::EventDispatcher::GetInstance().TriggerEvent(
-            Eclipse::PLAYERHOOK_ON_DELETE_FROM_DB,
+            Eclipse::PLAYER_EVENT_ON_DELETE_FROM_DB,
             Eclipse::PlayerGuid(guid)
         );
     }
@@ -1773,7 +1773,7 @@ public:
     bool OnPlayerCanRepopAtGraveyard(Player* player) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD,
+            Eclipse::PLAYER_EVENT_ON_CAN_REPOP_AT_GRAVEYARD,
             player
         );
 
@@ -1788,7 +1788,7 @@ public:
     Optional<bool> OnPlayerIsClass(Player const* player, Classes playerClass, ClassContext context) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_IS_CLASS,
+            Eclipse::PLAYER_EVENT_ON_PLAYER_IS_CLASS,
             player,
             playerClass,
             context
@@ -1805,7 +1805,7 @@ public:
     void OnPlayerGetMaxSkillValue(Player* player, uint32 skill, int32& value, bool IsPure) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_MAX_SKILL_VALUE,
+            Eclipse::PLAYER_EVENT_ON_GET_MAX_SKILL_VALUE,
             player,
             skill,
             value,
@@ -1821,7 +1821,7 @@ public:
     bool OnPlayerHasActivePowerType(Player const* player, Powers power) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_PLAYER_HAS_ACTIVE_POWER_TYPE,
+            Eclipse::PLAYER_EVENT_ON_PLAYER_HAS_ACTIVE_POWER_TYPE,
             player,
             power
         );
@@ -1837,7 +1837,7 @@ public:
     void OnPlayerUpdateGatheringSkill(Player* player, uint32 skill_id, uint32 current, uint32 gray, uint32 green, uint32 yellow, uint32& gain) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_GATHERING_SKILL,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_GATHERING_SKILL,
             player,
             skill_id,
             current,
@@ -1856,7 +1856,7 @@ public:
     void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 current_level, uint32& gain) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_CRAFTING_SKILL,
             player,
             skill,
             current_level,
@@ -1872,7 +1872,7 @@ public:
     bool OnPlayerUpdateFishingSkill(Player* player, int32 skill, int32 zone_skill, int32 chance, int32 roll) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_UPDATE_FISHING_SKILL,
+            Eclipse::PLAYER_EVENT_ON_UPDATE_FISHING_SKILL,
             player,
             skill,
             zone_skill,
@@ -1891,7 +1891,7 @@ public:
     bool OnPlayerCanAreaExploreAndOutdoor(Player* player) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_AREA_EXPLORE_AND_OUTDOOR,
+            Eclipse::PLAYER_EVENT_ON_CAN_AREA_EXPLORE_AND_OUTDOOR,
             player
         );
 
@@ -1906,7 +1906,7 @@ public:
     void OnPlayerVictimRewardBefore(Player* player, Player* victim, uint32& killer_title, uint32& victim_title) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_VICTIM_REWARD_BEFORE,
+            Eclipse::PLAYER_EVENT_ON_VICTIM_REWARD_BEFORE,
             player,
             victim,
             killer_title,
@@ -1932,7 +1932,7 @@ public:
     void OnPlayerVictimRewardAfter(Player* player, Player* victim, uint32& killer_title, uint32& victim_rank, float& honor_f) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_VICTIM_REWARD_AFTER,
+            Eclipse::PLAYER_EVENT_ON_VICTIM_REWARD_AFTER,
             player,
             victim,
             killer_title,
@@ -1964,7 +1964,7 @@ public:
     void OnPlayerCustomScalingStatValueBefore(Player* player, ItemTemplate const* proto, uint8 slot, bool apply, uint32& CustomScalingStatValue) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CUSTOM_SCALING_STAT_VALUE_BEFORE,
+            Eclipse::PLAYER_EVENT_ON_CUSTOM_SCALING_STAT_VALUE_BEFORE,
             player,
             proto,
             slot,
@@ -1981,7 +1981,7 @@ public:
     void OnPlayerCustomScalingStatValue(Player* player, ItemTemplate const* proto, uint32& statType, int32& val, uint8 itemProtoStatNumber, uint32 ScalingStatValue, ScalingStatValuesEntry const* ssv) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_CUSTOM_SCALING_STAT_VALUE,
+            Eclipse::PLAYER_EVENT_ON_CUSTOM_SCALING_STAT_VALUE,
             player,
             proto,
             statType,
@@ -2010,7 +2010,7 @@ public:
     void OnPlayerApplyItemModsBefore(Player* player, uint8 slot, bool apply, uint8 itemProtoStatNumber, uint32 statType, int32& val) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_APPLY_ITEM_MODS_BEFORE,
+            Eclipse::PLAYER_EVENT_ON_APPLY_ITEM_MODS_BEFORE,
             player,
             slot,
             apply,
@@ -2028,7 +2028,7 @@ public:
     void OnPlayerApplyEnchantmentItemModsBefore(Player* player, Item* item, EnchantmentSlot slot, bool apply, uint32 enchant_spell_id, uint32& enchant_amount) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_APPLY_ENCHANTMENT_ITEM_MODS_BEFORE,
+            Eclipse::PLAYER_EVENT_ON_APPLY_ENCHANTMENT_ITEM_MODS_BEFORE,
             player,
             item,
             slot,
@@ -2046,7 +2046,7 @@ public:
     void OnPlayerApplyWeaponDamage(Player* player, uint8 slot, ItemTemplate const* proto, float& minDamage, float& maxDamage, uint8 damageIndex) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_APPLY_WEAPON_DAMAGE,
+            Eclipse::PLAYER_EVENT_ON_APPLY_WEAPON_DAMAGE,
             player,
             slot,
             proto,
@@ -2074,7 +2074,7 @@ public:
     bool OnPlayerCanArmorDamageModifier(Player* player) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_ARMOR_DAMAGE_MODIFIER,
+            Eclipse::PLAYER_EVENT_ON_CAN_ARMOR_DAMAGE_MODIFIER,
             player
         );
 
@@ -2089,7 +2089,7 @@ public:
     void OnPlayerGetFeralApBonus(Player* player, int32& feral_bonus, int32 dpsMod, ItemTemplate const* proto, ScalingStatValuesEntry const* ssv) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_FERAL_AP_BONUS,
+            Eclipse::PLAYER_EVENT_ON_GET_FERAL_AP_BONUS,
             player,
             feral_bonus,
             dpsMod,
@@ -2106,7 +2106,7 @@ public:
     bool OnPlayerCanApplyWeaponDependentAuraDamageMod(Player* player, Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_APPLY_WEAPON_DEPENDENT_AURA_DAMAGE_MOD,
+            Eclipse::PLAYER_EVENT_ON_CAN_APPLY_WEAPON_DEPENDENT_AURA_DAMAGE_MOD,
             player,
             item,
             attackType,
@@ -2125,7 +2125,7 @@ public:
     bool OnPlayerCanApplyEquipSpell(Player* player, SpellInfo const* spellInfo, Item* item, bool apply, bool form_change) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_APPLY_EQUIP_SPELL,
+            Eclipse::PLAYER_EVENT_ON_CAN_APPLY_EQUIP_SPELL,
             player,
             spellInfo,
             item,
@@ -2144,7 +2144,7 @@ public:
     bool OnPlayerCanApplyEquipSpellsItemSet(Player* player, ItemSetEffect* eff) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_APPLY_EQUIP_SPELLS_ITEM_SET,
+            Eclipse::PLAYER_EVENT_ON_CAN_APPLY_EQUIP_SPELLS_ITEM_SET,
             player,
             eff
         );
@@ -2160,7 +2160,7 @@ public:
     bool OnPlayerCanCastItemCombatSpell(Player* player, Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_CAST_ITEM_COMBAT_SPELL,
+            Eclipse::PLAYER_EVENT_ON_CAN_CAST_ITEM_COMBAT_SPELL,
             player,
             target,
             attType,
@@ -2181,7 +2181,7 @@ public:
     bool OnPlayerCanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
+            Eclipse::PLAYER_EVENT_ON_CAN_CAST_ITEM_USE_SPELL,
             player,
             item,
             targets,
@@ -2213,7 +2213,7 @@ public:
     void OnPlayerApplyAmmoBonuses(Player* player, ItemTemplate const* proto, float& currentAmmoDPS) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_APPLY_AMMO_BONUSES,
+            Eclipse::PLAYER_EVENT_ON_APPLY_AMMO_BONUSES,
             player,
             proto,
             currentAmmoDPS
@@ -2228,7 +2228,7 @@ public:
     bool OnPlayerCanEquipItem(Player* player, uint8 slot, uint16& dest, Item* pItem, bool swap, bool not_loading) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_EQUIP_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_EQUIP_ITEM,
             player,
             slot,
             dest,
@@ -2265,7 +2265,7 @@ public:
     bool OnPlayerCanUnequipItem(Player* player, uint16 pos, bool swap) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_UNEQUIP_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_UNEQUIP_ITEM,
             player,
             pos,
             swap
@@ -2282,7 +2282,7 @@ public:
     bool OnPlayerCanUseItem(Player* player, ItemTemplate const* proto, InventoryResult& inventoryResult) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_USE_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_USE_ITEM,
             player,
             proto,
             inventoryResult
@@ -2316,7 +2316,7 @@ public:
     bool OnPlayerCanSaveEquipNewItem(Player* player, Item* item, uint16 pos, bool update) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_SAVE_EQUIP_NEW_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_SAVE_EQUIP_NEW_ITEM,
             player,
             item,
             pos,
@@ -2334,7 +2334,7 @@ public:
     bool OnPlayerCanApplyEnchantment(Player* player, Item* item, EnchantmentSlot slot, bool apply, bool apply_dur, bool ignore_condition) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_APPLY_ENCHANTMENT,
+            Eclipse::PLAYER_EVENT_ON_CAN_APPLY_ENCHANTMENT,
             player,
             item,
             slot,
@@ -2354,7 +2354,7 @@ public:
     void OnPlayerGetQuestRate(Player* player, float& rate) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_QUEST_RATE,
+            Eclipse::PLAYER_EVENT_ON_GET_QUEST_RATE,
             player,
             rate
         );
@@ -2368,7 +2368,7 @@ public:
     bool OnPlayerPassedQuestKilledMonsterCredit(Player* player, Quest const* qinfo, uint32 entry, uint32 real_entry, ObjectGuid guid) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
+            Eclipse::PLAYER_EVENT_PASSED_QUEST_KILLED_MONSTER_CREDIT,
             player,
             qinfo,
             entry,
@@ -2387,7 +2387,7 @@ public:
     bool OnPlayerCheckItemInSlotAtLoadInventory(Player* player, Item* item, uint8 slot, uint8& err, uint16& dest) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CHECK_ITEM_IN_SLOT_AT_LOAD_INVENTORY,
+            Eclipse::PLAYER_EVENT_CHECK_ITEM_IN_SLOT_AT_LOAD_INVENTORY,
             player,
             item,
             slot,
@@ -2428,7 +2428,7 @@ public:
     bool OnPlayerNotAvoidSatisfy(Player* player, DungeonProgressionRequirements const* ar, uint32 target_map, bool report) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_NOT_AVOID_SATISFY,
+            Eclipse::PLAYER_EVENT_NOT_AVOID_SATISFY,
             player,
             ar,
             target_map,
@@ -2446,7 +2446,7 @@ public:
     bool OnPlayerNotVisibleGloballyFor(Player* player, Player const* u) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_NOT_VISIBLE_GLOBALLY_FOR,
+            Eclipse::PLAYER_EVENT_NOT_VISIBLE_GLOBALLY_FOR,
             player,
             u
         );
@@ -2462,7 +2462,7 @@ public:
     void OnPlayerGetArenaPersonalRating(Player* player, uint8 slot, uint32& rating) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_ARENA_PERSONAL_RATING,
+            Eclipse::PLAYER_EVENT_ON_GET_ARENA_PERSONAL_RATING,
             player,
             slot,
             rating
@@ -2477,7 +2477,7 @@ public:
     void OnPlayerGetArenaTeamId(Player* player, uint8 slot, uint32& rating) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_ARENA_TEAM_ID,
+            Eclipse::PLAYER_EVENT_ON_GET_ARENA_TEAM_ID,
             player,
             slot,
             rating
@@ -2492,7 +2492,7 @@ public:
     void OnPlayerIsFFAPvP(Player* player, bool& active) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_IS_FFA_PVP,
+            Eclipse::PLAYER_EVENT_ON_IS_FFA_PVP,
             player,
             active
         );
@@ -2506,7 +2506,7 @@ public:
     void OnPlayerFfaPvpStateUpdate(Player* player, bool active) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE,
+            Eclipse::PLAYER_EVENT_ON_FFA_PVP_STATE_UPDATE,
             player,
             active
         );
@@ -2520,7 +2520,7 @@ public:
     void OnPlayerIsPvP(Player* player, bool& active) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_IS_PVP,
+            Eclipse::PLAYER_EVENT_ON_IS_PVP,
             player,
             active
         );
@@ -2534,7 +2534,7 @@ public:
     void OnPlayerGetMaxSkillValueForLevel(Player* player, uint16& value) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_GET_MAX_SKILL_VALUE_FOR_LEVEL,
+            Eclipse::PLAYER_EVENT_ON_GET_MAX_SKILL_VALUE_FOR_LEVEL,
             player,
             value
         );
@@ -2548,7 +2548,7 @@ public:
     bool OnPlayerNotSetArenaTeamInfoField(Player* player, uint8 slot, ArenaTeamInfoType type, uint32 value) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_NOT_SET_ARENA_TEAM_INFO_FIELD,
+            Eclipse::PLAYER_EVENT_NOT_SET_ARENA_TEAM_INFO_FIELD,
             player,
             slot,
             type,
@@ -2572,7 +2572,7 @@ public:
     bool OnPlayerCanEnterMap(Player* player, MapEntry const* entry, InstanceTemplate const* instance, MapDifficulty const* mapDiff, bool loginCheck) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_ENTER_MAP,
+            Eclipse::PLAYER_EVENT_ON_CAN_ENTER_MAP,
             player,
             entry,
             instance,
@@ -2591,7 +2591,7 @@ public:
     bool OnPlayerCanInitTrade(Player* player, Player* target) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_INIT_TRADE,
+            Eclipse::PLAYER_EVENT_ON_CAN_INIT_TRADE,
             player,
             target
         );
@@ -2607,7 +2607,7 @@ public:
     bool OnPlayerCanSetTradeItem(Player* player, Item* tradedItem, uint8 tradeSlot) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_CAN_SET_TRADE_ITEM,
+            Eclipse::PLAYER_EVENT_ON_CAN_SET_TRADE_ITEM,
             player,
             tradedItem,
             tradeSlot
@@ -2624,7 +2624,7 @@ public:
     void OnPlayerSetServerSideVisibility(Player* player, ServerSideVisibilityType& type, AccountTypes& sec) override
     {
         std::optional<std::any> result = Eclipse::EventDispatcher::GetInstance().TriggerWithRetValueEvent(
-            Eclipse::PLAYERHOOK_ON_SET_SERVER_SIDE_VISIBILITY,
+            Eclipse::PLAYER_EVENT_ON_SET_SERVER_SIDE_VISIBILITY,
             player,
             type,
             sec
@@ -2656,16 +2656,16 @@ public:
         ALLMAPHOOK_ON_MAP_UPDATE,
      }) { }
 
-    void OnPlayerEnterAll(Map* map, Player* player) override
-    {
-        uint32 mapId = map->GetId();
-        Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
+    // void OnPlayerEnterAll(Map* map, Player* player) override
+    // {
+    //     uint32 mapId = map->GetId();
+    //     Eclipse::MapStateManager::GetInstance().GetStateForMap(mapId);
 
-        Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_PLAYER_ENTER,
-            map,
-            player
-        );
-    }
+    //     Eclipse::EventDispatcher::GetInstance().TriggerEvent(Eclipse::MAP_EVENT_ON_PLAYER_ENTER,
+    //         map,
+    //         player
+    //     );
+    // }
 
     void OnCreateMap(Map* map) override
     {
