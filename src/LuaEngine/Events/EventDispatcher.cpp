@@ -15,7 +15,7 @@ namespace Eclipse
         std::vector<LuaEngine*> engines;
         engines.reserve(2);
 
-        static thread_local auto& manager = MapStateManager::GetInstance();
+        auto& manager = MapStateManager::GetInstance();
 
         auto* globalEngine = manager.GetGlobalState();
         if (globalEngine)
@@ -72,11 +72,93 @@ namespace Eclipse
         std::vector<LuaEngine*> engines;
         engines.reserve(1);
 
-        static thread_local auto& manager = MapStateManager::GetInstance();
+        auto& manager = MapStateManager::GetInstance();
         auto* globalEngine = manager.GetGlobalState();
         if (globalEngine)
         {
             engines.emplace_back(globalEngine);
+        }
+
+        return engines;
+    }
+
+    // Wrapper type implementations
+    std::vector<LuaEngine*> EventDispatcher::GetRelevantEngines(const PlayerGuid& playerGuid)
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(1);
+
+        auto& manager = MapStateManager::GetInstance();
+        auto* globalEngine = manager.GetGlobalState();
+        if (globalEngine)
+        {
+            engines.emplace_back(globalEngine);
+        }
+
+        return engines;
+    }
+
+    std::vector<LuaEngine*> EventDispatcher::GetRelevantEngines(const CreatureEntry& creatureEntry)
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(1);
+
+        auto& manager = MapStateManager::GetInstance();
+        auto* globalEngine = manager.GetGlobalState();
+        if (globalEngine)
+        {
+            engines.emplace_back(globalEngine);
+        }
+
+        return engines;
+    }
+
+    std::vector<LuaEngine*> EventDispatcher::GetRelevantEngines(const GameObjectEntry& gameObjectEntry)
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(1);
+
+        auto& manager = MapStateManager::GetInstance();
+        auto* globalEngine = manager.GetGlobalState();
+        if (globalEngine)
+        {
+            engines.emplace_back(globalEngine);
+        }
+
+        return engines;
+    }
+
+    std::vector<LuaEngine*> EventDispatcher::GetRelevantEngines(const ItemEntry& itemEntry)
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(1);
+
+        auto& manager = MapStateManager::GetInstance();
+        auto* globalEngine = manager.GetGlobalState();
+        if (globalEngine)
+        {
+            engines.emplace_back(globalEngine);
+        }
+
+        return engines;
+    }
+
+    std::vector<LuaEngine*> EventDispatcher::GetRelevantEngines(const MapId& mapId)
+    {
+        std::vector<LuaEngine*> engines;
+        engines.reserve(2);
+
+        auto& manager = MapStateManager::GetInstance();
+        auto* globalEngine = manager.GetGlobalState();
+        if (globalEngine)
+        {
+            engines.emplace_back(globalEngine);
+        }
+
+        auto* mapEngine = manager.GetStateForMap(mapId.mapId);
+        if (mapEngine && mapEngine != globalEngine)
+        {
+            engines.emplace_back(mapEngine);
         }
 
         return engines;

@@ -31,6 +31,15 @@ namespace Eclipse
                 auto engines = GetRelevantEngines<ObjectGuid>(nullptr);
                 TriggerOnEngines<FirstArgType>(engines, eventId, std::forward<Args>(args)...);
             }
+            else if constexpr (std::is_same_v<FirstArgType, PlayerGuid> ||
+                               std::is_same_v<FirstArgType, CreatureEntry> ||
+                               std::is_same_v<FirstArgType, GameObjectEntry> ||
+                               std::is_same_v<FirstArgType, ItemEntry> ||
+                               std::is_same_v<FirstArgType, MapId>)
+            {
+                auto engines = GetRelevantEngines(firstArg);
+                TriggerOnEngines<FirstArgType>(engines, eventId, std::forward<Args>(args)...);
+            }
             else
             {
                 auto engines = GetRelevantEngines(firstArg);
@@ -147,6 +156,13 @@ namespace Eclipse
                 }
             }
         }
+
+        // Specializations for wrapper types
+        std::vector<LuaEngine*> GetRelevantEngines(const PlayerGuid& playerGuid);
+        std::vector<LuaEngine*> GetRelevantEngines(const CreatureEntry& creatureEntry);
+        std::vector<LuaEngine*> GetRelevantEngines(const GameObjectEntry& gameObjectEntry);
+        std::vector<LuaEngine*> GetRelevantEngines(const ItemEntry& itemEntry);
+        std::vector<LuaEngine*> GetRelevantEngines(const MapId& mapId);
     };
 }
 

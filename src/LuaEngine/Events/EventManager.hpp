@@ -53,6 +53,12 @@ namespace Eclipse
 
         template<EventType Type>
         auto& GetKeyedEventContainer();
+
+        template<typename... Args>
+        void TriggerEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args);
+
+        template<typename... Args>
+        bool TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args);
     };
 
     // Template implementation
@@ -80,13 +86,25 @@ namespace Eclipse
     {
         static_assert(sizeof...(args) > 0, "At least one argument required");
 
-        constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
-        auto& eventContainer = GetEventContainer<eventType>();
-
-        const auto it = eventContainer.find(eventId);
-        if (it != eventContainer.end())
+        using FirstArgType = std::tuple_element_t<0, std::tuple<Args...>>;
+        
+        if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
         {
-            const auto& callbacks = it->second;
+            // Runtime type detection for ObjectGuid
+            auto firstArg = std::get<0>(std::forward_as_tuple(args...));
+            auto eventType = get_event_type(firstArg);
+            TriggerEventWithRuntimeType(eventType, eventId, std::forward<Args>(args)...);
+        }
+        else
+        {
+            // Compile-time type detection for other types
+            constexpr auto eventType = get_event_type<FirstArgType>();
+            auto& eventContainer = GetEventContainer<eventType>();
+
+            const auto it = eventContainer.find(eventId);
+            if (it != eventContainer.end())
+            {
+                const auto& callbacks = it->second;
             for (const auto& callback : callbacks)
             {
                 if (callback.valid())
@@ -99,6 +117,7 @@ namespace Eclipse
                 }
             }
         }
+        }
     }
 
     template<typename... Args>
@@ -106,8 +125,20 @@ namespace Eclipse
     {
         static_assert(sizeof...(args) > 0, "At least one argument required");
 
-        constexpr auto eventType = get_event_type<std::tuple_element_t<0, std::tuple<Args...>>>();
-        auto& eventContainer = events[eventType];
+        using FirstArgType = std::tuple_element_t<0, std::tuple<Args...>>;
+        
+        if constexpr (std::is_same_v<FirstArgType, ObjectGuid>)
+        {
+            // Runtime type detection for ObjectGuid
+            auto firstArg = std::get<0>(std::forward_as_tuple(args...));
+            auto eventType = get_event_type(firstArg);
+            return TriggerWithRetValueEventWithRuntimeType(eventType, eventId, std::forward<Args>(args)...);
+        }
+        else
+        {
+            // Compile-time type detection for other types
+            constexpr auto eventType = get_event_type<FirstArgType>();
+            auto& eventContainer = events[eventType];
 
 
         const auto it = eventContainer.find(eventId);
@@ -146,6 +177,7 @@ namespace Eclipse
 
         // All callbacks either returned true or nothing - allow the action
         return true;
+        }
     }
 
     template<typename... Args>
@@ -242,6 +274,117 @@ namespace Eclipse
             }
         }
         return false;
+    }
+
+    template<typename... Args>
+    void EventManager::TriggerEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args)
+    {
+        std::unordered_map<uint32, std::vector<sol::function>>* eventContainer = nullptr;
+        switch (eventType)
+        {
+            case EventType::PLAYER:
+                eventContainer = &GetEventContainer<EventType::PLAYER>();
+                break;
+            case EventType::CREATURE:
+                eventContainer = &GetEventContainer<EventType::CREATURE>();
+                break;
+            case EventType::GAMEOBJECT:
+                eventContainer = &GetEventContainer<EventType::GAMEOBJECT>();
+                break;
+            case EventType::ITEM:
+                eventContainer = &GetEventContainer<EventType::ITEM>();
+                break;
+            case EventType::MAP:
+                eventContainer = &GetEventContainer<EventType::MAP>();
+                break;
+        }
+
+        if (eventContainer)
+        {
+            const auto it = eventContainer->find(eventId);
+            if (it != eventContainer->end())
+            {
+                const auto& callbacks = it->second;
+                for (const auto& callback : callbacks)
+                {
+                    if (callback.valid())
+                    {
+                        try
+                        {
+                            callback(eventId, std::forward<Args>(args)...);
+                        }
+                        catch (const std::exception&) {}
+                    }
+                }
+            }
+        }
+    }
+
+    template<typename... Args>
+    bool EventManager::TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args)
+    {
+        std::unordered_map<uint32, std::vector<sol::function>>* eventContainer = nullptr;
+        
+        switch (eventType)
+        {
+            case EventType::PLAYER:
+                eventContainer = &GetEventContainer<EventType::PLAYER>();
+                break;
+            case EventType::CREATURE:
+                eventContainer = &GetEventContainer<EventType::CREATURE>();
+                break;
+            case EventType::GAMEOBJECT:
+                eventContainer = &GetEventContainer<EventType::GAMEOBJECT>();
+                break;
+            case EventType::ITEM:
+                eventContainer = &GetEventContainer<EventType::ITEM>();
+                break;
+            case EventType::MAP:
+                eventContainer = &GetEventContainer<EventType::MAP>();
+                break;
+        }
+
+        if (!eventContainer)
+        {
+            return true;
+        }
+
+        const auto it = eventContainer->find(eventId);
+        if (it == eventContainer->end())
+        {
+            // No callbacks registered, allow by default
+            return true;
+        }
+
+        const auto& callbacks = it->second;
+
+        // Check all callbacks - if any returns false, block the action
+        for (const auto& callback : callbacks)
+        {
+            if (callback.valid())
+            {
+                try
+                {
+                    sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
+
+                    if (result.valid() && result.get_type() == sol::type::boolean)
+                    {
+                        if (!result.get<bool>())
+                        {
+                            return false;
+                        }
+                    }
+                    // If callback returns non-boolean, nil, or true, continue (treat as allow)
+                }
+                catch (const std::exception&) 
+                {
+                    // If callback throws, treat as allowing the action
+                }
+            }
+        }
+
+        // All callbacks either returned true or nothing - allow the action
+        return true;
     }
 
 }

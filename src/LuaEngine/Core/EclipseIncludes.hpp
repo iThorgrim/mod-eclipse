@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "Log.h"
+#include "SpellAuraEffects.h"
 #include "Player.h"
 #include "Chat.h"
 #include "Group.h"
