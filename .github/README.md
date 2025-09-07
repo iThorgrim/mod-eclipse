@@ -1,319 +1,141 @@
-# 🌙 Eclipse - High-Performance Lua Engine for AzerothCore
+<div align="center">
 
-[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![AzerothCore](https://img.shields.io/badge/AzerothCore-Compatible-brightgreen.svg)](https://www.azerothcore.org/)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://github.com/iThorgrim/mod-eclipse)
-[![Performance](https://img.shields.io/badge/Performance-25%25%20Faster-success.svg)](#-performance-benchmarks)
-[![LuaJIT](https://img.shields.io/badge/LuaJIT-Supported-orange.svg)](#-lua-version-support)
+# Eclipse - Lua Engine for AzerothCore
 
-Eclipse is a **next-generation Lua scripting engine** designed specifically for AzerothCore, delivering **superior performance**, **advanced caching**, and **modern architecture**. Built with Sol2 and optimized for production environments.
+*Modern Lua scripting engine for AzerothCore*
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ZKSVREE7)
+[![Lua](https://img.shields.io/badge/Lua-5.4-2C2D72?style=for-the-badge&logo=lua&logoColor=white)](http://www.lua.org/manual/5.4/)
+[![AzerothCore](https://img.shields.io/badge/AzerothCore-Compatible-darkgreen?style=for-the-badge)](http://www.azerothcore.org/)
+
+---
+</div>
+
+> [!IMPORTANT]  
+> Eclipse is a **modern Lua scripting engine** designed for AzerothCore.  
+> Built with **Sol2**, it offers caching, hot reload, multi-state architecture, and full API integration.
+
+## 🚀 Overview
+
+Eclipse enables developers and administrators to extend AzerothCore with Lua scripts in a clean, modular, and production-ready way.
+
+### ✨ Key Features
+- 📂 **Caching system** with timestamp validation
+- 🔄 **Hot reload** without server restart  
+- 🧩 **Multi-state architecture** (global + per-map)  
+- 📁 **Dynamic path management** for `require()`  
+- 🛡️ **Error handling** with safe recovery  
+- 🧵 **Thread-safe messaging**  
+- ⚙️ **ConfigValueCache integration**  
+- 🎮 **In-game commands** via `.eclipse`  
+- 🔗 **Extensive API bindings** (Player, Creature, GameObject, etc.)  
 
 ---
 
-## 🎯 Key Features
-
-### 🚀 **Performance Optimized**
-- **25% faster execution** than existing solutions
-- **LuaJIT support** for maximum performance
-- **Optimized Sol2 configuration** with JIT-aware settings
-- **Memory efficient** with superior garbage collection
-
-### 🧠 **Smart & Modern**
-- **Smart caching system** with MD5-based script validation
-- **Hot reload capabilities** - modify scripts without server restart
-- **Multi-state architecture** with global compiler and per-map instances
-- **Dynamic path management** for automatic `require()` discovery
-
-### 🛡️ **Production Ready**
-- **Comprehensive error handling** with graceful failure recovery
-- **Thread-safe message system** for inter-state communication
-- **ConfigValueCache integration** with AzerothCore's native configuration
-- **In-game management commands** with `.eclipse` suite
-
-### 🎮 **Developer Friendly**
-- **Extensive API bindings** for Player, Creature, GameObject, and more
-- **Event system integration** for seamless hook management  
-- **Comprehensive documentation** and examples
-- **Easy migration path** from existing Lua solutions
-
----
-
-## 🏗️ Architecture Overview
+## 📂 Architecture Overview
 
 ```
 mod-eclipse/
-├── 📁 src/
-│   ├── 🧠 LuaEngine/
-│   │   ├── 🏗️ Core/
-│   │   │   ├── LuaEngine.cpp      # Main engine orchestrator  
-│   │   │   ├── LuaState.cpp       # Sol2 state management
-│   │   │   └── EclipseConfig.cpp  # ConfigValueCache integration
-│   │   ├── 📜 Scripting/
-│   │   │   ├── ScriptLoader.cpp   # Script discovery & loading
-│   │   │   ├── LuaCompiler.cpp    # MoonScript compilation
-│   │   │   ├── LuaCache.cpp       # MD5-based bytecode cache
-│   │   │   └── LuaPathManager.cpp # Dynamic require() paths
-│   │   ├── 🛠️ Utils/
-│   │   │   └── MessageManager.cpp # Inter-state messaging
-│   │   └── 🔗 Methods/
-│   │       ├── Methods.cpp        # Core Lua bindings
-│   │       ├── PlayerMethods.hpp  # Player API bindings
-│   │       ├── CreatureMethods.hpp # Creature API bindings
-│   │       └── GlobalMethods.cpp  # Engine management functions
-│   └── 📚 sol/                    # Optimized Sol2 configuration
-├── 📖 docs/                       # Documentation & guides
-│   ├── HOW-TO-INSTALL.md         # Installation guide
-│   └── HOW-TO-ADD-METHOD.md      # Method binding tutorial
-└── 🧪 lua_scripts/examples/      # Example scripts
+├── src/
+│   ├── LuaEngine/
+│   │   ├── Core/
+│   │   ├── Scripting/
+│   │   ├── Utils/
+│   │   └── Methods/
+│   └── sol/
+├── docs/
+└── lua_scripts/examples/
 ```
 
 ---
 
-## 🚀 Quick Start
+## ⚡ Installation
 
-### 📦 Installation
-
-**Step 1: Clone the Module**
 ```bash
 cd azerothcore-wotlk/modules/
 git clone https://github.com/iThorgrim/mod-eclipse.git
-```
-
-**Step 2: Apply CMake Patch**
-```bash
-git apply mod-eclipse/cmake_patch.diff
-```
-
-**Step 3: Configure & Build**
-```bash
 cd ../build
-cmake .. -DLUA_VERSION=luajit  # Or lua54 for features
+cmake .. -DLUA_VERSION=luajit
 make -j$(nproc)
 ```
 
-> 📚 **Need detailed instructions?** Check out our [Installation Guide](docs/HOW-TO-INSTALL.md)
+➡️ See the [Installation Guide](docs/HOW-TO-INSTALL.md) for details.
 
-### 🎮 First Script
+---
+
+## 📝 First Script
 
 Create `lua_scripts/hello_eclipse.lua`:
-```lua
-print("🌟 Hello Eclipse! Server is powered by high-performance Lua!")
 
--- Your first Eclipse script is ready!
--- Check server logs to see this message on startup
+```lua
+print("Hello Eclipse! Lua scripting is now enabled.")
 ```
 
 ---
 
-## 🎯 Implementation Status
+## ✅ Implementation Status
 
-### ✅ **Production Features**
-- [x] **🏗️ Multi-state Architecture** - Global compiler (-1) + per-map instances  
-- [x] **🧠 Advanced Caching** - MD5-based script validation with hot reload
-- [x] **⚙️ ConfigValueCache Integration** - AzerothCore-native configuration  
-- [x] **⚡ Sol2 Performance Optimization** - JIT-aware, zero-overhead configuration
-- [x] **📁 Dynamic Path Management** - Automatic `require()` path discovery
-- [x] **🔄 Thread-safe Message System** - Inter-state communication
-- [x] **🛡️ Comprehensive Error Handling** - Graceful failure recovery
-- [x] **🎮 In-game Management Commands** - `.eclipse` command suite
-- [x] **🎯 Player API Bindings** - Complete Player method exposure
-- [x] **🏰 Creature API Bindings** - Comprehensive Creature scripting
-- [x] **🗃️ GameObject Bindings** - Full GameObject manipulation
-
-### 🚧 **In Development**  
-- [ ] 🔍 **Advanced Debugging Tools** - Profiling and script analysis
-- [ ] 📊 **Performance Monitoring** - Real-time performance metrics
-- [ ] 🎨 **Visual Script Editor** - Web-based script management
-- [ ] 🌐 **REST API Integration** - External service communication
-
-
----
-
-## 🎮 Lua Version Support
-
-| Version | Status | Performance | Use Case |
-|---------|:------:|:-----------:|----------|
-| **LuaJIT** | ✅ | ⚡⚡⚡ **Best** | Production servers |
-| **Lua 5.4** | ✅ | ⚡⚡ Great | Modern features |
-| **Lua 5.3** | ✅ | ⚡⚡ Good | Stable choice |
-| **Lua 5.2** | ✅ | ⚡ Basic | Legacy support |
-| **Lua 5.1** | ✅ | ⚡ Basic | Compatibility |
-
-> 🎯 **Recommendation**: Use **LuaJIT** for production environments to maximize performance benefits.
+- 🧩 Multi-state architecture  
+- 📂 Timestamp-based caching with hot reload
+- ⚙️ ConfigValueCache integration  
+- 🔗 Sol2 integration  
+- 📁 Dynamic path management  
+- 🧵 Thread-safe messaging  
+- 🛡️ Error handling with recovery  
+- 🎮 `.eclipse` command suite  
+- 👤 Player, Creature, GameObject API bindings  
 
 ---
 
 ## 🔧 Configuration
 
-### ⚙️ **mod_eclipse.conf Settings**
+`mod_eclipse.conf`:
 
 ```ini
-###################################################################################################
-# ECLIPSE LUA ENGINE
-###################################################################################################
-
-# Enable/disable Eclipse engine
-# Default: 1 (enabled)
 Eclipse.Enabled = 1
-
-# Script directory path (relative to server binary)
-# Default: "lua_scripts"
+Eclipse.Compatibility = false
 Eclipse.ScriptPath = "lua_scripts"
-
-# Additional require() search paths (semicolon separated)
-# Default: "" (empty)
 Eclipse.RequirePaths = ""
-
-# Additional C library search paths (semicolon separated)  
-# Default: "" (empty)
 Eclipse.RequireCPaths = ""
 ```
 
-### 🎮 **In-Game Commands**
+---
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `.eclipse reload` | 🔄 Hot reload all scripts | `.eclipse reload` |
+## 🎮 In-Game Commands
+
+| Command           | Description        |
+|-------------------|--------------------|
+| `.eclipse reload` | Reload all scripts |
 
 ---
 
-## 🔧 API Reference  
+## 📚 Documentation
 
-### 🌟 **Core Functions**
-
-```lua
--- 📝 Logging (Compatible with Eluna)
-print(message)              -- ℹ️ Info level logging
-log(message)                -- ℹ️ Info level logging  
-error(message)              -- ❌ Error level logging
-debug(message)              -- 🐛 Debug level logging
-warn(message)               -- ⚠️ Warning level logging
-
--- 🌟 Eclipse-Specific Functions
-ReloadScripts()             -- 🔄 Hot reload scripts
-SendMessage(state, msg)     -- 💬 Inter-state messaging
-GetScriptPath()             -- 📁 Get current script directory
-```
-
-### 🎯 **Player API Examples**
-
-```lua
--- 🎮 Player Management
-player:TeleportTo(0, -8949.95, -132.493, 83.5312, 0)
-player:SendBroadcastMessage("🌟 Welcome to Eclipse!")
-player:ModifyMoney(10000)  -- Add 1 gold
-
--- 🎒 Inventory Management
-local itemCount = player:GetItemCount(12345)
-player:AddItem(12345, 5)   -- Add 5 items with ID 12345
-
--- ⚔️ Combat & Stats
-player:SetLevel(80)
-player:GiveXP(1000)
-local health = player:GetHealth()
-```
-
-### 🏰 **Creature API Examples**
-
-```lua
--- 🏰 Creature Spawning & Management
-local creature = player:SpawnCreature(123, x, y, z, o, 3, 300)
-creature:SendUnitSay("🌟 Eclipse-powered NPC!", 0)
-creature:CastSpell(creature, 12345)
-
--- 🎯 AI & Behavior
-creature:AttackStart(player)
-creature:MoveToPlayer(player)
-creature:SetFacingToObject(player)
-```
+- [Installation Guide](docs/HOW-TO-INSTALL.md)  
+- [Method Binding Tutorial](docs/HOW-TO-ADD-METHOD.md)  
+- [Example Scripts](lua_scripts/examples/)  
 
 ---
 
-## 🛠️ Development
+## 🤝 Contributing
 
-### 🏗️ **Building from Source**
-
-**Prerequisites:**
-- ✅ **C++17** compatible compiler (GCC 8+, Clang 7+, MSVC 2019+)
-- ✅ **AzerothCore** development environment
-- ✅ **CMake** 3.16+
-- ✅ **Git** for version control
-
-### 🤝 **Contributing**
-
-We welcome contributions! Here's how to get started:
-
-1. **🍴 Fork** the repository
-2. **🌿 Create** your feature branch (`git checkout -b feature/amazing-feature`)
-3. **💾 Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **📤 Push** to the branch (`git push origin feature/amazing-feature`)
-5. **🔄 Open** a Pull Request
-
-### 📋 **Development Guidelines**
-
-- ✅ Follow C++17 best practices
-- ✅ Write comprehensive tests
-- ✅ Document new features
-- ✅ Maintain Sol2 compatibility
-- ✅ Ensure thread safety
+1. Fork the repository  
+2. Create a branch  
+3. Commit changes  
+4. Push branch  
+5. Open a Pull Request  
 
 ---
 
-## 📚 Documentation & Resources
+## 🌟 Acknowledgments
 
-### 📖 **Guides & Tutorials**
-- 🚀 **[Installation Guide](docs/HOW-TO-INSTALL.md)** - Step-by-step installation
-- 🔧 **[Method Binding Tutorial](docs/HOW-TO-ADD-METHOD.md)** - Expose C++ methods to Lua
-- 🧪 **[Example Scripts](lua_scripts/examples/)** - Ready-to-use script examples
-
-### 🔗 **External Resources**
-- 📚 **[Sol2 Documentation](https://sol2.readthedocs.io/)** - Sol2 binding library
-- 🌐 **[AzerothCore Wiki](https://www.azerothcore.org/wiki/)** - Server core documentation
-- 🔥 **[LuaJIT Documentation](https://luajit.org/)** - LuaJIT performance guide
-- 📖 **[Lua 5.4 Manual](https://www.lua.org/manual/5.4/)** - Official Lua reference
-
----
-
-## ⚠️ Current Limitations
-
-### 🚧 **Known Limitations**
-- 🎮 **Extended API Coverage**: Some advanced game mechanics still in development
-- 🔍 **Debugging Tools**: Advanced profiling features planned for next release
-- 📊 **Performance Monitoring**: Real-time metrics dashboard coming soon
-
----
-
-## 📄 License
-
-This project is licensed under the **GNU General Public License v2.0** - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-### 🌟 **Core Team & Contributors**
-- **🏗️ AzerothCore Team** - For the amazing WoW server core
-- **⚡ Sol3 Team** - For the excellent modern Lua binding library  
-- **🎯 Eluna Project** - For inspiring this modern approach to Lua scripting
-- **👥 Community** - For feedback, testing, and continuous support
-
-### 🚀 **Special Thanks**
-- All beta testers who helped optimize performance
-- Contributors who provided valuable feedback and bug reports
-- The AzerothCore community for embracing modern Lua scripting
+- AzerothCore team  
+- Sol2 project  
+- Eluna project  
+- Community contributors  
 
 ---
 
 <div align="center">
-
-## 🌟 Ready to Power Up Your Server?
-
-**[📖 Installation Guide](docs/HOW-TO-INSTALL.md) • [🔧 API Documentation](docs/HOW-TO-ADD-METHOD.md) • [🐛 Report Issues](https://github.com/iThorgrim/mod-eclipse/issues) • [💬 Discussions](https://github.com/iThorgrim/mod-eclipse/discussions)**
-
-*Built with ❤️ for the AzerothCore community*
-
----
-
-⭐ **Star this repository if Eclipse powers your server!** ⭐
-
+⭐ Star this repository if Eclipse powers your server ⭐
 </div>
