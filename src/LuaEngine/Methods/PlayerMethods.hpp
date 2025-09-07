@@ -10,14 +10,39 @@ namespace Eclipse
     namespace PlayerMethods
     {
 
-        // ========== WRAPPER FUNCTIONS ==========
-
-        // Static method wrappers - consistent player:Method() API
-
         /**
+         * @brief Teleports [Player] to a specific map coordinate with various options.
+         * @brief Can handle combat state, vehicles, pets and other special conditions.
          *
+         * @enum TeleportToOptions
+         * @enum {
+         * @enum    TELE_TO_GM_MODE             = 0x01,
+         * @enum    TELE_TO_NOT_LEAVE_TRANSPORT = 0x02,
+         * @enum    TELE_TO_NOT_LEAVE_COMBAT    = 0x04,
+         * @enum    TELE_TO_NOT_UNSUMMON_PET    = 0x08,
+         * @enum    TELE_TO_SPELL               = 0x10,
+         * @enum    TELE_TO_NOT_LEAVE_VEHICLE   = 0x20,
+         * @enum    TELE_TO_WITH_PET            = 0x40,
+         * @enum    TELE_TO_NOT_LEAVE_TAXI      = 0x80
+         * @enum }
+         *
+         * @code {.lua}
+         * player:Teleport(mapId, x, y, z, o)
+         * player:Teleport(mapId, x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT, target, true)
+         * @endcode
+         *
+         * @param uint32 mapId
+         * @param float xCoord
+         * @param float yCoord
+         * @param float zCoord
+         * @param float orientation
+         * @param uint32 options = 0 (optional teleportation flags)
+         * @param [Unit] target = nullptr (optional target for spell-based teleports)
+         * @param bool forced = false (force teleport even if conditions aren't met)
+         *
+         * @return bool success : true if the player was teleported
          */
-        bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z, float orientation, uint32 options, Unit* target, bool forced)
+        inline bool TeleportTo(Player* player, uint32 mapId, float x, float y, float z, float orientation, uint32 options, Unit* target, bool forced)
         {
             return player->TeleportTo(mapId, x, y, z, orientation, options, target, forced);
         }
@@ -25,7 +50,7 @@ namespace Eclipse
         /**
          *
          */
-        bool TeleportToEntryPoint(Player* player)
+        inline bool TeleportToEntryPoint(Player* player)
         {
             return player->TeleportToEntryPoint();
         }
@@ -33,7 +58,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetSummonPoint(Player* player, uint32 mapId, float x, float y, float z, uint32 zoneId, bool asSpectator)
+        inline void SetSummonPoint(Player* player, uint32 mapId, float x, float y, float z, uint32 zoneId, bool asSpectator)
         {
             player->SetSummonPoint(mapId, x, y, z, zoneId, asSpectator);
         }
@@ -41,7 +66,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsSummonAsSpectator(Player* player)
+        inline bool IsSummonAsSpectator(Player* player)
         {
             return player->IsSummonAsSpectator();
         }
@@ -49,7 +74,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetSummonAsSpectator(Player* player, bool spectator)
+        inline void SetSummonAsSpectator(Player* player, bool spectator)
         {
             player->SetSummonAsSpectator(spectator);
         }
@@ -57,7 +82,7 @@ namespace Eclipse
         /**
          *
          */
-        void SummonIfPossible(Player* player, bool asSpectator, ObjectGuid summoner)
+        inline void SummonIfPossible(Player* player, bool asSpectator, ObjectGuid summoner)
         {
             player->SummonIfPossible(asSpectator, summoner);
         }
@@ -65,7 +90,7 @@ namespace Eclipse
         /**
          *
          */
-        time_t GetSummonExpireTimer(Player* player)
+        inline time_t GetSummonExpireTimer(Player* player)
         {
             return player->GetSummonExpireTimer();
         }
@@ -73,7 +98,7 @@ namespace Eclipse
         /**
          *
          */
-        PlayerFlags GetPlayerFlags(Player* player)
+        inline PlayerFlags GetPlayerFlags(Player* player)
         {
             return player->GetPlayerFlags();
         }
@@ -81,7 +106,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasPlayerFlag(Player* player, PlayerFlags flag)
+        inline bool HasPlayerFlag(Player* player, PlayerFlags flag)
         {
             return player->HasPlayerFlag(flag);
         }
@@ -89,7 +114,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetPlayerFlag(Player* player, PlayerFlags flag)
+        inline void SetPlayerFlag(Player* player, PlayerFlags flag)
         {
             player->SetPlayerFlag(flag);
         }
@@ -97,7 +122,7 @@ namespace Eclipse
         /**
          *
          */
-        void RemovePlayerFlag(Player* player, PlayerFlags flag)
+        inline void RemovePlayerFlag(Player* player, PlayerFlags flag)
         {
             player->RemovePlayerFlag(flag);
         }
@@ -105,7 +130,7 @@ namespace Eclipse
         /**
          *
          */
-        void ReplaceAllPlayerFlags(Player* player, PlayerFlags flags)
+        inline void ReplaceAllPlayerFlags(Player* player, PlayerFlags flags)
         {
             player->ReplaceAllPlayerFlags(flags);
         }
@@ -113,7 +138,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsClass(Player* player, Classes clss, ClassContext context)
+        inline bool IsClass(Player* player, Classes clss, ClassContext context)
         {
             return player->IsClass(clss, context);
         }
@@ -121,7 +146,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetInWater(Player* player, bool apply)
+        inline void SetInWater(Player* player, bool apply)
         {
             player->SetInWater(apply);
         }
@@ -129,7 +154,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsInWater(Player* player)
+        inline bool IsInWater(Player* player)
         {
             return player->IsInWater();
         }
@@ -137,7 +162,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsFalling(Player* player)
+        inline bool IsFalling(Player* player)
         {
             return player->IsFalling();
         }
@@ -145,7 +170,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsInAreaTriggerRadius(Player* player, const AreaTrigger* at, float delta)
+        inline bool IsInAreaTriggerRadius(Player* player, const AreaTrigger* at, float delta)
         {
             return player->IsInAreaTriggerRadius(at, delta);
         }
@@ -153,7 +178,7 @@ namespace Eclipse
         /**
          *
          */
-        bool CanInteractWithQuestGiver(Player* player, Object* questGiver)
+        inline bool CanInteractWithQuestGiver(Player* player, Object* questGiver)
         {
             return player->CanInteractWithQuestGiver(questGiver);
         }
@@ -161,7 +186,7 @@ namespace Eclipse
         /**
          *
          */
-        Creature* GetNPCIfCanInteractWith(Player* player, ObjectGuid guid, uint32 npcflagmask)
+        inline Creature* GetNPCIfCanInteractWith(Player* player, ObjectGuid guid, uint32 npcflagmask)
         {
             return player->GetNPCIfCanInteractWith(guid, npcflagmask);
         }
@@ -169,7 +194,7 @@ namespace Eclipse
         /**
          *
          */
-        GameObject* GetGameObjectIfCanInteractWith(Player* player, ObjectGuid guid, GameobjectTypes type)
+        inline GameObject* GetGameObjectIfCanInteractWith(Player* player, ObjectGuid guid, GameobjectTypes type)
         {
             return player->GetGameObjectIfCanInteractWith(guid, type);
         }
@@ -177,7 +202,7 @@ namespace Eclipse
         /**
          *
          */
-        void ToggleAFK(Player* player)
+        inline void ToggleAFK(Player* player)
         {
             player->ToggleAFK();
         }
@@ -185,7 +210,7 @@ namespace Eclipse
         /**
          *
          */
-        void ToggleDND(Player* player)
+        inline void ToggleDND(Player* player)
         {
             player->ToggleDND();
         }
@@ -193,7 +218,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsAFK(Player* player)
+        inline bool IsAFK(Player* player)
         {
             return player->isAFK();
         }
@@ -201,7 +226,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsDND(Player* player)
+        inline bool IsDND(Player* player)
         {
             return player->isDND();
         }
@@ -209,7 +234,7 @@ namespace Eclipse
         /**
          *
          */
-        uint8 GetChatTag(Player* player)
+        inline uint8 GetChatTag(Player* player)
         {
             return player->GetChatTag();
         }
@@ -217,7 +242,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetBarberShopCost(Player* player, uint8 newHairStyle, uint8 newHairColor, uint8 newFacialHair, const BarberShopStyleEntry* newSkin)
+        inline uint32 GetBarberShopCost(Player* player, uint8 newHairStyle, uint8 newHairColor, uint8 newFacialHair, const BarberShopStyleEntry* newSkin)
         {
             return player->GetBarberShopCost(newHairStyle, newHairColor, newFacialHair, newSkin);
         }
@@ -225,7 +250,7 @@ namespace Eclipse
         /**
          *
          */
-        PlayerSocial* GetSocial(Player* player)
+        inline PlayerSocial* GetSocial(Player* player)
         {
             return player->GetSocial();
         }
@@ -233,7 +258,7 @@ namespace Eclipse
         /**
          *
          */
-        void InitTaxiNodesForLevel(Player* player)
+        inline void InitTaxiNodesForLevel(Player* player)
         {
             player->InitTaxiNodesForLevel();
         }
@@ -241,7 +266,7 @@ namespace Eclipse
         /**
          *
          */
-        bool ActivateTaxiPathToByVector(Player* player, const std::vector<uint32>& nodes, Creature* npc, uint32 spellid)
+        inline bool ActivateTaxiPathToByVector(Player* player, const std::vector<uint32>& nodes, Creature* npc, uint32 spellid)
         {
             return player->ActivateTaxiPathTo(nodes, npc, spellid);
         }
@@ -249,7 +274,7 @@ namespace Eclipse
         /**
          *
          */
-        bool ActivateTaxiPathToByNodes(Player* player, uint32 taxi_path_id, uint32 spellid)
+        inline bool ActivateTaxiPathToByNodes(Player* player, uint32 taxi_path_id, uint32 spellid)
         {
             return player->ActivateTaxiPathTo(taxi_path_id, spellid);
         }
@@ -257,7 +282,7 @@ namespace Eclipse
         /**
          *
          */
-        void CleanupAfterTaxiFlight(Player* player)
+        inline void CleanupAfterTaxiFlight(Player* player)
         {
             player->CleanupAfterTaxiFlight();
         }
@@ -265,7 +290,7 @@ namespace Eclipse
         /**
          *
          */
-        void ContinueTaxiFlight(Player* player)
+        inline void ContinueTaxiFlight(Player* player)
         {
             player->ContinueTaxiFlight();
         }
@@ -273,7 +298,7 @@ namespace Eclipse
         /**
          *
          */
-        void SendTaxiNodeStatusMultiple(Player* player)
+        inline void SendTaxiNodeStatusMultiple(Player* player)
         {
             player->SendTaxiNodeStatusMultiple();
         }
@@ -281,7 +306,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsCommentator(Player* player)
+        inline bool IsCommentator(Player* player)
         {
             return player->IsCommentator();
         }
@@ -289,7 +314,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetCommentator(Player* player, bool on)
+        inline void SetCommentator(Player* player, bool on)
         {
             player->SetCommentator(on);
         }
@@ -297,7 +322,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsDeveloper(Player* player)
+        inline bool IsDeveloper(Player* player)
         {
             return player->IsDeveloper();
         }
@@ -305,7 +330,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetDeveloper(Player* player, bool on)
+        inline void SetDeveloper(Player* player, bool on)
         {
             player->SetDeveloper(on);
         }
@@ -313,7 +338,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsAcceptWhispers(Player* player)
+        inline bool IsAcceptWhispers(Player* player)
         {
             return player->isAcceptWhispers();
         }
@@ -321,7 +346,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetAcceptWhispers(Player* player, bool on)
+        inline void SetAcceptWhispers(Player* player, bool on)
         {
             player->SetAcceptWhispers(on);
         }
@@ -329,7 +354,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsGameMaster(Player* player)
+        inline bool IsGameMaster(Player* player)
         {
             return player->IsGameMaster();
         }
@@ -337,7 +362,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetGameMaster(Player* player, bool on)
+        inline void SetGameMaster(Player* player, bool on)
         {
             player->SetGameMaster(on);
         }
@@ -345,7 +370,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsGMChat(Player* player)
+        inline bool IsGMChat(Player* player)
         {
             return player->isGMChat();
         }
@@ -353,7 +378,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetGMChat(Player* player, bool on)
+        inline void SetGMChat(Player* player, bool on)
         {
             player->SetGMChat(on);
         }
@@ -361,7 +386,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsGMSpectator(Player* player)
+        inline bool IsGMSpectator(Player* player)
         {
             return player->IsGMSpectator();
         }
@@ -369,7 +394,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetGMSpectator(Player* player, bool on)
+        inline void SetGMSpectator(Player* player, bool on)
         {
             player->SetGMSpectator(on);
         }
@@ -377,7 +402,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsTaxiCheater(Player* player)
+        inline bool IsTaxiCheater(Player* player)
         {
             return player->isTaxiCheater();
         }
@@ -385,7 +410,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetTaxiCheater(Player* player, bool on)
+        inline void SetTaxiCheater(Player* player, bool on)
         {
             player->SetTaxiCheater(on);
         }
@@ -393,7 +418,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsGMVisible(Player* player)
+        inline bool IsGMVisible(Player* player)
         {
             return player->isGMVisible();
         }
@@ -401,7 +426,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetGMVisible(Player* player, bool on)
+        inline void SetGMVisible(Player* player, bool on)
         {
             player->SetGMVisible(on);
         }
@@ -409,7 +434,7 @@ namespace Eclipse
         /**
          *
          */
-        bool Has310Flyer(Player* player, bool checkAllSpells, uint32 excludeSpellId)
+        inline bool Has310Flyer(Player* player, bool checkAllSpells, uint32 excludeSpellId)
         {
             return player->Has310Flyer(checkAllSpells, excludeSpellId);
         }
@@ -417,7 +442,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetHas310Flyer(Player* player, bool on)
+        inline void SetHas310Flyer(Player* player, bool on)
         {
             player->SetHas310Flyer(on);
         }
@@ -425,7 +450,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetPvPDeath(Player* player, bool on)
+        inline void SetPvPDeath(Player* player, bool on)
         {
             player->SetPvPDeath(on);
         }
@@ -433,7 +458,7 @@ namespace Eclipse
         /**
          *
          */
-        void GiveXP(Player* player, uint32 xp, Unit* victim, float group_rate, bool use_group_rate)
+        inline void GiveXP(Player* player, uint32 xp, Unit* victim, float group_rate, bool use_group_rate)
         {
             player->GiveXP(xp, victim, group_rate, use_group_rate);
         }
@@ -441,7 +466,7 @@ namespace Eclipse
         /**
          *
          */
-        void GiveLevel(Player* player, uint8 level)
+        inline void GiveLevel(Player* player, uint8 level)
         {
             player->GiveLevel(level);
         }
@@ -449,7 +474,7 @@ namespace Eclipse
         /**
          *
          */
-        void InitStatsForLevel(Player* player, bool reapplyMods)
+        inline void InitStatsForLevel(Player* player, bool reapplyMods)
         {
             player->InitStatsForLevel(reapplyMods);
         }
@@ -457,7 +482,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasActivePowerType(Player* player, Powers power)
+        inline bool HasActivePowerType(Player* player, Powers power)
         {
             return player->HasActivePowerType(power);
         }
@@ -465,7 +490,7 @@ namespace Eclipse
         /**
          *
          */
-        bool GetCommandStatus(Player* player, uint32 command)
+        inline bool GetCommandStatus(Player* player, uint32 command)
         {
             return player->GetCommandStatus(command);
         }
@@ -473,7 +498,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetCommandStatusOn(Player* player, uint32 command)
+        inline void SetCommandStatusOn(Player* player, uint32 command)
         {
             player->SetCommandStatusOn(command);
         }
@@ -481,7 +506,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetCommandStatusOff(Player* player, uint32 command)
+        inline void SetCommandStatusOff(Player* player, uint32 command)
         {
             player->SetCommandStatusOff(command);
         }
@@ -489,7 +514,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetTotalPlayedTime(Player* player)
+        inline uint32 GetTotalPlayedTime(Player* player)
         {
             return player->GetTotalPlayedTime();
         }
@@ -497,7 +522,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetLevelPlayedTime(Player* player)
+        inline uint32 GetLevelPlayedTime(Player* player)
         {
             return player->GetLevelPlayedTime();
         }
@@ -505,7 +530,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetDeathState(Player* player, DeathState s, bool despawn)
+        inline void SetDeathState(Player* player, DeathState s, bool despawn)
         {
             player->setDeathState(s, despawn);
         }
@@ -513,7 +538,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetRestState(Player* player, uint32 triggerId)
+        inline void SetRestState(Player* player, uint32 triggerId)
         {
             player->SetRestState(triggerId);
         }
@@ -521,7 +546,7 @@ namespace Eclipse
         /**
          *
          */
-        void RemoveRestState(Player* player)
+        inline void RemoveRestState(Player* player)
         {
             player->RemoveRestState();
         }
@@ -529,7 +554,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetXPRestBonus(Player* player, uint32 xp)
+        inline uint32 GetXPRestBonus(Player* player, uint32 xp)
         {
             return player->GetXPRestBonus(xp);
         }
@@ -537,7 +562,7 @@ namespace Eclipse
         /**
          *
          */
-        float GetRestBonus(Player* player)
+        inline float GetRestBonus(Player* player)
         {
             return player->GetRestBonus();
         }
@@ -545,7 +570,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetRestBonus(Player* player, float rest_bonus_new)
+        inline void SetRestBonus(Player* player, float rest_bonus_new)
         {
             player->SetRestBonus(rest_bonus_new);
         }
@@ -553,7 +578,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasRestFlag(Player* player, RestFlag flag)
+        inline bool HasRestFlag(Player* player, RestFlag flag)
         {
             return player->HasRestFlag(flag);
         }
@@ -561,7 +586,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetRestFlag(Player* player, RestFlag flag, uint32 triggerId)
+        inline void SetRestFlag(Player* player, RestFlag flag, uint32 triggerId)
         {
             player->SetRestFlag(flag, triggerId);
         }
@@ -569,7 +594,7 @@ namespace Eclipse
         /**
          *
          */
-        void RemoveRestFlag(Player* player, RestFlag flag)
+        inline void RemoveRestFlag(Player* player, RestFlag flag)
         {
             player->RemoveRestFlag(flag);
         }
@@ -577,7 +602,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetInnTriggerId(Player* player)
+        inline uint32 GetInnTriggerId(Player* player)
         {
             return player->GetInnTriggerId();
         }
@@ -585,7 +610,7 @@ namespace Eclipse
         /**
          *
          */
-        PetStable* GetPetStable(Player* player)
+        inline PetStable* GetPetStable(Player* player)
         {
             return player->GetPetStable();
         }
@@ -593,7 +618,7 @@ namespace Eclipse
         /**
          *
          */
-        const PetStable* GetPetStableConst(Player* player)
+        inline const PetStable* GetPetStableConst(Player* player)
         {
             return player->GetPetStable();
         }
@@ -601,7 +626,7 @@ namespace Eclipse
         /**
          *
          */
-        PetStable& GetOrInitPetStable(Player* player)
+        inline PetStable& GetOrInitPetStable(Player* player)
         {
             return player->GetOrInitPetStable();
         }
@@ -609,7 +634,7 @@ namespace Eclipse
         /**
          *
          */
-        Pet* GetPet(Player* player)
+        inline Pet* GetPet(Player* player)
         {
             return player->GetPet();
         }
@@ -617,7 +642,7 @@ namespace Eclipse
         /**
          *
          */
-        Pet* SummonPet(Player* player, uint32 entry, float x, float y, float z, float ang, PetType petType, Milliseconds duration, uint32 spellId)
+        inline Pet* SummonPet(Player* player, uint32 entry, float x, float y, float z, float ang, PetType petType, Milliseconds duration, uint32 spellId)
         {
             return player->SummonPet(entry, x, y, z, ang, petType, duration, spellId);
         }
@@ -625,7 +650,7 @@ namespace Eclipse
         /**
          *
          */
-        void RemovePet(Player* player, Pet* pet, PetSaveMode mode, bool returnreagent)
+        inline void RemovePet(Player* player, Pet* pet, PetSaveMode mode, bool returnreagent)
         {
             player->RemovePet(pet, mode, returnreagent);
         }
@@ -633,7 +658,7 @@ namespace Eclipse
         /**
          *
          */
-        bool CanPetResurrect(Player* player)
+        inline bool CanPetResurrect(Player* player)
         {
             return player->CanPetResurrect();
         }
@@ -641,7 +666,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsExistPet(Player* player)
+        inline bool IsExistPet(Player* player)
         {
             return player->IsExistPet();
         }
@@ -649,7 +674,7 @@ namespace Eclipse
         /**
          *
          */
-        Pet* CreatePetFromCreature(Player* player, Creature* creature, uint32 spell_id)
+        inline Pet* CreatePetFromCreature(Player* player, Creature* creature, uint32 spell_id)
         {
             return player->CreatePet(creature, spell_id);
         }
@@ -657,7 +682,7 @@ namespace Eclipse
         /**
          *
          */
-        Pet* CreatePetFromEntry(Player* player, uint32 entry, uint32 spell_id)
+        inline Pet* CreatePetFromEntry(Player* player, uint32 entry, uint32 spell_id)
         {
             return player->CreatePet(entry, spell_id);
         }
@@ -665,7 +690,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetPhaseMaskForSpawn(Player* player)
+        inline uint32 GetPhaseMaskForSpawn(Player* player)
         {
             return player->GetPhaseMaskForSpawn();
         }
@@ -673,7 +698,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetVirtualItemSlot(Player* player, uint8 i, Item* item)
+        inline void SetVirtualItemSlot(Player* player, uint8 i, Item* item)
         {
             player->SetVirtualItemSlot(i, item);
         }
@@ -681,7 +706,7 @@ namespace Eclipse
         /**
          *
          */
-        uint8 FindEquipSlot(Player* player, const ItemTemplate* proto, uint32 slot, bool swap)
+        inline uint8 FindEquipSlot(Player* player, const ItemTemplate* proto, uint32 slot, bool swap)
         {
             return player->FindEquipSlot(proto, slot, swap);
         }
@@ -689,7 +714,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetItemCount(Player* player, uint32 item, bool inBankAlso, Item* skipItem)
+        inline uint32 GetItemCount(Player* player, uint32 item, bool inBankAlso, Item* skipItem)
         {
             return player->GetItemCount(item, inBankAlso, skipItem);
         }
@@ -697,7 +722,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetItemCountWithLimitCategory(Player* player, uint32 limitCategory, Item* skipItem)
+        inline uint32 GetItemCountWithLimitCategory(Player* player, uint32 limitCategory, Item* skipItem)
         {
             return player->GetItemCountWithLimitCategory(limitCategory, skipItem);
         }
@@ -705,7 +730,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetItemByGuid(Player* player, ObjectGuid itemGuid)
+        inline Item* GetItemByGuid(Player* player, ObjectGuid itemGuid)
         {
             return player->GetItemByGuid(itemGuid);
         }
@@ -713,7 +738,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetItemByEntry(Player* player, uint32 item)
+        inline Item* GetItemByEntry(Player* player, uint32 item)
         {
             return player->GetItemByEntry(item);
         }
@@ -721,7 +746,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetItemByPosSlot(Player* player, uint16 pos)
+        inline Item* GetItemByPosSlot(Player* player, uint16 pos)
         {
             return player->GetItemByPos(pos);
         }
@@ -729,7 +754,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetItemByPosBagSlot(Player* player, uint8 bag, uint8 slot)
+        inline Item* GetItemByPosBagSlot(Player* player, uint8 bag, uint8 slot)
         {
             return player->GetItemByPos(bag, slot);
         }
@@ -737,7 +762,7 @@ namespace Eclipse
         /**
          *
          */
-        Bag* GetBagByPos(Player* player, uint8 slot)
+        inline Bag* GetBagByPos(Player* player, uint8 slot)
         {
             return player->GetBagByPos(slot);
         }
@@ -745,7 +770,7 @@ namespace Eclipse
         /**
          *
          */
-        uint32 GetFreeInventorySpace(Player* player)
+        inline uint32 GetFreeInventorySpace(Player* player)
         {
             return player->GetFreeInventorySpace();
         }
@@ -753,7 +778,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetUseableItemByPos(Player* player, uint8 bag, uint8 slot)
+        inline Item* GetUseableItemByPos(Player* player, uint8 bag, uint8 slot)
         {
             return player->GetUseableItemByPos(bag, slot);
         }
@@ -761,7 +786,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetWeaponForAttack(Player* player, WeaponAttackType attackType, bool useable)
+        inline Item* GetWeaponForAttack(Player* player, WeaponAttackType attackType, bool useable)
         {
             return player->GetWeaponForAttack(attackType, useable);
         }
@@ -769,7 +794,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasWeapon(Player* player, WeaponAttackType attackType)
+        inline bool HasWeapon(Player* player, WeaponAttackType attackType)
         {
             return player->HasWeapon(attackType);
         }
@@ -777,7 +802,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasWeaponForAttack(Player* player, WeaponAttackType attackType)
+        inline bool HasWeaponForAttack(Player* player, WeaponAttackType attackType)
         {
             return player->HasWeaponForAttack(attackType);
         }
@@ -785,7 +810,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* GetShield(Player* player, bool useable)
+        inline Item* GetShield(Player* player, bool useable)
         {
             return player->GetShield(useable);
         }
@@ -793,7 +818,7 @@ namespace Eclipse
         /**
          *
          */
-        uint8 GetAttackBySlot(Player* player, uint8 slot)
+        inline uint8 GetAttackBySlot(Player* player, uint8 slot)
         {
             (void)player; // unused parameter
             return Player::GetAttackBySlot(slot);
@@ -802,7 +827,7 @@ namespace Eclipse
         /**
          *
          */
-        std::vector<Item*>& GetItemUpdateQueue(Player* player)
+        inline std::vector<Item*>& GetItemUpdateQueue(Player* player)
         {
             return player->GetItemUpdateQueue();
         }
@@ -810,7 +835,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsInventoryPosBySlot(Player* player, uint16 pos)
+        inline bool IsInventoryPosBySlot(Player* player, uint16 pos)
         {
             (void)player; // Unused parameter
             return Player::IsInventoryPos(pos);
@@ -819,7 +844,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsInventoryPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        inline bool IsInventoryPosByBagSlot(Player* player, uint8 bag, uint8 slot)
         {
             (void)player; // Unused parameter
             return Player::IsInventoryPos(bag, slot);
@@ -828,7 +853,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsEquipmentPosBySlot(Player* player, uint16 pos)
+        inline bool IsEquipmentPosBySlot(Player* player, uint16 pos)
         {
             (void)player; // Unused parameter
             return Player::IsEquipmentPos(pos);
@@ -837,7 +862,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsEquipmentPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        inline bool IsEquipmentPosByBagSlot(Player* player, uint8 bag, uint8 slot)
         {
             (void)player; // Unused parameter
             return Player::IsEquipmentPos(bag, slot);
@@ -846,7 +871,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsBagPos(Player* player, uint8 pos)
+        inline bool IsBagPos(Player* player, uint8 pos)
         {
             return player->IsBagPos(pos);
         }
@@ -854,7 +879,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsBankPosBySlot(Player* player, uint16 pos)
+        inline bool IsBankPosBySlot(Player* player, uint16 pos)
         {
             (void)player; // Unused parameter
             return Player::IsBankPos(pos);
@@ -863,7 +888,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsBankPosByBagSlot(Player* player, uint8 bag, uint8 slot)
+        inline bool IsBankPosByBagSlot(Player* player, uint8 bag, uint8 slot)
         {
             (void)player; // Unused parameter
             return Player::IsBankPos(bag, slot);
@@ -872,7 +897,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsValidPosBySlot(Player* player, uint16 pos, bool explicit_pos)
+        inline bool IsValidPosBySlot(Player* player, uint16 pos, bool explicit_pos)
         {
             return player->IsValidPos(pos, explicit_pos);
         }
@@ -880,7 +905,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsValidPosByBagSlot(Player* player, uint8 bag, uint8 slot, bool explicit_pos)
+        inline bool IsValidPosByBagSlot(Player* player, uint8 bag, uint8 slot, bool explicit_pos)
         {
             return player->IsValidPos(bag, slot, explicit_pos);
         }
@@ -888,7 +913,7 @@ namespace Eclipse
         /**
          *
          */
-        uint8 GetBankBagSlotCount(Player* player)
+        inline uint8 GetBankBagSlotCount(Player* player)
         {
             return player->GetBankBagSlotCount();
         }
@@ -896,7 +921,7 @@ namespace Eclipse
         /**
          *
          */
-        void SetBankBagSlotCount(Player* player, uint8 count)
+        inline void SetBankBagSlotCount(Player* player, uint8 count)
         {
             player->SetBankBagSlotCount(count);
         }
@@ -904,7 +929,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasItemCount(Player* player, uint32 item, uint32 count, bool inBankAlso)
+        inline bool HasItemCount(Player* player, uint32 item, uint32 count, bool inBankAlso)
         {
             return player->HasItemCount(item, count, inBankAlso);
         }
@@ -912,7 +937,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasItemFitToSpellRequirements(Player* player, const SpellInfo* spellInfo, const Item* ignoreItem)
+        inline bool HasItemFitToSpellRequirements(Player* player, const SpellInfo* spellInfo, const Item* ignoreItem)
         {
             return player->HasItemFitToSpellRequirements(spellInfo, ignoreItem);
         }
@@ -920,7 +945,7 @@ namespace Eclipse
         /**
          *
          */
-        bool CanNoReagentCast(Player* player, const SpellInfo* spellInfo)
+        inline bool CanNoReagentCast(Player* player, const SpellInfo* spellInfo)
         {
             return player->CanNoReagentCast(spellInfo);
         }
@@ -928,7 +953,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasItemOrGemWithIdEquipped(Player* player, uint32 item, uint32 count, uint8 except_slot)
+        inline bool HasItemOrGemWithIdEquipped(Player* player, uint32 item, uint32 count, uint8 except_slot)
         {
             return player->HasItemOrGemWithIdEquipped(item, count, except_slot);
         }
@@ -936,7 +961,7 @@ namespace Eclipse
         /**
          *
          */
-        bool HasItemOrGemWithLimitCategoryEquipped(Player* player, uint32 limitCategory, uint32 count, uint8 except_slot)
+        inline bool HasItemOrGemWithLimitCategoryEquipped(Player* player, uint32 limitCategory, uint32 count, uint8 except_slot)
         {
             return player->HasItemOrGemWithLimitCategoryEquipped(limitCategory, count, except_slot);
         }
@@ -944,28 +969,28 @@ namespace Eclipse
         /**
          *
          */
-        InventoryResult CanTakeMoreSimilarItemsByItem(Player* player, Item* pItem)
+        inline uint8 CanTakeMoreSimilarItemsByItem(Player* player, Item* pItem)
         {
-            return player->CanTakeMoreSimilarItems(pItem);
+            return static_cast<uint8>(player->CanTakeMoreSimilarItems(pItem));
         }
 
         /**
          *
          */
-        InventoryResult CanTakeMoreSimilarItemsByEntry(Player* player, uint32 entry, uint32 count)
+        inline uint8 CanTakeMoreSimilarItemsByEntry(Player* player, uint32 entry, uint32 count)
         {
-            return player->CanTakeMoreSimilarItems(entry, count);
+            return static_cast<uint8>(player->CanTakeMoreSimilarItems(entry, count));
         }
 
         /**
          *
          */
-        std::tuple<InventoryResult, uint32, sol::table> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, sol::this_state s)
+        inline std::tuple<uint8, uint32, sol::table> CanStoreNewItem(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec dest;
             uint32 no_space_count = 0;
-            InventoryResult result = player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count);
+            uint8 result = static_cast<uint8>(player->CanStoreNewItem(bag, slot, dest, entry, count, &no_space_count));
 
             sol::table dest_table = lua.create_table();
             for (size_t i = 0; i < dest.size(); ++i) {
@@ -981,11 +1006,11 @@ namespace Eclipse
         /**
          *
          */
-        std::tuple<InventoryResult, sol::table> CanStoreItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, sol::this_state s)
+        inline std::tuple<uint8, sol::table> CanStoreItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec dest;
-            InventoryResult result = player->CanStoreItem(bag, slot, dest, pItem, swap);
+            uint8 result = static_cast<uint8>(player->CanStoreItem(bag, slot, dest, pItem, swap));
 
             sol::table dest_table = lua.create_table();
             for (size_t i = 0; i < dest.size(); ++i) {
@@ -1001,11 +1026,11 @@ namespace Eclipse
         /**
          *
          */
-        std::tuple<InventoryResult, sol::table> CanStoreItemWithEntry(Player* player, uint8 bag, uint8 slot, uint32 pItem, bool swap, sol::this_state s)
+        inline std::tuple<uint8, sol::table> CanStoreItemWithEntry(Player* player, uint8 bag, uint8 slot, uint32 pItem, bool swap, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec dest;
-            InventoryResult result = player->CanStoreItem(bag, slot, dest, pItem, swap);
+            uint8 result = static_cast<uint8>(player->CanStoreItem(bag, slot, dest, pItem, swap));
 
             sol::table dest_table = lua.create_table();
             for (size_t i = 0; i < dest.size(); ++i) {
@@ -1021,72 +1046,72 @@ namespace Eclipse
         /**
          *
          */
-        InventoryResult CanStoreItems(Player* player, const std::vector<Item*>& items, int count)
+        inline uint8 CanStoreItems(Player* player, const std::vector<Item*>& items, int count)
         {
             std::vector<Item*> item_ptrs = items;
-            return player->CanStoreItems(item_ptrs.data(), count);
+            return static_cast<uint8>(player->CanStoreItems(item_ptrs.data(), count));
         }
 
         /**
          *
          */
-        std::tuple<InventoryResult, uint16> CanEquipNewItem(Player* player, uint8 slot, uint32 item, bool swap)
+        inline std::tuple<uint8, uint16> CanEquipNewItem(Player* player, uint8 slot, uint32 item, bool swap)
         {
             uint16 dest = 0;
-            InventoryResult result = player->CanEquipNewItem(slot, dest, item, swap);
+            uint8 result = static_cast<uint8>(player->CanEquipNewItem(slot, dest, item, swap));
             return std::make_tuple(result, dest);
         }
 
         /**
          *
          */
-        std::tuple<InventoryResult, uint16> CanEquipItem(Player* player, uint8 slot, Item* pItem, bool swap, bool not_loading)
+        inline std::tuple<uint8, uint16> CanEquipItem(Player* player, uint8 slot, Item* pItem, bool swap, bool not_loading)
         {
             uint16 dest = 0;
-            InventoryResult result = player->CanEquipItem(slot, dest, pItem, swap, not_loading);
+            uint8 result = static_cast<uint8>(player->CanEquipItem(slot, dest, pItem, swap, not_loading));
             return std::make_tuple(result, dest);
         }
 
         /**
          *
          */
-        InventoryResult CanEquipUniqueItem(Player* player, Item* pItem, uint8 except_slot, uint32 limit_count)
+        inline uint8 CanEquipUniqueItem(Player* player, Item* pItem, uint8 except_slot, uint32 limit_count)
         {
-            return player->CanEquipUniqueItem(pItem, except_slot, limit_count);
+            return static_cast<uint8>(player->CanEquipUniqueItem(pItem, except_slot, limit_count));
         }
 
         /**
          *
          */
-        InventoryResult CanEquipUniqueItemTemplate(Player* player, ItemTemplate const* itemProto, uint8 except_slot, uint32 limit_count)
+        inline uint8 CanEquipUniqueItemTemplate(Player* player, ItemTemplate const* itemProto, uint8 except_slot, uint32 limit_count)
         {
-            return player->CanEquipUniqueItem(itemProto, except_slot, limit_count);
+            return static_cast<uint8>(player->CanEquipUniqueItem(itemProto, except_slot, limit_count));
         }
 
         /**
          *
          */
-        InventoryResult CanUnequipItems(Player* player, uint32 item, uint32 count)
+        inline uint8 CanUnequipItems(Player* player, uint32 item, uint32 count)
         {
-            return player->CanUnequipItems(item, count);
+            return static_cast<uint8>(player->CanUnequipItems(item, count));
         }
 
         /**
          *
          */
-        InventoryResult CanUnequipItem(Player* player, uint16 src, bool swap)
+        inline uint8 CanUnequipItem(Player* player, uint16 src, bool swap)
         {
-            return player->CanUnequipItem(src, swap);
+            return static_cast<uint8>(player->CanUnequipItem(src, swap));
         }
 
         /**
          *
          */
-        std::tuple<InventoryResult, sol::table> CanBankItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, bool not_loading, sol::this_state s)
+        inline std::tuple<uint8, sol::table> CanBankItem(Player* player, uint8 bag, uint8 slot, Item* pItem, bool swap, bool not_loading, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec dest;
-            InventoryResult result = player->CanBankItem(bag, slot, dest, pItem, swap, not_loading);
+            uint8 result = static_cast<uint8>(player->CanBankItem(bag, slot, dest, pItem, swap, not_loading));
 
             sol::table dest_table = lua.create_table();
             for (size_t i = 0; i < dest.size(); ++i) {
@@ -1102,23 +1127,23 @@ namespace Eclipse
         /**
          *
          */
-        InventoryResult CanUseItem(Player* player, Item* pItem, bool not_loading)
+        inline uint8 CanUseItem(Player* player, Item* pItem, bool not_loading)
         {
-            return player->CanUseItem(pItem, not_loading);
+            return static_cast<uint8>(player->CanUseItem(pItem, not_loading));
         }
 
         /**
          *
          */
-        InventoryResult CanUseItemByTemplate(Player* player, ItemTemplate const* pItem)
+        inline uint8 CanUseItemByTemplate(Player* player, ItemTemplate const* pItem)
         {
-            return player->CanUseItem(pItem);
+            return static_cast<uint8>(player->CanUseItem(pItem));
         }
 
         /**
          *
          */
-        bool HasItemTotemCategory(Player* player, uint32 totemCategory)
+        inline bool HasItemTotemCategory(Player* player, uint32 totemCategory)
         {
             return player->HasItemTotemCategory(totemCategory);
         }
@@ -1126,7 +1151,7 @@ namespace Eclipse
         /**
          *
          */
-        bool IsTotemCategoryCompatiableWith(Player* player, ItemTemplate const* pProto, uint32 requiredTotemCategoryId)
+        inline bool IsTotemCategoryCompatiableWith(Player* player, ItemTemplate const* pProto, uint32 requiredTotemCategoryId)
         {
             return player->IsTotemCategoryCompatiableWith(pProto, requiredTotemCategoryId);
         }
@@ -1134,23 +1159,23 @@ namespace Eclipse
         /**
          *
          */
-        InventoryResult CanUseAmmo(Player* player, uint32 item)
+        inline uint8 CanUseAmmo(Player* player, uint32 item)
         {
-            return player->CanUseAmmo(item);
+            return static_cast<uint8>(player->CanUseAmmo(item));
         }
 
         /**
          *
          */
-        InventoryResult CanRollForItemInLFG(Player* player, ItemTemplate const* item, WorldObject const* lootedObject)
+        inline uint8 CanRollForItemInLFG(Player* player, ItemTemplate const* item, WorldObject const* lootedObject)
         {
-            return player->CanRollForItemInLFG(item, lootedObject);
+            return static_cast<uint8>(player->CanRollForItemInLFG(item, lootedObject));
         }
 
         /**
          *
          */
-        Item* StoreNewItem(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::this_state s)
+        inline Item* StoreNewItem(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec pos;
@@ -1169,7 +1194,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* StoreNewItemWithAllowedLooters(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::table allowedLooters_table, sol::this_state s)
+        inline Item* StoreNewItemWithAllowedLooters(Player* player, sol::table pos_table, uint32 item, bool update, int32 randomPropertyId, sol::table allowedLooters_table, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec pos;
@@ -1195,7 +1220,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* StoreItem(Player* player, sol::table pos_table, Item* pItem, bool update, sol::this_state s)
+        inline Item* StoreItem(Player* player, sol::table pos_table, Item* pItem, bool update, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec pos;
@@ -1214,7 +1239,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* EquipNewItem(Player* player, uint16 pos, uint32 item, bool update)
+        inline Item* EquipNewItem(Player* player, uint16 pos, uint32 item, bool update)
         {
             return player->EquipNewItem(pos, item, update);
         }
@@ -1222,7 +1247,7 @@ namespace Eclipse
         /**
          *
          */
-        Item* EquipItem(Player* player, uint16 pos, Item* pItem, bool update)
+        inline Item* EquipItem(Player* player, uint16 pos, Item* pItem, bool update)
         {
             return player->EquipItem(pos, pItem, update);
         }
@@ -1230,7 +1255,7 @@ namespace Eclipse
         /**
          *
          */
-        void AutoUnequipOffhandIfNeed(Player* player, bool force)
+        inline void AutoUnequipOffhandIfNeed(Player* player, bool force)
         {
             player->AutoUnequipOffhandIfNeed(force);
         }
@@ -1238,7 +1263,7 @@ namespace Eclipse
         /**
          *
          */
-        bool StoreNewItemInBestSlots(Player* player, uint32 item_id, uint32 item_count)
+        inline bool StoreNewItemInBestSlots(Player* player, uint32 item_id, uint32 item_count)
         {
             return player->StoreNewItemInBestSlots(item_id, item_count);
         }
@@ -1246,7 +1271,7 @@ namespace Eclipse
         /**
          *
          */
-        void AutoStoreLootWithBagSlot(Player* player, uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast)
+        inline void AutoStoreLootWithBagSlot(Player* player, uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast)
         {
             player->AutoStoreLoot(bag, slot, loot_id, store, broadcast);
         }
@@ -1254,7 +1279,7 @@ namespace Eclipse
         /**
          *
          */
-        void AutoStoreLoot(Player* player, uint32 loot_id, LootStore const& store, bool broadcast)
+        inline void AutoStoreLoot(Player* player, uint32 loot_id, LootStore const& store, bool broadcast)
         {
             player->AutoStoreLoot(loot_id, store, broadcast);
         }
@@ -1262,17 +1287,17 @@ namespace Eclipse
         /**
          *
          */
-        std::tuple<LootItem*, InventoryResult> StoreLootItem(Player* player, uint8 lootSlot, Loot* loot)
+        inline std::tuple<LootItem*, uint8> StoreLootItem(Player* player, uint8 lootSlot, Loot* loot)
         {
             InventoryResult msg = EQUIP_ERR_OK;
             LootItem* result = player->StoreLootItem(lootSlot, loot, msg);
-            return std::make_tuple(result, msg);
+            return std::make_tuple(result, static_cast<uint8>(msg));
         }
 
         /**
          *
          */
-        void UpdateLootAchievements(Player* player, LootItem* item, Loot* loot)
+        inline void UpdateLootAchievements(Player* player, LootItem* item, Loot* loot)
         {
             player->UpdateLootAchievements(item, loot);
         }
@@ -1280,7 +1305,7 @@ namespace Eclipse
         /**
          *
          */
-        void UpdateTitansGrip(Player* player)
+        inline void UpdateTitansGrip(Player* player)
         {
             player->UpdateTitansGrip();
         }
@@ -1288,7 +1313,7 @@ namespace Eclipse
         /**
          * Check if player can store item in specific bag and slot
          */
-        uint8 CanStoreItemInSlot(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, Item* pItem, bool swap)
+        inline uint8 CanStoreItemInSlot(Player* player, uint8 bag, uint8 slot, uint32 entry, uint32 count, Item* pItem, bool swap)
         {
             ItemPosCountVec dest;
             return static_cast<uint8>(player->CanStoreItem(bag, slot, dest, entry, count, pItem, swap, nullptr));
@@ -1297,7 +1322,7 @@ namespace Eclipse
         /**
          * Check if player can store item anywhere
          */
-        uint8 CanStoreItemAnywhere(Player* player, uint32 entry, uint32 count, Item* pItem, bool swap)
+        inline uint8 CanStoreItemAnywhere(Player* player, uint32 entry, uint32 count, Item* pItem, bool swap)
         {
             ItemPosCountVec dest;
             return static_cast<uint8>(player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, entry, count, pItem, swap, nullptr));
@@ -1306,7 +1331,7 @@ namespace Eclipse
         /**
          * Add refund reference for item
          */
-        void AddRefundReference(Player* player, ObjectGuid itemGUID)
+        inline void AddRefundReference(Player* player, ObjectGuid itemGUID)
         {
             player->AddRefundReference(itemGUID);
         }
@@ -1314,7 +1339,7 @@ namespace Eclipse
         /**
          * Delete refund reference for item
          */
-        void DeleteRefundReference(Player* player, ObjectGuid itemGUID)
+        inline void DeleteRefundReference(Player* player, ObjectGuid itemGUID)
         {
             player->DeleteRefundReference(itemGUID);
         }
@@ -1322,7 +1347,7 @@ namespace Eclipse
         /**
          * Apply equip cooldown for item
          */
-        void ApplyEquipCooldown(Player* player, Item* pItem)
+        inline void ApplyEquipCooldown(Player* player, Item* pItem)
         {
             player->ApplyEquipCooldown(pItem);
         }
@@ -1330,7 +1355,7 @@ namespace Eclipse
         /**
          * Set ammo
          */
-        void SetAmmo(Player* player, uint32 item)
+        inline void SetAmmo(Player* player, uint32 item)
         {
             player->SetAmmo(item);
         }
@@ -1338,7 +1363,7 @@ namespace Eclipse
         /**
          * Remove ammo
          */
-        void RemoveAmmo(Player* player)
+        inline void RemoveAmmo(Player* player)
         {
             player->RemoveAmmo();
         }
@@ -1346,7 +1371,7 @@ namespace Eclipse
         /**
          * Get ammo DPS
          */
-        float GetAmmoDPS(Player* player)
+        inline float GetAmmoDPS(Player* player)
         {
             return player->GetAmmoDPS();
         }
@@ -1354,7 +1379,7 @@ namespace Eclipse
         /**
          * Check ammo compatibility
          */
-        bool CheckAmmoCompatibility(Player* player, ItemTemplate const* ammo_proto)
+        inline bool CheckAmmoCompatibility(Player* player, ItemTemplate const* ammo_proto)
         {
             return player->CheckAmmoCompatibility(ammo_proto);
         }
@@ -1362,7 +1387,7 @@ namespace Eclipse
         /**
          * Quick equip item
          */
-        void QuickEquipItem(Player* player, uint16 pos, Item* pItem)
+        inline void QuickEquipItem(Player* player, uint16 pos, Item* pItem)
         {
             player->QuickEquipItem(pos, pItem);
         }
@@ -1370,7 +1395,7 @@ namespace Eclipse
         /**
          * Visualize item
          */
-        void VisualizeItem(Player* player, uint8 slot, Item* pItem)
+        inline void VisualizeItem(Player* player, uint8 slot, Item* pItem)
         {
             player->VisualizeItem(slot, pItem);
         }
@@ -1378,7 +1403,7 @@ namespace Eclipse
         /**
          * Set visible item slot
          */
-        void SetVisibleItemSlot(Player* player, uint8 slot, Item* pItem)
+        inline void SetVisibleItemSlot(Player* player, uint8 slot, Item* pItem)
         {
             player->SetVisibleItemSlot(slot, pItem);
         }
@@ -1386,7 +1411,7 @@ namespace Eclipse
         /**
          * Bank item at position
          */
-        Item* BankItem(Player* player, Item* pItem, uint32 count, bool update, sol::this_state s)
+        inline Item* BankItem(Player* player, Item* pItem, uint32 count, bool update, sol::this_state s)
         {
             sol::state_view lua(s);
             ItemPosCountVec dest;
@@ -1396,7 +1421,7 @@ namespace Eclipse
         /**
          * Remove item from bag/slot
          */
-        void RemoveItem(Player* player, uint8 bag, uint8 slot, bool update, bool swap)
+        inline void RemoveItem(Player* player, uint8 bag, uint8 slot, bool update, bool swap)
         {
             player->RemoveItem(bag, slot, update, swap);
         }
@@ -1404,7 +1429,7 @@ namespace Eclipse
         /**
          * Remove item from bag/slot without swap
          */
-        void RemoveItemSimple(Player* player, uint8 bag, uint8 slot, bool update)
+        inline void RemoveItemSimple(Player* player, uint8 bag, uint8 slot, bool update)
         {
             player->RemoveItem(bag, slot, update, false);
         }
@@ -1412,7 +1437,7 @@ namespace Eclipse
         /**
          * Move item from inventory
          */
-        void MoveItemFromInventory(Player* player, uint8 bag, uint8 slot, bool update)
+        inline void MoveItemFromInventory(Player* player, uint8 bag, uint8 slot, bool update)
         {
             player->MoveItemFromInventory(bag, slot, update);
         }

@@ -11,7 +11,7 @@ namespace Eclipse
         /**
          * Get the raw 64-bit value of the ObjectGuid
          */
-        uint64 GetRawValue(ObjectGuid* guid)
+        inline uint64 GetRawValue(ObjectGuid* guid)
         {
             return guid->GetRawValue();
         }
@@ -19,7 +19,7 @@ namespace Eclipse
         /**
          * Get the high part of the GUID
          */
-        uint32 GetHigh(ObjectGuid* guid)
+        inline uint32 GetHigh(ObjectGuid* guid)
         {
             return static_cast<uint32>(guid->GetHigh());
         }
@@ -27,7 +27,7 @@ namespace Eclipse
         /**
          * Get the entry part of the GUID (for entities that have entries)
          */
-        uint32 GetEntry(ObjectGuid* guid)
+        inline uint32 GetEntry(ObjectGuid* guid)
         {
             return guid->GetEntry();
         }
@@ -35,7 +35,7 @@ namespace Eclipse
         /**
          * Get the counter part of the GUID
          */
-        uint32 GetCounter(ObjectGuid* guid)
+        inline uint32 GetCounter(ObjectGuid* guid)
         {
             return guid->GetCounter();
         }
@@ -43,7 +43,7 @@ namespace Eclipse
         /**
          * Check if the GUID is empty
          */
-        bool IsEmpty(ObjectGuid* guid)
+        inline bool IsEmpty(ObjectGuid* guid)
         {
             return guid->IsEmpty();
         }
@@ -51,7 +51,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a creature
          */
-        bool IsCreature(ObjectGuid* guid)
+        inline bool IsCreature(ObjectGuid* guid)
         {
             return guid->IsCreature();
         }
@@ -59,7 +59,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a pet
          */
-        bool IsPet(ObjectGuid* guid)
+        inline bool IsPet(ObjectGuid* guid)
         {
             return guid->IsPet();
         }
@@ -67,7 +67,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a vehicle
          */
-        bool IsVehicle(ObjectGuid* guid)
+        inline bool IsVehicle(ObjectGuid* guid)
         {
             return guid->IsVehicle();
         }
@@ -75,7 +75,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a creature or pet
          */
-        bool IsCreatureOrPet(ObjectGuid* guid)
+        inline bool IsCreatureOrPet(ObjectGuid* guid)
         {
             return guid->IsCreatureOrPet();
         }
@@ -83,7 +83,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a creature or vehicle
          */
-        bool IsCreatureOrVehicle(ObjectGuid* guid)
+        inline bool IsCreatureOrVehicle(ObjectGuid* guid)
         {
             return guid->IsCreatureOrVehicle();
         }
@@ -91,7 +91,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents any type of creature (creature, pet, or vehicle)
          */
-        bool IsAnyTypeCreature(ObjectGuid* guid)
+        inline bool IsAnyTypeCreature(ObjectGuid* guid)
         {
             return guid->IsAnyTypeCreature();
         }
@@ -99,7 +99,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a player
          */
-        bool IsPlayer(ObjectGuid* guid)
+        inline bool IsPlayer(ObjectGuid* guid)
         {
             return guid->IsPlayer();
         }
@@ -107,7 +107,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a unit (player or any creature type)
          */
-        bool IsUnit(ObjectGuid* guid)
+        inline bool IsUnit(ObjectGuid* guid)
         {
             return guid->IsUnit();
         }
@@ -115,7 +115,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents an item
          */
-        bool IsItem(ObjectGuid* guid)
+        inline bool IsItem(ObjectGuid* guid)
         {
             return guid->IsItem();
         }
@@ -123,7 +123,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a game object
          */
-        bool IsGameObject(ObjectGuid* guid)
+        inline bool IsGameObject(ObjectGuid* guid)
         {
             return guid->IsGameObject();
         }
@@ -131,7 +131,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a dynamic object
          */
-        bool IsDynamicObject(ObjectGuid* guid)
+        inline bool IsDynamicObject(ObjectGuid* guid)
         {
             return guid->IsDynamicObject();
         }
@@ -139,7 +139,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a corpse
          */
-        bool IsCorpse(ObjectGuid* guid)
+        inline bool IsCorpse(ObjectGuid* guid)
         {
             return guid->IsCorpse();
         }
@@ -147,7 +147,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a transport
          */
-        bool IsTransport(ObjectGuid* guid)
+        inline bool IsTransport(ObjectGuid* guid)
         {
             return guid->IsTransport();
         }
@@ -155,7 +155,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a MO transport
          */
-        bool IsMOTransport(ObjectGuid* guid)
+        inline bool IsMOTransport(ObjectGuid* guid)
         {
             return guid->IsMOTransport();
         }
@@ -163,7 +163,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents any type of game object
          */
-        bool IsAnyTypeGameObject(ObjectGuid* guid)
+        inline bool IsAnyTypeGameObject(ObjectGuid* guid)
         {
             return guid->IsAnyTypeGameObject();
         }
@@ -171,7 +171,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents an instance
          */
-        bool IsInstance(ObjectGuid* guid)
+        inline bool IsInstance(ObjectGuid* guid)
         {
             return guid->IsInstance();
         }
@@ -179,7 +179,7 @@ namespace Eclipse
         /**
          * Check if the GUID represents a group
          */
-        bool IsGroup(ObjectGuid* guid)
+        inline bool IsGroup(ObjectGuid* guid)
         {
             return guid->IsGroup();
         }
@@ -187,7 +187,7 @@ namespace Eclipse
         /**
          * Get the TypeID of the GUID
          */
-        uint32 GetTypeId(ObjectGuid* guid)
+        inline uint32 GetTypeId(ObjectGuid* guid)
         {
             return static_cast<uint32>(guid->GetTypeId());
         }
@@ -195,7 +195,7 @@ namespace Eclipse
         /**
          * Get the type name as string
          */
-        std::string GetTypeName(ObjectGuid* guid)
+        inline std::string GetTypeName(ObjectGuid* guid)
         {
             return std::string(guid->GetTypeName());
         }
@@ -203,7 +203,7 @@ namespace Eclipse
         /**
          * Convert GUID to string representation
          */
-        std::string ToString(ObjectGuid* guid)
+        inline std::string ToString(ObjectGuid* guid)
         {
             return guid->ToString();
         }
@@ -211,7 +211,7 @@ namespace Eclipse
         /**
          * Clear the GUID (set to empty)
          */
-        void Clear(ObjectGuid* guid)
+        inline void Clear(ObjectGuid* guid)
         {
             guid->Clear();
         }
@@ -219,7 +219,7 @@ namespace Eclipse
         /**
          * Set the GUID to a raw 64-bit value
          */
-        void Set(ObjectGuid* guid, uint64 rawValue)
+        inline void Set(ObjectGuid* guid, uint64 rawValue)
         {
             guid->Set(rawValue);
         }
@@ -227,7 +227,7 @@ namespace Eclipse
         /**
          * Create an ObjectGuid from raw value
          */
-        ObjectGuid CreateFromRaw(uint64 rawValue)
+        inline ObjectGuid CreateFromRaw(uint64 rawValue)
         {
             return ObjectGuid(rawValue);
         }
@@ -235,7 +235,7 @@ namespace Eclipse
         /**
          * Compare two ObjectGuids for equality
          */
-        bool IsEqual(ObjectGuid* guid1, ObjectGuid* guid2)
+        inline bool IsEqual(ObjectGuid* guid1, ObjectGuid* guid2)
         {
             return *guid1 == *guid2;
         }
@@ -243,7 +243,7 @@ namespace Eclipse
         /**
          * Compare two ObjectGuids for inequality
          */
-        bool IsNotEqual(ObjectGuid* guid1, ObjectGuid* guid2)
+        inline bool IsNotEqual(ObjectGuid* guid1, ObjectGuid* guid2)
         {
             return *guid1 != *guid2;
         }

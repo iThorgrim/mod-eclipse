@@ -4,6 +4,7 @@
 #include "LuaEngine.hpp"
 #include "MessageManager.hpp"
 #include "ObjectGuid.h"
+#include "ObjectAccessor.h"
 
 namespace Eclipse
 {
@@ -129,12 +130,90 @@ namespace Eclipse
             return ObjectGuid(raw);
         }
 
+        /**
+         *
+         */
+        inline Player* FindPlayer(LuaEngine* lua, ObjectGuid const& guid)
+        {
+            (void)lua;
+            return ObjectAccessor::FindConnectedPlayer(guid);
+        }
+
+        /**
+         *
+         */
+        inline Player* FindPlayerByLowGUID(LuaEngine* lua, ObjectGuid::LowType lowguid)
+        {
+            (void)lua;
+            return ObjectAccessor::FindPlayerByLowGUID(lowguid);
+        }
+
+        /**
+         *
+         */
+        inline Player* FindPlayerByName(LuaEngine* lua, std::string const& name, bool checkInWorld = true)
+        {
+            (void)lua;
+            return ObjectAccessor::FindPlayerByName(name, checkInWorld);
+        }
+
+        /**
+         *
+         */
+        inline Creature* GetSpawnedCreatureByDBGUID(LuaEngine* lua, uint32 mapId, uint64 guid)
+        {
+            (void)lua;
+            return ObjectAccessor::GetSpawnedCreatureByDBGUID(mapId, guid);
+        }
+
+        /**
+         *
+         */
+        inline GameObject* GetSpawnedGameObjectByDBGUID(LuaEngine* lua, uint32 mapId, uint64 guid)
+        {
+            (void)lua;
+            return ObjectAccessor::GetSpawnedGameObjectByDBGUID(mapId, guid);
+        }
+
+        /**
+         *
+         */
+        inline sol::table GetPlayers(LuaEngine* lua)
+        {
+            sol::table players = lua->GetState().create_table();
+            auto const& playerMap = ObjectAccessor::GetPlayers();
+
+            int index = 1;
+            for (auto const& pair : playerMap)
+            {
+                if (pair.second && pair.second->IsInWorld())
+                {
+                    players[index] = pair.second;
+                    ++index;
+                }
+            }
+
+            return players;
+        }
+
+        inline void SaveAllPlayers(LuaEngine* lua)
+        {
+            (void)lua;
+            ObjectAccessor::SaveAllPlayers();
+        }
+
         // ========== LUA REGISTRATION ==========
         void Register(LuaEngine* lua_engine, sol::state& lua)
         {
             // Getters
             lua["GetStateMapId"] = Bind(&GetStateMapId, lua_engine);
+            lua["GetSpawnedCreatureByDBGUID"] = Bind(&GetSpawnedCreatureByDBGUID, lua_engine);
+            lua["GetSpawnedGameObjectByDBGUID"] = Bind(&GetSpawnedGameObjectByDBGUID, lua_engine);
+            lua["GetPlayers"] = Bind(&GetPlayers, lua_engine);
 
+            lua["FindPlayer"] = Bind(&FindPlayer, lua_engine);
+            lua["FindPlayerByLowGUID"] = Bind(&FindPlayerByLowGUID, lua_engine);
+            lua["FindPlayerByName"] = Bind(&FindPlayerByName, lua_engine);
             // Setters
 
             // Booleans
@@ -153,6 +232,8 @@ namespace Eclipse
             lua["RegisterItemEvent"] = Bind(&RegisterItemEvent, lua_engine);
             lua["ClearItemEvents"] = Bind(&ClearItemEvents, lua_engine);
             lua["CreateGuidFromRaw"] = Bind(&CreateGuidFromRaw, lua_engine);
+
+            lua["SaveAllPlayers"] = Bind(&SaveAllPlayers, lua_engine);
         }
     }
 }
