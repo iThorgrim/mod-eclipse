@@ -98,7 +98,7 @@ namespace Eclipse
     std::vector<std::string> LuaCache::GetModifiedScripts() const
     {
         std::vector<std::string> modifiedScripts;
-        modifiedScripts.reserve(cache_.size() / 4);
+        modifiedScripts.reserve(cache_.size());
 
         for (const auto& [filePath, entry] : cache_) {
             if (IsScriptModified(filePath)) {
