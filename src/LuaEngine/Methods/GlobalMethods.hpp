@@ -42,7 +42,29 @@ namespace Eclipse
         }
 
         /**
+         * @brief Register a callback function for a specific player event
          *
+         * @enum PlayerEvents
+         * @enum {
+         * @enum    PLAYER_EVENT_ON_CHARACTER_CREATE    = 1,    // Triggered when character is created | Context: WORLD_STATE (-1) | Args: (event, player)
+         * @enum    PLAYER_EVENT_ON_CHARACTER_DELETE    = 2,    // Triggered when character is deleted | Context: WORLD_STATE (-1) | Args: (event, guid)
+         * @enum    PLAYER_EVENT_ON_LOGIN               = 3,    // Triggered when player loggin | Context: WORLD_STATE (-1) & MAP_STATE | Args: (event, player)
+         * @enum    PLAYER_EVENT_ON_LOGOUT              = 4,    // Triggered when player logout | Context: WORLD_STATE (-1) & MAP_STATE | Args: (event, player)
+         * @enum }
+         *
+         * @code {.lua}
+         * local function OnPlayerLogin(event, player)
+         *     print("Player " .. player:GetName() .. " logged in")
+         * end
+         * RegisterPlayerEvent(3, OnPlayerLogin)
+         *
+         * RegisterPlayerEvent(5, function(event, player, oldLevel)
+         *     print("Player leveled from " .. oldLevel .. " to " .. player:GetLevel())
+         * end)
+         * @endcode
+         *
+         * @param uint32 eventId The player event ID to register for
+         * @param function callback The Lua function to call when event triggers
          */
         inline void RegisterPlayerEvent(LuaEngine* lua, uint32 eventId, sol::function callback)
         {
