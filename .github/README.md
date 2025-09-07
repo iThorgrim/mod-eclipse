@@ -136,6 +136,13 @@ Eclipse.RequireCPaths = ""
 
 ---
 
+### 🌙 Related Projects
+
+A playful fork inspired by Eclipse. Not recommended for production unless you enjoy chaos 😉
+Check out [mod-crescent](https://github.com/AnchyDev/mod-crescent)
+
+---
+
 <div align="center">
 ⭐ Star this repository if Eclipse powers your server ⭐
 </div>
