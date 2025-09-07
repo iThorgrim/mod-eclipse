@@ -465,10 +465,6 @@ public:
         {
             return std::any_cast<bool>(*result);
         }
-        else if (result && result->type() == typeid(int32))
-        {
-            standing = std::any_cast<int32>(*result);
-        }
 
         return true;
     }
@@ -1224,9 +1220,13 @@ public:
         {
             sol::table resultTable = std::any_cast<sol::table>(*result);
 
-            if (resultTable["power"].valid() && resultTable["power"].is<Powers>())
+            if (resultTable["power"].valid())
             {
-                power = resultTable["power"];
+                if (resultTable["power"].is<uint32>())
+                {
+                    int powerValue = resultTable["power"];
+                    power = static_cast<Powers>(powerValue);
+                }
             }
 
             if (resultTable["value"].valid() && resultTable["value"].is<float>())
@@ -1384,18 +1384,14 @@ public:
                 }
             }
 
-            if (resultTable["error"].valid() && resultTable["error"].is<GroupJoinBattlegroundResult>())
+            if (resultTable["error"].valid() && resultTable["error"].is<int32>())
             {
-                err = resultTable["error"];
+                err = static_cast<GroupJoinBattlegroundResult>(resultTable["error"]);
             }
         }
         else if (result && result->type() == typeid(bool))
         {
             return std::any_cast<bool>(*result);
-        }
-        else if (result && result->type() == typeid(GroupJoinBattlegroundResult))
-        {
-            err = std::any_cast<GroupJoinBattlegroundResult>(*result);
         }
 
         return true;
@@ -1518,18 +1514,14 @@ public:
                 }
             }
 
-            if (resultTable["error"].valid() && resultTable["error"].is<GroupJoinBattlegroundResult>())
+            if (resultTable["error"].valid() && resultTable["error"].is<int32>())
             {
-                err = resultTable["error"];
+                err = static_cast<GroupJoinBattlegroundResult>(resultTable["error"]);
             }
         }
         else if (result && result->type() == typeid(bool))
         {
             return std::any_cast<bool>(*result);
-        }
-        else if (result && result->type() == typeid(GroupJoinBattlegroundResult))
-        {
-            err = std::any_cast<GroupJoinBattlegroundResult>(*result);
         }
 
         return true;
@@ -2300,9 +2292,10 @@ public:
                 }
             }
 
-            if (resultTable["result"].valid() && resultTable["result"].is<InventoryResult>())
+            if (resultTable["result"].valid() && resultTable["result"].is<uint32>())
             {
-                inventoryResult = resultTable["result"];
+                int resultValue = resultTable["result"];
+                inventoryResult = static_cast<InventoryResult>(resultValue);
             }
         }
         else if (result && result->type() == typeid(bool))
@@ -2633,14 +2626,14 @@ public:
         if (result && result->type() == typeid(sol::table))
         {
             sol::table resultTable = std::any_cast<sol::table>(*result);
-            if (resultTable["type"].valid() && resultTable["type"].is<ServerSideVisibilityType>())
+            if (resultTable["type"].valid() && resultTable["type"].is<uint32>())
             {
-                type = resultTable["type"];
+                type = static_cast<ServerSideVisibilityType>(resultTable["type"]);
             }
 
-            if (resultTable["sec"].valid() && resultTable["sec"].is<AccountTypes>())
+            if (resultTable["sec"].valid() && resultTable["sec"].is<uint32>())
             {
-                sec = resultTable["sec"];
+                sec = static_cast<AccountTypes>(resultTable["sec"]);
             }
         }
     }

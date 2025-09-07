@@ -48,7 +48,7 @@ namespace Eclipse
          */
         template<typename... Args>
         requires(sizeof...(Args) > 0 && SupportedEventObject<std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>>)
-        bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
+        std::optional<std::any> TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
         {
             auto firstArg = std::get<0>(std::forward_as_tuple(args...));
             using FirstArgType = std::decay_t<decltype(firstArg)>;
@@ -238,7 +238,7 @@ namespace Eclipse
         Map* GetObjectMap(T* object)
         {
             if constexpr (std::is_same_v<T, Player>) {
-                return object->GetMap();
+                return object->IsInWorld() ? object->GetMap() : nullptr;
             }
             else if constexpr (std::is_same_v<T, Map>) {
                 return object;
@@ -271,7 +271,7 @@ namespace Eclipse
         }
 
         template<typename FirstArgType, typename... Args>
-        bool TriggerWithRetValueOnEngines(std::span<LuaEngine* const> engines, uint32 eventId, Args&&... args)
+        std::optional<std::any> TriggerWithRetValueOnEngines(std::span<LuaEngine* const> engines, uint32 eventId, Args&&... args)
         {
             for (auto* engine : engines)
             {
@@ -279,14 +279,15 @@ namespace Eclipse
                 {
                     if (eventManager->template HasCallbacksFor<Args...>(eventId))
                     {
-                        if (!eventManager->TriggerWithRetValueEvent(eventId, std::forward<Args>(args)...))
+                        auto result = eventManager->TriggerWithRetValueEvent(eventId, std::forward<Args>(args)...);
+                        if (result)
                         {
-                            return false; // Event blocked
+                            return result;
                         }
                     }
                 }
             }
-            return true; // Event allowed
+            return std::nullopt; // No callbacks returned anything
         }
     };
 }

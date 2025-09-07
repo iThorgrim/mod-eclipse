@@ -23,7 +23,7 @@ namespace Eclipse
         void TriggerEvent(uint32 eventId, Args&&... args);
 
         template<typename... Args>
-        bool TriggerWithRetValueEvent(uint32 eventId, Args&&... args);
+        std::optional<std::any> TriggerWithRetValueEvent(uint32 eventId, Args&&... args);
 
         template<typename... Args>
         bool HasCallbacksFor(uint32 eventId) const;
@@ -58,7 +58,7 @@ namespace Eclipse
         void TriggerEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args);
 
         template<typename... Args>
-        bool TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args);
+        std::optional<std::any> TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args);
     };
 
     // Template implementation
@@ -121,7 +121,7 @@ namespace Eclipse
     }
 
     template<typename... Args>
-    bool EventManager::TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
+    std::optional<std::any> EventManager::TriggerWithRetValueEvent(uint32 eventId, Args&&... args)
     {
         static_assert(sizeof...(args) > 0, "At least one argument required");
 
@@ -138,11 +138,10 @@ namespace Eclipse
             constexpr auto eventType = get_event_type<FirstArgType>();
             auto& eventContainer = events[eventType];
 
-
             const auto it = eventContainer.find(eventId);
             if (it == eventContainer.end())
             {
-                return true;
+                return std::nullopt;
             }
 
             const auto& callbacks = it->second;
@@ -155,24 +154,36 @@ namespace Eclipse
                     {
                         sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
 
-                        if (result.valid() && result.get_type() == sol::type::boolean)
+                        if (result.valid())
                         {
-                            if (!result.get<bool>())
+                            // Return any non-nil result from the first callback that returns something
+                            if (result.get_type() == sol::type::boolean)
                             {
-                                return false;
+                                return std::make_any<bool>(result.get<bool>());
                             }
+                            else if (result.get_type() == sol::type::table)
+                            {
+                                return std::make_any<sol::table>(result.get<sol::table>());
+                            }
+                            else if (result.get_type() == sol::type::string)
+                            {
+                                return std::make_any<std::string>(result.get<std::string>());
+                            }
+                            else if (result.get_type() == sol::type::number)
+                            {
+                                return std::make_any<double>(result.get<double>());
+                            }
+                            // Add more types as needed
                         }
-                        // If callback returns non-boolean, nil, or true, continue (treat as allow)
                     }
                     catch (const std::exception&) 
                     {
-                        // If callback throws, treat as allowing the action
+                        // If callback throws, continue to next callback
                     }
                 }
             }
 
-            // All callbacks either returned true or nothing - allow the action
-            return true;
+            return std::nullopt;
         }
     }
 
@@ -319,7 +330,7 @@ namespace Eclipse
     }
 
     template<typename... Args>
-    bool EventManager::TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args)
+    std::optional<std::any> EventManager::TriggerWithRetValueEventWithRuntimeType(EventType eventType, uint32 eventId, Args&&... args)
     {
         std::unordered_map<uint32, std::vector<sol::function>>* eventContainer = nullptr;
 
@@ -346,19 +357,17 @@ namespace Eclipse
 
         if (!eventContainer)
         {
-            return true;
+            return std::nullopt;
         }
 
         const auto it = eventContainer->find(eventId);
         if (it == eventContainer->end())
         {
-            // No callbacks registered, allow by default
-            return true;
+            return std::nullopt;
         }
 
         const auto& callbacks = it->second;
 
-        // Check all callbacks - if any returns false, block the action
         for (const auto& callback : callbacks)
         {
             if (callback.valid())
@@ -367,24 +376,36 @@ namespace Eclipse
                 {
                     sol::protected_function_result result = callback(eventId, std::forward<Args>(args)...);
 
-                    if (result.valid() && result.get_type() == sol::type::boolean)
+                    if (result.valid())
                     {
-                        if (!result.get<bool>())
+                        // Return any non-nil result from the first callback that returns something
+                        if (result.get_type() == sol::type::boolean)
                         {
-                            return false;
+                            return std::make_any<bool>(result.get<bool>());
                         }
+                        else if (result.get_type() == sol::type::table)
+                        {
+                            return std::make_any<sol::table>(result.get<sol::table>());
+                        }
+                        else if (result.get_type() == sol::type::string)
+                        {
+                            return std::make_any<std::string>(result.get<std::string>());
+                        }
+                        else if (result.get_type() == sol::type::number)
+                        {
+                            return std::make_any<double>(result.get<double>());
+                        }
+                        // Add more types as needed
                     }
-                    // If callback returns non-boolean, nil, or true, continue (treat as allow)
                 }
                 catch (const std::exception&) 
                 {
-                    // If callback throws, treat as allowing the action
+                    // If callback throws, continue to next callback
                 }
             }
         }
 
-        // All callbacks either returned true or nothing - allow the action
-        return true;
+        return std::nullopt;
     }
 
 }
