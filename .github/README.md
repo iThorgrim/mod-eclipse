@@ -10,14 +10,6 @@ Eclipse is a **next-generation Lua scripting engine** designed specifically for 
 
 ---
 
-## ⚡ Why Choose Eclipse?
-
-| 🚀 **Performance** | 🧠 **Intelligence** | 🛡️ **Reliability** |
-|-------------------|---------------------|-------------------|
-| 25% faster than Eluna | Smart caching system | Production-tested |
-| LuaJIT optimization | Hot reload capability | Comprehensive error handling |
-| Memory efficient | MD5-based validation | Thread-safe architecture |
-
 ## 🎯 Key Features
 
 ### 🚀 **Performance Optimized**
@@ -134,35 +126,6 @@ print("🌟 Hello Eclipse! Server is powered by high-performance Lua!")
 - [ ] 🎨 **Visual Script Editor** - Web-based script management
 - [ ] 🌐 **REST API Integration** - External service communication
 
----
-
-## 📊 Performance Benchmarks
-
-### 🧪 **Test Environment**
-- **💻 CPU:** AMD Ryzen 9 9950X
-- **🧠 RAM:** 64GB DDR5-6400
-- **🌟 Eclipse:** AzerothCore + mod-eclipse (LuaJIT)
-- **📊 Baseline:** ElunaTrinityWotlk (LuaJIT)
-
-### 🏆 **Benchmark Results**
-
-| Test Category | Eclipse | Eluna | Performance Gain |
-|---------------|---------|-------|:----------------:|
-| **⚡ Overall Runtime** | 1.73s | 2.31s | **🚀 +25% faster** |
-| **🧠 Memory Efficiency** | +13.6 KB | +52.6 KB | **💾 -74% memory usage** |
-| **🔄 Function Calls** | 464M ops/s | 284M ops/s | **⚡ +63% faster** |
-| **🎯 Metamethods** | 510M ops/s | 225M ops/s | **🎯 +127% faster** |
-| **📊 Table Operations** | 113K ops/s | 70K ops/s | **📈 +61% faster** |
-| **📝 String Processing** | 80K ops/s | 65K ops/s | **📝 +23% faster** |
-
-> *Benchmarks performed using comprehensive stress tests with 500,000 iterations per test category.*
-
-### 🎯 **Key Performance Advantages**
-
-- **🔧 Sol2 Optimizations**: JIT-aware configuration with disabled safety checks in release builds
-- **🧠 Smart Caching**: Bytecode cache with MD5 validation eliminates redundant compilation  
-- **💾 Memory Efficiency**: Superior garbage collection and memory management
-- **🏗️ Clean Architecture**: Optimized state management with separation of concerns
 
 ---
 
