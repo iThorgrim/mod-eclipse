@@ -1,0 +1,3 @@
+[submodule "src/Eclipse"]
+	path = src/Eclipse
+	url = https://github.com/EclipseLuaEngine/Eclipse.git
